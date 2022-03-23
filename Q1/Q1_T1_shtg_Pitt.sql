@@ -86,33 +86,82 @@ when Age BETWEEN 65 and 75
                    from pat_list
                             left join CDM_60_ETL.encounter e using (patid)
                    where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
-                     and payer_type_primary is not null),
+                     and raw_payer_type_primary is not null),
      insurance_type as (select patid,
                                COHORT,
-                               payer_type_primary,
-
+                               raw_payer_type_primary,
+                               raw_payer_id_primary,
                                case
-                                   when payer_type_primary in (
-                                                               '2',
-                                                               '21',
-                                                               '29')
+                                   when raw_payer_id_primary in (
+                                                                 'X',
+                                                                 '3',
+                                                                 '104',
+                                                                 '143',
+                                                                 '151',
+                                                                 '127',
+                                                                 '157',
+                                                                 '155',
+                                                                 '103')
                                        then 'Medicaid'
-                                   when payer_type_primary in ('1',
-                                                               '11',
-                                                               '19',
-                                                               '111',
-                                                               '112',
-                                                               '122'
+                                   when raw_payer_id_primary in ('147',
+                                                                 '159',
+                                                                 'N',
+                                                                 '137',
+                                                                 '2M',
+                                                                 '2',
+                                                                 '152',
+                                                                 'MC',
+                                                                 '150',
+                                                                 '142',
+                                                                 '156',
+                                                                 '101',
+                                                                 'M',
+                                                                 'UM',
+                                                                 '2'
                                        ) then 'Medicare'
-                                   when payer_type_primary in ('5',
-                                                               '51',
-                                                               '521',
-                                                               '561',
-                                                               '6'
+                                   when raw_payer_id_primary in ('116', '111', '3C', 'cc', '145',
+                                                                 '4A',
+                                                                 '4M',
+                                                                 '138',
+                                                                 'I4',
+                                                                 '134',
+                                                                 'IC',
+                                                                 'HA',
+                                                                 '2B',
+                                                                 '4',
+                                                                 '158',
+                                                                 '107',
+                                                                 'DB',
+                                                                 'CM',
+                                                                 'B',
+                                                                 '119',
+                                                                 '0',
+                                                                 '4H',
+                                                                 '149',
+                                                                 'C',
+                                                                 '132',
+                                                                 '133',
+                                                                 '10',
+                                                                 'CG',
+                                                                 'AD',
+                                                                 'MS',
+                                                                 '131',
+                                                                 'MU',
+                                                                 'GA',
+                                                                 'US',
+                                                                 '100',
+                                                                 '144',
+                                                                 '1',
+                                                                 'Q',
+                                                                 '153',
+                                                                 'UH',
+                                                                 '102',
+                                                                 'BE',
+                                                                 '108',
+                                                                 '112'
                                        ) then 'Commercial'
 
-                                   when payer_type_primary is null then 'No Information'
-                                   when payer_type_primary = 'UN' then 'No Information'
+                                   when raw_payer_id_primary is null then 'No Information'
                                    else 'Other'
                                    end as insurance_type
                         from insurance),
@@ -146,11 +195,14 @@ when Age BETWEEN 65 and 75
                 '207QA0505X', '207R00000X', '207RA0000X', '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X',
                 '364SF0001X')
            And encounter.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY'))
+
+/*select distinct patid, cohort, insurance_type, raw_payer_type_primary from insurance_type
+order by patid*/
         ,
      Table1_pre as (select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
                     from pat_list
                     group by cohort
-                    union
+                   union
                     select '2' as order1, 'Age', Age_category, count(distinct patid) as N, cohort
                     from pat_list
                     group by cohort, Age_category
@@ -168,22 +220,21 @@ when Age BETWEEN 65 and 75
                     group by cohort
                     union
 
-                    select '2' as                order1,
+                    select '2' as order1,
                            'age',
                            'pct_25',
-                           PERCENTILE_CONT(0.25) WITHIN
-                    GROUP (ORDER BY age asc) "pct_25",
+                           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY age asc)
+                                  "pct_25",
                            cohort
                     from pat_list
                     group by cohort
                     union
                     select '2' as order1,
-                        'age',
-                        'pct_75',
-                        PERCENTILE_CONT(0.75) WITHIN
-                    GROUP (ORDER BY age asc)
-                        "pct_75",
-                        cohort
+                           'age',
+                           'pct_75',
+                           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY age asc)
+                                  "pct_75",
+                           cohort
                     from pat_list
                     group by cohort
                     union
@@ -228,22 +279,20 @@ when Age BETWEEN 65 and 75
                     group by cohort
                     union
                     select '9' as order1,
-                        'pre-index_days',
-                        'pct_25',
-                        PERCENTILE_CONT(0.25) WITHIN
-                    GROUP (ORDER BY PRE_INDEX_DAYS asc)
-                        "pct_25",
-                        cohort
+                           'pre-index_days',
+                           'pct_25',
+                           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                                  "pct_25",
+                           cohort
                     from pat_list
                     group by cohort
                     union
                     select '9' as order1,
-                        'pre-index_days',
-                        'pct_75',
-                        PERCENTILE_CONT(0.75) WITHIN
-                    GROUP (ORDER BY PRE_INDEX_DAYS asc)
-                        "pct_75",
-                        cohort
+                           'pre-index_days',
+                           'pct_75',
+                           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                                  "pct_75",
+                           cohort
                     from pat_list
                     group by cohort
                     union
@@ -260,31 +309,35 @@ when Age BETWEEN 65 and 75
                     from pat_list
                     where Age is not null
                     group by cohort
-     ),
-     totals as (select N as N_cohort_total, cohort From Table1_pre where label1 = 'Total'),
 
-     percentages as (select order1,
-                            Cohort,
-                            label1,
-                            label2,
-                            N,
-                            N_cohort_total,
-                            case
-                                when (Table1_pre.label2 in ('pct_75', 'pct_25')
-                                    or Table1_pre.label2 like ('Mean%')
-                                    or Table1_pre.label2 like ('Median%')
-                                    or Table1_pre.label2 like ('STD%'))
-                                    then 0
-                                else
-                                    trunc(100 * N / N_cohort_total, 2)
-                                end
-                                as percentage1
+     ),
+     totals as (select N as N_cohort_total, cohort  From Table1_pre where label1 = 'Total' ),
+
+     percentages as (select order1, Cohort, label1, label2, N, N_cohort_total,
+                            case  when (Table1_pre.label2 in ('pct_75','pct_25')
+
+        or Table1_pre.label2 like ('Mean%')
+             or Table1_pre.label2 like ('Median%')
+              or Table1_pre.label2 like ('STD%'))
+              then 0
+              else
+              trunc(100 * N/N_cohort_total,2)
+               end
+               as percentage1
                      from Table1_pre
                               left join totals using (cohort)
+
      )
 
 
-select *
-from percentages
+select * from percentages
 order by cohort, order1;
+from Table1_pre
+order by cohort, order1
+
+/* pivot (
+
+sum(N) FOR cohort in ('cohort_A', 'cohort_B', 'cohort_C', 'cohort_D', 'cohort_E', 'cohort_F', 'cohort_G', 'cohort_H', 'cohort_I',' cohort_J','cohort_K')
+ )*/
+
 ;
