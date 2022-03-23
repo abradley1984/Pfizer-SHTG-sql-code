@@ -1,6 +1,6 @@
 /* Q1 step 1
 This code defines the overall cohort for the first section of the SHTG qery (Q1) as patients who
-   -had a TG value in the one year study period (30-Nov-2020 to 30-Nov-2021)
+   -had a TG value in the one year study period (30-Sep-2020 to 30-Sep-2021)
    -had a TG>500, or had an LDL within the study period if their TG was <500,
    - had an NHDL within 30 days of their first TG.
 
@@ -49,7 +49,7 @@ with TG_all as (select lab_result_cm.patid,
                        LAB_RESULT_CM.RAW_RESULT
 
                 FROM cdm_60_etl.lab_result_cm
-                WHERE lab_result_cm.result_date BETWEEN TO_DATE('11/30/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
                   AND lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                   and lab_result_cm.result_num is not null
@@ -71,12 +71,12 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('11/30/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+        --  AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
@@ -93,14 +93,12 @@ with TG_all as (select lab_result_cm.patid,
                                lab_result_cm.result_date result_date
 
                         FROM cdm_60_etl.lab_result_cm
-                        WHERE lab_result_cm.result_date BETWEEN TO_DATE('10/31/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                        WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
                           and lab_result_cm.result_num >= 0
            AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
 
      ),
      total_chol as (select *
@@ -116,7 +114,7 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('10/31/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
                  and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
@@ -403,14 +401,3 @@ group by cohort;
 
 
 
-
---Non-HDL value incident within 30 days of index TG (note non-HDL maybe reported in EHR or derived as Non-HDL = Total cholesterol (TC) - HDL
-
-
---Create individual patient table with chosen TG, LDL, HDL.
---Check that all are within 30 days? check details
---categorize TG values
---categorize LDL, HDL, to get final group
-
---Get demographics for final included group
---Age, in buckets
