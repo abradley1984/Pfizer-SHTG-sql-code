@@ -1,8 +1,10 @@
---To do -edit insurance categories to apply to other sites
---Check provider categories?
+/* Generates demographics table for all cohorts.
+   Same for Q1 and Q2, just editing initial pat_list
+   Running time: ~2 minutes
+ */
 
 
---with pat_list as (select * from htg_step3_with_exclusions_d1),
+
 with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
      smoking AS (select *
                  from (
@@ -20,7 +22,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                             AND not vital.smoking in ('NI', 'OT', 'UN'))
                  where row_num = 1),
      smoking_category as (select patid,
-                                 cohort,
+                                 pat_list.cohort,
                                  smoking,
                                  case
                                      when smoking in ('01', '02', '07', '08') then 'Current smoker'
@@ -34,7 +36,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                                      end as smoking_category
 
 
-                          from smoking),
+                          from pat_list left join smoking using(patid) ),
      race_category as (select patid,
                               cohort,
                               race,
@@ -90,7 +92,8 @@ when Age BETWEEN 65 and 75
                    from pat_list
                             left join CDM_60_ETL.encounter e using (patid)
                    where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
-                     and payer_type_primary is not null),
+                     and payer_type_primary is not null
+                          and not payer_type_primary in ( 'UN' , 'NI' )),
      insurance_type as (select patid,
                                COHORT,
                                payer_type_primary,
@@ -215,9 +218,9 @@ when Age BETWEEN 65 and 75
 
                     group by cohort
                     union
-                    select '6' as order1, 'Smoking', smoking_category, count(distinct patid), cohort
-                    from smoking_category
-                    group by cohort, smoking_category
+                    select '6' as order1, 'Smoking', smoking_category, count(distinct patid), pat_list.cohort
+                    from pat_list left join smoking_category using (patid)
+                    group by pat_list.cohort, smoking_category
                     union
                     select '9' as order1, 'pre-index_days', 'Mean', trunc(avg(PRE_INDEX_DAYS)) as N, cohort
                     from pat_list
