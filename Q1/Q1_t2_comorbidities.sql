@@ -1,5 +1,6 @@
-with pat_list as (select patid, cohort, TG_DATE
+with pat_list as (select patid, cohort, TG_DATE as index_date
                   from shtg_Q1_cohorts_with_exclusions),
+
 
 
      comorbid_conditions AS ( --All diagnoses for each patient
@@ -459,7 +460,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ('K86', '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
+                 OR Como.dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
                                 'K86.9') -- CHRONIC PANCREATITIS
 
 
@@ -542,7 +543,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      comorbidity_group as (select patid,
                                   cohort,
 
-                                  max(TG_date - admit_date) / 365.25              as time_since_first_lipidemia_diagnosis,
+                                  max(index_date - admit_date) / 365.25              as time_since_first_lipidemia_diagnosis,
                                   'Disorders of lipoprotein metabolism and other' as Comorbidity_name
                            FROM pat_list pats
 
@@ -556,7 +557,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                            group by patid, cohort),
      ASCVD as (select patid,
                       cohort,
-                      max(TG_Date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
+                      max(index_date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
                       'ASCVD'                            as Comorbidity_name
                FROM pat_list pats
                         INNER JOIN cdm_60_etl.diagnosis como using (patid)
