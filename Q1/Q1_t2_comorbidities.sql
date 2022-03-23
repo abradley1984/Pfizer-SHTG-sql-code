@@ -934,7 +934,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
                 order by cohort),
-      totals as (select count(distinct patid),cohort as N_cohort_total, cohort From pat_list group by cohort),
+      totals as (select count(distinct patid)as N_cohort_total, cohort From pat_list group by cohort),
 
      percentages as (select
                               Cohort,
@@ -964,6 +964,6 @@ select *
 from percentages
 order by cohort, order1;
 
-select * from table2
+
 
 
