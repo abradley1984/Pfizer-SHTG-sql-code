@@ -1,19 +1,11 @@
---To do: edit code list based on feedback from Jonathan Arnold
---Check Egfr calculations
---labs within 3 months?
---
-
---Table 3 - two parts, 3a and 3b
---drop table creatinine_test;
---drop table Q1_labs_all_D2;
+/*This code generates a table with all labs for the cohorts, mostly for T3
+The Q2 version is pretty similar, but is run before cohorts are extracted, so there may be slight differences.
+Run time: ~40 mins?
+ */
 
 
-/*select cohort, count(case when egfr_2021 is null then 1  end)
-select * from Q1_labs_all_D2
-  from Q1_labs_all_D2
-group by cohort;*/
 
-select * From Q1_labs_all;
+--select * From Q1_labs_all;
 --
 -- drop table Q1_labs_all;*/
 create table Q1_labs_all as
@@ -63,27 +55,46 @@ with pat_list as
                  and lab_result_cm.result_num is not null),
 
 
---lpa
+     --  lpa - mol and mass handled separately
 
-     lpa as (select patid,
-                    row_number() OVER (
-                        PARTITION BY patid
-                        ORDER BY lab_result_cm.result_date asc
-                        )                     row_num,
-                    lab_result_cm.result_num  lpa,
-                    lab_result_cm.result_unit result_unit,
-                    lab_result_cm.result_date result_date
-
-
-             FROM pat_list
-                      left join cdm_60_etl.lab_result_cm using (patid)
-             WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-               AND lab_result_cm.lab_loinc in
+     lpa_mass as (select patid,
+                         row_number() OVER (
+                             PARTITION BY patid
+                             ORDER BY lab_result_cm.result_date asc
+                             )                     row_num,
+                         lab_result_cm.result_num  lpa_mass,
+                         lab_result_cm.result_unit result_unit,
+                         lab_result_cm.result_date result_date
 
 
+                  FROM pat_list
+                           left join cdm_60_etl.lab_result_cm using (patid)
+                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                    AND (lab_result_cm.lab_loinc in
+                         ('10835-7') and not result_unit = 'nmol/L')
 
-                   ('43583-4', '35388-8', '49748-7', '17845-9')
-               and lab_result_cm.result_num is not null),
+
+                    and lab_result_cm.result_num is not null),
+
+     lpa_mol as (select patid,
+                        row_number() OVER (
+                            PARTITION BY patid
+                            ORDER BY lab_result_cm.result_date asc
+                            )                     row_num,
+                        lab_result_cm.result_num  lpa_mol,
+                        lab_result_cm.result_unit result_unit,
+                        lab_result_cm.result_date result_date
+
+
+                 FROM pat_list
+                          left join cdm_60_etl.lab_result_cm using (patid)
+                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                   AND (lab_result_cm.lab_loinc in
+                        ('43583-4')
+                     or (lab_result_cm.lab_loinc in
+                         ('10835-7') and result_unit = 'nmol/L')
+                            and lab_result_cm.result_num is not null))
+        ,
 
 
 --apo_a1
@@ -106,8 +117,6 @@ with pat_list as
 
 
 --nlr
-
-
      nlr as (select patid,
                     row_number() OVER (
                         PARTITION BY patid
@@ -122,9 +131,9 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in
-                   ('770-8', '26505-8', '769-0', '764-1', '26508-2', '35332-6', '32200-8', '23761-0', '26511-6',
-                    '26499-4', '26524-9')
-               and lab_result_cm.result_num is not null),
+                   ('770-8', '23761-0',  '26511-6')
+               and lab_result_cm.result_num is not null
+                   and (result_unit in ('OT', '%') or result_unit is null)),
 
 
 --hscrp
@@ -401,24 +410,6 @@ with pat_list as
               where row_num = 1
      ),
 
-     /*all_labsx as (select patid,
-                          cohort,
-                          egfr_2021,
-                          a1c,
-                          uacr,
-                          hscrp,
-                          vldl,
-                          round((pat_list.AGE * ast) / (platelets * SQRT(alt.alt)), 2) AS FIB_4
-                   from pat_list
-                            full outer join egfr using (patid, cohort)
-                            full outer join a1c using (patid)
-                            full outer join uacr using (patid, row_num)
-                            full outer join hscrp using (patid, row_num)
-                            full outer join vldl using (patid, row_num)
-                            full outer join platelets using (patid, row_num)
-                            full outer join alp using (patid, row_num)
-                            full outer join ast using (patid, row_num)
-                            full outer join alt using (patid, row_num)),*/
 
      all_labs2 as (select *
                    from (
@@ -448,13 +439,13 @@ with pat_list as
                                    hscrp,
                                    nlr,
                                    apo_a1,
-                                   lpa
-                                    ,
+                                   lpa_mol,
+                                   lpa_mass,
                                    egfr_2021
-                            , creat_result_num
+                                    ,
+                                   creat_result_num
 
-                            from pat_list
-                                     full outer join egfr using (patid)
+                            from pat_list full outer join egfr using (patid)
                                      full outer join (select * From a1c where row_num = 1) using (patid)
                                      full outer join (select * From uacr where row_num = 1) using (patid)
                                      full outer join(select * From hscrp where row_num = 1) using (patid)
@@ -470,41 +461,10 @@ with pat_list as
                                      full outer join (select * From apo_b where row_num = 1) using (patid)
                                      full outer join (select * From nlr where row_num = 1) using (patid)
                                      full outer join (select * From apo_a1 where row_num = 1) using (patid)
-                                     full outer join (select * From lpa where row_num = 1) using (patid))
-         /* where row_num = 1*/),
-/*select count(*),'all pat_lst','joined'
-         from pat_list left join all_labs2 using (patid);
-             union*/
-     all_labs3 as (
-         select patid,
-                pat_list.cohort,
-                a1c,
-                albumin,
-                platelets,
-                ast,
-                pat_list.age,
-                alt,
-                ggt,
-                alp,
-                FIB_4,
-                BMI,
-                TRLC,
-                weight,
-                all_labs2.TG  as TG,
-                all_labs2.LDL as LDL,
-                all_labs2.TC  as TC,
-                all_labs2.HDL as HDL,
-                pat_list.NHDL,
-                apob,
-                vldl,
-                uacr,
-                hscrp,
-                nlr,
-                apo_a1,
-                lpa
-                 ,
-                egfr_2021
-         from pat_list
-                  left join all_labs2 using (patid))
+
+                                     full outer join (select * From lpa_mass where row_num = 1) using (patid)
+                                     full outer join (select * From lpa_mol where row_num = 1) using (patid))
+
 --writing labs table
-select * From all_labs3;
+select *
+From all_labs2;
