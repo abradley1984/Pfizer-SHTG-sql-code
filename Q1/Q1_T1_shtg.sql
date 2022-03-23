@@ -4,7 +4,6 @@
  */
 
 
-
 with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
      smoking AS (select *
                  from (
@@ -27,7 +26,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                                  case
                                      when smoking in ('01', '02', '07', '08') then 'Current smoker'
                                      when smoking in ('NI', 'UN', '05', '06', 'OT') then 'NI/unknown/refuse to answer'
-                                      when smoking is Null then 'NI/unknown/refuse to answer'
+                                     when smoking is Null then 'NI/unknown/refuse to answer'
 
                                      when smoking = '03' then 'Former smoker'
                                      when smoking = '04' then 'Never smoker'
@@ -36,7 +35,8 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                                      end as smoking_category
 
 
-                          from pat_list left join smoking using(patid) ),
+                          from pat_list
+                                   left join smoking using (patid)),
      race_category as (select patid,
                               cohort,
                               race,
@@ -93,7 +93,7 @@ when Age BETWEEN 65 and 75
                             left join CDM_60_ETL.encounter e using (patid)
                    where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                      and payer_type_primary is not null
-                          and not payer_type_primary in ( 'UN' , 'NI' )),
+                     and not payer_type_primary in ('UN', 'NI')),
      insurance_type as (select patid,
                                COHORT,
                                payer_type_primary,
@@ -154,6 +154,12 @@ when Age BETWEEN 65 and 75
                 '364SF0001X')
            And encounter.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY'))
         ,
+     --Both cariology and endocrinology
+     cardio_plus_endo as (select patid, 'both_endo_cardio' as both_endo_cardio, cohort
+                          from (select * from providers where provider_specialty = 'endo')
+                                   inner join (select * from providers where provider_specialty = 'cardiology')
+                                             using (patid, cohort)),
+
      Table1_pre as (select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
                     from pat_list
                     group by cohort
@@ -175,22 +181,22 @@ when Age BETWEEN 65 and 75
                     group by cohort
                     union
 
-                    select '2' as                order1,
+                    select '2' as                       order1,
                            'age',
                            'pct_25',
                            PERCENTILE_CONT(0.25) WITHIN
-                    GROUP (ORDER BY age asc) "pct_25",
+                               GROUP (ORDER BY age asc) "pct_25",
                            cohort
                     from pat_list
                     group by cohort
                     union
                     select '2' as order1,
-                        'age',
-                        'pct_75',
-                        PERCENTILE_CONT(0.75) WITHIN
-                    GROUP (ORDER BY age asc)
-                        "pct_75",
-                        cohort
+                           'age',
+                           'pct_75',
+                           PERCENTILE_CONT(0.75) WITHIN
+                               GROUP (ORDER BY age asc)
+                                  "pct_75",
+                           cohort
                     from pat_list
                     group by cohort
                     union
@@ -214,12 +220,13 @@ when Age BETWEEN 65 and 75
 
                     union
                     select '8' as order1, 'Insurance', 'has_insurance_info', count(distinct patid), cohort
-                    from insurance_type
+                    from insurance
 
                     group by cohort
                     union
                     select '6' as order1, 'Smoking', smoking_category, count(distinct patid), pat_list.cohort
-                    from pat_list left join smoking_category using (patid)
+                    from pat_list
+                             left join smoking_category using (patid)
                     group by pat_list.cohort, smoking_category
                     union
                     select '9' as order1, 'pre-index_days', 'Mean', trunc(avg(PRE_INDEX_DAYS)) as N, cohort
@@ -235,22 +242,22 @@ when Age BETWEEN 65 and 75
                     group by cohort
                     union
                     select '9' as order1,
-                        'pre-index_days',
-                        'pct_25',
-                        PERCENTILE_CONT(0.25) WITHIN
-                    GROUP (ORDER BY PRE_INDEX_DAYS asc)
-                        "pct_25",
-                        cohort
+                           'pre-index_days',
+                           'pct_25',
+                           PERCENTILE_CONT(0.25) WITHIN
+                               GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                                  "pct_25",
+                           cohort
                     from pat_list
                     group by cohort
                     union
                     select '9' as order1,
-                        'pre-index_days',
-                        'pct_75',
-                        PERCENTILE_CONT(0.75) WITHIN
-                    GROUP (ORDER BY PRE_INDEX_DAYS asc)
-                        "pct_75",
-                        cohort
+                           'pre-index_days',
+                           'pct_75',
+                           PERCENTILE_CONT(0.75) WITHIN
+                               GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                                  "pct_75",
+                           cohort
                     from pat_list
                     group by cohort
                     union
@@ -258,6 +265,11 @@ when Age BETWEEN 65 and 75
                     select '7' as order1, 'Provider', provider_specialty, count(distinct patid), cohort
                     from providers
                     group by cohort, provider_specialty
+                    union
+
+                    select '7' as order1, 'Provider', both_endo_cardio, count(distinct patid), cohort
+                    from cardio_plus_endo
+                    group by cohort, both_endo_cardio
                     union
                     select '7' as order1, 'Provider', 'provider_info_available', count(distinct patid), cohort
                     from providers
