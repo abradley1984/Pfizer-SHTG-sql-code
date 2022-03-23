@@ -27,7 +27,7 @@ with
                    and lab_result_cm.result_num is not null
 
          -- and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
@@ -49,7 +49,7 @@ with
                           and lab_result_cm.result_num is not null
 
          -- and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+          AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
