@@ -1,3 +1,8 @@
+/* This query counts comorbidity occurences.
+   Same for Q1 and Q2, with edits to pat_list and changing index date to LDL_date
+Run time: ~ 3 mins
+ */
+
 with pat_list as (select patid, cohort, TG_DATE as index_date
                   from shtg_Q1_cohorts_with_exclusions),
 
@@ -929,16 +934,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
                 order by cohort)
-     /*table9 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2), cohort
-         from comorbidity_count
-                order by cohort)*/
-/*select count(distinct patid), dx from comorbid_conditions
-where Comorbidity_name='other'
-group by dx;*/
+
 select * from table2;
-/*select count(patid), cohort, stroke.Comorbidity_name, MI.Comorbidity_name
-from stroke full outer join MI using(patid, cohort)
-group by cohort, stroke.Comorbidity_name, MI.Comorbidity_name
-order by cohort
-;*/
+
 
