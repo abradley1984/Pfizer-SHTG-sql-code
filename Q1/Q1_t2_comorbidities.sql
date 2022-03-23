@@ -933,8 +933,37 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
          ),
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
-                order by cohort)
+                order by cohort),
+      totals as (select count(distinct patid),cohort as N_cohort_total, cohort From pat_list group by cohort),
 
-select * from table2;
+     percentages as (select
+                              Cohort,
+                            order1,
+                             Comorbidity_name,
+
+                     N_mean_etc,
+
+                            N_cohort_total,
+                            case
+                                when (Comorbidity_name like '%75%'
+                                or Comorbidity_name like '%25%'
+                                    or Comorbidity_name like ('%Mean%')
+                                    or Comorbidity_name like ('%Median%')
+                                    or Comorbidity_name like ('%std%'))
+                                    then 0
+                                else
+                                    trunc(100 * N_mean_etc/ N_cohort_total, 2)
+                                end
+                                as percentage1
+                     from table2
+                              left join totals using (cohort)
+     )
+
+
+select *
+from percentages
+order by cohort, order1;
+
+select * from table2
 
 
