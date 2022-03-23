@@ -1,6 +1,6 @@
 --To do -edit insurance categories to apply to other sites
 --Check provider categories?
---combine race, smoking categories
+
 
 --with pat_list as (select * from htg_step3_with_exclusions_d1),
 with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
@@ -25,6 +25,8 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                                  case
                                      when smoking in ('01', '02', '07', '08') then 'Current smoker'
                                      when smoking in ('NI', 'UN', '05', '06', 'OT') then 'NI/unknown/refuse to answer'
+                                      when smoking is Null then 'NI/unknown/refuse to answer'
+
                                      when smoking = '03' then 'Former smoker'
                                      when smoking = '04' then 'Never smoker'
 
@@ -40,6 +42,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                               case
                                   when race in ('01', '04', '06', 'OT') then 'Other'
                                   when race in ('NI', 'UN', '07') then 'NI/unknown/refuse to answer'
+                                  when race is Null then 'NI/unknown/refuse to answer'
                                   when race = '03' then 'Black/African American'
                                   when race = '05' then 'White'
                                   when race = '02' then 'Asian'
@@ -47,6 +50,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
                                   end as race_category,
                               case
                                   when hispanic in ('R', 'NI', 'UN', 'OT') then 'NI/unknown/refuse to answer'
+                                  when hispanic is Null then 'NI/unknown/refuse to answer'
                                   when hispanic = 'Y' then 'hispanic'
                                   when hispanic = 'N' then 'non-hispanic'
                                   else 'check_categorization'
