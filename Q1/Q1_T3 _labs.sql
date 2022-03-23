@@ -1,9 +1,6 @@
-
 --Running time: 8 mins *2
 
-with
-
-    pat_list as
+with pat_list as
          (
              select TG_Date as index_date, shtg_Q1_cohorts_with_exclusions.*
              from shtg_Q1_cohorts_with_exclusions
@@ -13,7 +10,7 @@ with
          ),
      all_labs as (select * from Q1_labs_all),-- generated in Q1_labs_part1
 
- HDL_all as (select distinct patid,
+     HDL_all as (select distinct patid,
 
                                  --  lab_result_cm.result_num  total_chol_result_num,
                                  -- lab_result_cm.result_unit result_unit,
@@ -26,8 +23,9 @@ with
                    AND lab_result_cm.lab_loinc in ('2085-9')
                    and lab_result_cm.result_num is not null
 
-         -- and lab_result_cm.result_num >= 0
-         AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+                   -- and lab_result_cm.result_num >= 0
+                   AND not lab_result_cm.result_unit in
+                           ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
@@ -48,8 +46,9 @@ with
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
 
-         -- and lab_result_cm.result_num >= 0
-          AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+                          -- and lab_result_cm.result_num >= 0
+                          AND not lab_result_cm.result_unit in
+                                  ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
@@ -136,21 +135,23 @@ with
                            where row_num = 1
      ),
      diabetic_control as (
-         select count(patid)                                          count_patients,
-                count(case when a1c is not null then 1 end) as        count_non_null,
-                median(a1c)                                           median,
-                trunc(avg(a1c), 2)                                    mean,
-                trunc(STDDEV(a1c), 2)                                 std,
-                PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY a1c asc) "pct_25",
-                PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY a1c asc) "pct_75",
+         select count(patid)                                   count_patients,
+                count(case when a1c is not null then 1 end) as count_non_null,
+                median(a1c)                                    median,
+                trunc(avg(a1c), 2)                             mean,
+                trunc(STDDEV(a1c), 2)                          std,
+                PERCENTILE_CONT(0.25)                          WITHIN
+         GROUP (ORDER BY a1c asc) "pct_25",
+                PERCENTILE_CONT(0.75) WITHIN
+         GROUP (ORDER BY a1c asc) "pct_75",
 /*
                 COUNT(CASE WHEN a1c >= 7 THEN 1 END)                                as count_over_7,
                 COUNT(CASE WHEN a1c >= 8 THEN 1 END)                                as count_over_8,
                 trunc(100 * COUNT(CASE WHEN a1c >= 7 THEN 1 END) / count(patid), 2) as pct_over_7,
                 trunc(100 * COUNT(CASE WHEN a1c >= 8 THEN 1 END) / count(patid), 2) as pct_over_8
               */
-                'A1C'                                                 measure1,
-                cohort
+             'A1C' measure1,
+             cohort
          from all_labs
          group by cohort),
 
@@ -187,330 +188,335 @@ with
                           left join last_TG_above_500 using (patid)
                  group by cohort
                  union
-                 select count(patid)                                          count_patients,
-                        count(case when ggt is not null then 1 end) as        count_non_null,
-                        median(ggt)                                           median,
-                        trunc(avg(ggt), 2)                                    mean,
-                        trunc(STDDEV(ggt), 2)                                 std,
-                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ggt asc) "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ggt asc) "pct_75",
-
-                        'ggt'                                       as        measure1,
-                        cohort
+                 select count(patid)                                   count_patients,
+                        count(case when ggt is not null then 1 end) as count_non_null,
+                        median(ggt)                                    median,
+                        trunc(avg(ggt), 2)                             mean,
+                        trunc(STDDEV(ggt), 2)                          std,
+                        PERCENTILE_CONT(0.25)                          WITHIN
+                 GROUP (ORDER BY ggt asc) "pct_25",
+                        PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY ggt asc) "pct_75",
+                     'ggt' as measure1,
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                                        count_patients,
-
-                        count(case when albumin is not null then 1 end) as                  count_non_null
+                 select count(patid) count_patients,
+                     count(case when albumin is not null then 1 end) as count_non_null
                          ,
-                        trunc(median(albumin), 2)                                           median,
-                        trunc(avg(albumin), 2)                                              mean,
-                        trunc(STDDEV(albumin), 2)                                           std,
-                        trunc(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY albumin asc), 2) "pct_25",
-                        trunc(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY albumin asc), 2) "pct_75",
-
-
-                        'albumin',
-                        cohort
+                     trunc(median(albumin), 2) median,
+                     trunc(avg(albumin), 2) mean,
+                     trunc(STDDEV(albumin), 2) std,
+                     trunc(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY albumin asc), 2) "pct_25",
+                     trunc(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY albumin asc), 2) "pct_75",
+                     'albumin',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                          count_patients,
-                        count(case when ast is not null then 1 end) as        count_non_null,
-                        median(ast)                                           median,
-                        trunc(avg(ast), 2)                                    mean,
-                        trunc(STDDEV(ast), 2)                                 std,
-                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY ast asc) "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY ast asc) "pct_75",
-
-
-                        'ast',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when ast is not null then 1 end) as count_non_null,
+                     median(ast) median,
+                     trunc(avg(ast), 2) mean,
+                     trunc(STDDEV(ast), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY ast asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY ast asc) "pct_75",
+                     'ast',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                          count_patients,
-                        count(case when alt is not null then 1 end) as        count_non_null,
-                        median(alt)                                           median,
-                        trunc(avg(alt), 2)                                    mean,
-                        trunc(STDDEV(alt), 2)                                 std,
-                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY alt asc) "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY alt asc) "pct_75",
-
-
-                        'alt',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when alt is not null then 1 end) as count_non_null,
+                     median(alt) median,
+                     trunc(avg(alt), 2) mean,
+                     trunc(STDDEV(alt), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY alt asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY alt asc) "pct_75",
+                     'alt',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                          count_patients,
-                        count(case when alp is not null then 1 end) as        count_non_null,
-                        median(alp)                                           median,
-                        trunc(avg(alp), 2)                                    mean,
-                        trunc(STDDEV(alp), 2)                                 std,
-                        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY alp asc) "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY alp asc) "pct_75",
-
-
-                        'alp',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when alp is not null then 1 end) as count_non_null,
+                     median(alp) median,
+                     trunc(avg(alp), 2) mean,
+                     trunc(STDDEV(alp), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY alp asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY alp asc) "pct_75",
+                     'alp',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                     count_patients,
-                        count(case when FIB_4 is not null then 1 end) as count_non_null,
-                        median(FIB_4)                                    median,
-                        trunc(avg(FIB_4), 2)                             mean,
-                        trunc(STDDEV(FIB_4), 2)                          std,
-                        trunc(PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY FIB_4 asc), 2)               "pct_25",
-                        trunc(PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY FIB_4 asc), 2)               "pct_75",
-                        'FIB_4',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when FIB_4 is not null then 1 end) as count_non_null,
+                     median(FIB_4) median,
+                     trunc(avg(FIB_4), 2) mean,
+                     trunc(STDDEV(FIB_4), 2) std,
+                     trunc(PERCENTILE_CONT(0.25) WITHIN
+                     GROUP (ORDER BY FIB_4 asc), 2) "pct_25",
+                     trunc(PERCENTILE_CONT(0.75) WITHIN
+                     GROUP (ORDER BY FIB_4 asc), 2) "pct_75",
+                     'FIB_4',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                   count_patients,
-                        count(case when BMI is not null then 1 end) as count_non_null,
-                        median(BMI)                                    median,
-                        trunc(avg(BMI), 2)                             mean,
-                        trunc(STDDEV(BMI), 2)                          std,
-                        trunc(PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY BMI asc), 2)               "pct_25",
-                        trunc(PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY BMI asc), 2)               "pct_75",
-                        'BMI',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when BMI is not null then 1 end) as count_non_null,
+                     median(BMI) median,
+                     trunc(avg(BMI), 2) mean,
+                     trunc(STDDEV(BMI), 2) std,
+                     trunc(PERCENTILE_CONT(0.25) WITHIN
+                     GROUP (ORDER BY BMI asc), 2) "pct_25",
+                     trunc(PERCENTILE_CONT(0.75) WITHIN
+                     GROUP (ORDER BY BMI asc), 2) "pct_75",
+                     'BMI',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                      count_patients,
-                        count(case when weight is not null then 1 end) as count_non_null,
-                        median(weight)                                    median,
-                        trunc(avg(weight), 2)                             mean,
-                        trunc(STDDEV(weight), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY weight asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY weight asc)                   "pct_75",
-
-                        'weight',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when weight is not null then 1 end) as count_non_null,
+                     median(weight) median,
+                     trunc(avg(weight), 2) mean,
+                     trunc(STDDEV(weight), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY weight asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY weight asc) "pct_75",
+                     'weight',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                    count_patients,
-                        count(case when apob is not null then 1 end) as count_non_null,
-                        median(apob)                                    median,
-                        trunc(avg(apob), 2)                             mean,
-                        trunc(STDDEV(apob), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY apob asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY apob asc)                   "pct_75",
-
-                        'apob',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when apob is not null then 1 end) as count_non_null,
+                     median(apob) median,
+                     trunc(avg(apob), 2) mean,
+                     trunc(STDDEV(apob), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY apob asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY apob asc) "pct_75",
+                     'apob',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                  count_patients,
-                        count(case when TG is not null then 1 end) as count_non_null,
-                        median(TG)                                    median,
-                        trunc(avg(TG), 2)                             mean,
-                        trunc(STDDEV(TG), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY TG asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY TG asc)                   "pct_75",
-
-
-                        'TG',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when TG is not null then 1 end) as count_non_null,
+                     median(TG) median,
+                     trunc(avg(TG), 2) mean,
+                     trunc(STDDEV(TG), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY TG asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY TG asc) "pct_75",
+                     'TG',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                   count_patients,
-                        count(case when LDL is not null then 1 end) as count_non_null,
-                        median(LDL)                                    median,
-                        trunc(avg(LDL), 2)                             mean,
-                        trunc(STDDEV(LDL), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY LDL asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY LDL asc)                   "pct_75",
-
-
-                        'LDL',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when LDL is not null then 1 end) as count_non_null,
+                     median(LDL) median,
+                     trunc(avg(LDL), 2) mean,
+                     trunc(STDDEV(LDL), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY LDL asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY LDL asc) "pct_75",
+                     'LDL',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                   count_patients,
-                        count(case when HDL is not null then 1 end) as count_non_null,
-                        median(HDL)                                    median,
-                        trunc(avg(HDL), 2)                             mean,
-                        trunc(STDDEV(HDL), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY HDL asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY HDL asc)                   "pct_75",
-
-
-                        'HDL',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when HDL is not null then 1 end) as count_non_null,
+                     median(HDL) median,
+                     trunc(avg(HDL), 2) mean,
+                     trunc(STDDEV(HDL), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY HDL asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY HDL asc) "pct_75",
+                     'HDL',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                    count_patients,
-                        count(case when nhdl is not null then 1 end) as count_non_null,
-                        median(nhdl)                                    median,
-                        trunc(avg(nhdl), 2)                             mean,
-                        trunc(STDDEV(nhdl), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY nhdl asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY nhdl asc)                   "pct_75",
-
-
-                        'nhdl',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when nhdl is not null then 1 end) as count_non_null,
+                     median(nhdl) median,
+                     trunc(avg(nhdl), 2) mean,
+                     trunc(STDDEV(nhdl), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY nhdl asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY nhdl asc) "pct_75",
+                     'nhdl',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                    count_patients,
-                        count(case when vldl is not null then 1 end) as count_non_null,
-                        median(vldl)                                    median,
-                        trunc(avg(vldl), 2)                             mean,
-                        trunc(STDDEV(vldl), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY vldl asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY vldl asc)                   "pct_75",
-
-
-                        'vldl',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when vldl is not null then 1 end) as count_non_null,
+                     median(vldl) median,
+                     trunc(avg(vldl), 2) mean,
+                     trunc(STDDEV(vldl), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY vldl asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY vldl asc) "pct_75",
+                     'vldl',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                    count_patients,
-                        count(case when apob is not null then 1 end) as count_non_null,
-                        median(apob)                                    median,
-                        trunc(avg(apob), 2)                             mean,
-                        trunc(STDDEV(apob), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY apob asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY apob asc)                   "pct_75",
-
-
-                        'apob',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when apob is not null then 1 end) as count_non_null,
+                     median(apob) median,
+                     trunc(avg(apob), 2) mean,
+                     trunc(STDDEV(apob), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY apob asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY apob asc) "pct_75",
+                     'apob',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                   count_patients,
-                        count(case when nlr is not null then 1 end) as count_non_null,
-                        median(nlr)                                    median,
-                        trunc(avg(nlr), 2)                             mean,
-                        trunc(STDDEV(nlr), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY nlr asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY nlr asc)                   "pct_75",
-
-
-                        'nlr',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when nlr is not null then 1 end) as count_non_null,
+                     median(nlr) median,
+                     trunc(avg(nlr), 2) mean,
+                     trunc(STDDEV(nlr), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY nlr asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY nlr asc) "pct_75",
+                     'nlr',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                     count_patients,
-                        count(case when hscrp is not null then 1 end) as count_non_null,
-                        median(hscrp)                                    median,
-                        trunc(avg(hscrp), 2)                             mean,
-                        trunc(STDDEV(hscrp), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY hscrp asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY hscrp asc)                   "pct_75",
-
-
-                        'hscrp',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when hscrp is not null then 1 end) as count_non_null,
+                     median(hscrp) median,
+                     trunc(avg(hscrp), 2) mean,
+                     trunc(STDDEV(hscrp), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY hscrp asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY hscrp asc) "pct_75",
+                     'hscrp',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                      count_patients,
-                        count(case when apo_a1 is not null then 1 end) as count_non_null,
-                        median(apo_a1)                                    median,
-                        trunc(avg(apo_a1), 2)                             mean,
-                        trunc(STDDEV(apo_a1), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY apo_a1 asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY apo_a1 asc)                   "pct_75",
-
-
-                        'apo_a1',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when apo_a1 is not null then 1 end) as count_non_null,
+                     median(apo_a1) median,
+                     trunc(avg(apo_a1), 2) mean,
+                     trunc(STDDEV(apo_a1), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY apo_a1 asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY apo_a1 asc) "pct_75",
+                     'apo_a1',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                   count_patients,
-                        count(case when lpa is not null then 1 end) as count_non_null,
-                        median(lpa)                                    median,
-                        trunc(avg(lpa), 2)                             mean,
-                        trunc(STDDEV(lpa), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY lpa asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY lpa asc)                   "pct_75",
-
-
-                        'lpa',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when lpa_mol is not null then 1 end) as count_non_null,
+                     median(lpa_mol) median,
+                     trunc(avg(lpa_mol), 2) mean,
+                     trunc(STDDEV(lpa_mol), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY lpa_mol asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY lpa_mol asc) "pct_75",
+                     'lpa mol',
+                     cohort
+                 from all_labs
+                 union
+                 select count(patid) count_patients,
+                     count(case when lpa_mass is not null then 1 end) as count_non_null,
+                     median(lpa_mass) median,
+                     trunc(avg(lpa_mass), 2) mean,
+                     trunc(STDDEV(lpa_mass), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY lpa_mass asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY lpa_mass asc) "pct_75",
+                     'lpa mass',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                    count_patients,
-                        count(case when TRLC is not null then 1 end) as count_non_null,
-                        median(TRLC)                                    median,
-                        trunc(avg(TRLC), 2)                             mean,
-                        trunc(STDDEV(TRLC), 2)                          std,
-                        PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY TRLC asc)                   "pct_25",
-                        PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY TRLC asc)                   "pct_75",
-
-
-                        'TRLC',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when TRLC is not null then 1 end) as count_non_null,
+                     median(TRLC) median,
+                     trunc(avg(TRLC), 2) mean,
+                     trunc(STDDEV(TRLC), 2) std,
+                     PERCENTILE_CONT(0.25) WITHIN
+                 GROUP (ORDER BY TRLC asc) "pct_25",
+                     PERCENTILE_CONT(0.75) WITHIN
+                 GROUP (ORDER BY TRLC asc) "pct_75",
+                     'TRLC',
+                     cohort
                  from all_labs
                  group by cohort
                  union
-                 select count(patid)                                         count_patients,
-                        count(case when egfr_2021 is not null then 1 end) as count_non_null,
-                        trunc(median(egfr_2021), 2)                          median,
-                        trunc(avg(egfr_2021), 2)                             mean,
-                        trunc(STDDEV(egfr_2021), 2)                          std,
-                        trunc(PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY egfr_2021 asc), 2)               "pct_25",
-                        trunc(PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY egfr_2021 asc), 2)               "pct_75",
-
-
-                        'egfr_2021',
-                        cohort
+                 select count(patid) count_patients,
+                     count(case when egfr_2021 is not null then 1 end) as count_non_null,
+                     trunc(median(egfr_2021), 2) median,
+                     trunc(avg(egfr_2021), 2) mean,
+                     trunc(STDDEV(egfr_2021), 2) std,
+                     trunc(PERCENTILE_CONT(0.25) WITHIN
+                     GROUP (ORDER BY egfr_2021 asc), 2) "pct_25",
+                     trunc(PERCENTILE_CONT(0.75) WITHIN
+                     GROUP (ORDER BY egfr_2021 asc), 2) "pct_75",
+                     'egfr_2021',
+                     cohort
                  from all_labs
                  group by cohort)
         ,
 
 
      table3b as (select count(patid),
+                        COUNT(CASE WHEN lpa_mol >= 125 THEN 1 END)                                 count1,
+                        'N_lpa_over_125_nmol'   as                                                 count_label,
+                        trunc(100 * COUNT(CASE WHEN lpa_mass >= 125 THEN 1 END) / count(patid), 2) pct1,
+                        'pct_lpa_over_125_nmol' as                                                 pct_label,
+                        'lpa_mol'                                                                  measure1,
+                        cohort
+                 from all_labs
+                 group by cohort
+                 union
+                 select count(patid),
+                        COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END)                                count1,
+                        'N_lpa_over_50mg'   as                                                    count_label,
+                        trunc(100 * COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END) / count(patid), 2) pct1,
+                        'pct_lpa_over_50mg' as                                                    pct_label,
+                        'lpa_mass'                                                                measure1,
+                        cohort
+                 from all_labs
+                 group by cohort
+                 union
+                 select count(patid),
                         COUNT(CASE WHEN a1c >= 7 THEN 1 END)                                count1,
                         'N_a1c_over_7'   as                                                 count_label,
                         trunc(100 * COUNT(CASE WHEN a1c >= 7 THEN 1 END) / count(patid), 2) pct1,
@@ -914,7 +920,8 @@ with
                         'pct lipid panel within 90 days',
                         'lipid panel within 90 days'                                                     measure1,
                         cohort
-                 from pat_list left join lipid_panel_next_closest using (patid, cohort)
+                 from pat_list
+                          left join lipid_panel_next_closest using (patid, cohort)
                  group by cohort
                  union
                  select count(patid),
@@ -924,7 +931,8 @@ with
                         'pct lipid panel within 15 months',
                         'lipid panel within 15 months'                                                     measure1,
                         cohort
-                 from pat_list left join lipid_panel_next_closest using (patid, cohort)
+                 from pat_list
+                          left join lipid_panel_next_closest using (patid, cohort)
                  group by cohort
 
 
