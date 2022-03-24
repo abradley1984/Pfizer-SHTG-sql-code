@@ -14,6 +14,8 @@ Note: The scope calls these two sections \'93queries\'94 so that\'92s what I\'92
 For each \'93query\'94, I\'92ll first define the cohorts, and then use those cohorts to generate tables with demographics, lab distributions etc. Each step will write some tables to disk, and the last query will pull all of the written queries and should be saved in csv files. \
 \
 Queries should be run in  the following order:\
+\
+\
 Q1:\
 \
 Define Q1 cohorts: \
@@ -30,9 +32,15 @@ Q1_T7_T8_meds.sql\
 Q1_table9.sql\
 \
 \
+Q2:\
 \
 Define Q2 cohorts:\
 Q2_cohort_definition_part1.sql\
+Q2_cohort_definition_part2_labs.sql\
+Q2_cohort_definition_part3_cohort_groups.sql\
+\
+After that the queries can be run in any order. Q2 doesn\'92t have T9, but has a T10 that Q1 doesn\'92t have. \
+\
 \
 \
 \
