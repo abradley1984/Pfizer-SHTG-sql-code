@@ -14,16 +14,28 @@ Note: The scope calls these two sections \'93queries\'94 so that\'92s what I\'92
 For each \'93query\'94, I\'92ll first define the cohorts, and then use those cohorts to generate tables with demographics, lab distributions etc. Each step will write some tables to disk, and the last query will pull all of the written queries and should be saved in csv files. \
 \
 Queries should be run in  the following order:\
+Q1:\
 \
 Define Q1 cohorts: \
 Pfizer_shtg_Q1_cohort_definition.sql\
 \
+Run this next: Q1_labs_part 1.sql\
+\
+Then the rest of the tables can be run in any order:\
+Q1_T1_shtg.sql\
+Q1_T2_comorbidities.sql\
+Q1_T3 _labs.sql\
+Q1_T4-T6.sql\
+Q1_T7_T8_meds.sql\
+Q1_table9.sql\
+\
 \
 \
 Define Q2 cohorts:\
-SHTG QUERY 2 STEP 1.SQL\
-Q2_step_2_labs.sql\
-SHTG_Q2_STEP3_cohorts.SQL\
+Q2_cohort_definition_part1.sql\
+\
+\
+\
 \
 \
 \
