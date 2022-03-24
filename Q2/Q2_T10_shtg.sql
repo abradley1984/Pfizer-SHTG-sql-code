@@ -1,7 +1,11 @@
-with pat_list as
-    (select * from SHTG_Q2_STEP1_d6 left join SHTG_Q2_STEP3_d1),
+/* T10 - only for Q2
+   This table is categorizing patients into Obesity, NASH and Diabetes groups, looking at some labs */
 
-     diabetes as ( select patid ,diabetes from SHTG_Q2_STEP1_d5),
+with pat_list as
+    (select * from SHTG_Q2_STEP3_d2
+        where cohort is not null),
+
+    /* diabetes as ( select patid ,diabetes from SHTG_Q2_STEP3_d2),*/
 
      BMI as (select patid,BMI from Q2_LABS_ALL),
      BMI_category as (select patid, BMI,
@@ -33,6 +37,6 @@ as t10_category
 from  pat_list
          left join BMI_category using(patid)
 left join nash using(patid)
-left join diabetes using(patid))
+/*left join diabetes using(patid)*/)
 
 select count (patid ), t10_category, BMI_category,v_high_risk,enhanced_risk, ascvd from combined group by t10_category, v_high_risk,enhanced_risk,  ascvd,BMI_category  ;
