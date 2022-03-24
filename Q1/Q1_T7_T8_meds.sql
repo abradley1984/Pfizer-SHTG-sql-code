@@ -1,20 +1,20 @@
---For Q1 T7 and T8
---drop table shtg_meds_q1;
+/*For Q1 T7 and T8
+  Two tables will be output at the end, T7 and T8.
+ */
 
-create table shtg_meds_Q2_d2 as
---statins
+
+
+create table shtg_meds_Q1 as
+
  with
-    joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
-    where cohort is not null),
+
  pat_list as
          (
-             select distinct *
-
-             from joined1
+           select * from shtg_Q1_cohorts_with_exclusions
          )
 
         ,
-
+--statins
      statins as (
          select distinct patid, cohort, 1 as Statin
          from pat_list
@@ -1358,9 +1358,7 @@ create table shtg_meds_Q2_d2 as
          FROM all_meds)
 select *
 from all_meds_with_labs;
-/*
-select patid, statin_plus_other_lipid_lowering,cohort, statin_plus_other_lipid_lowering from all_labs2 where cohort = 'cohort_F'; group by cohort,statin_plus_other_lipid_lowering ;
-*/
+
 --table 7
 select
        cohort,
@@ -1382,34 +1380,7 @@ select
 
 from shtg_meds_Q1
 group by cohort;
---table 8 - old version
 
-select sum(Statin)                                              Statin,
-       sum(High_Intensity_Statin)                               High_Intensity_Statin,
-       sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
-     sum(fibrate)                            fibrate,
-     sum(pcsk9)                              pcsk9,
-     sum(omega_3)                            omega_3,
-     sum(niacin)                             niacin,
-     sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
-       sum(Statin * pcsk9)                               as     statin_pcsk9,
-       sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
-       sum(no_lipid_lowering)                            as     no_lipid_lowering,
-       sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
-       ldl_above_70,
-       ldl_above_100,
-       nhdl_above_100,
-       nhdl_above_130,
-       TG_above_150
-
-
-       --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
-group by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150;
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
@@ -1432,7 +1403,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q2
+from shtg_meds_Q1
 group by ldl_above_70
 having ldl_above_70 = 1
 union
@@ -1558,7 +1529,7 @@ select sum(Statin)                                              Statin,
        'ldl_under_70_nhdl_above_100_TG_above_150'
 
 
-       --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
+
 from shtg_meds_Q1
 group by ldl_under_70_nhdl_above_100_TG_above_150
 having ldl_under_70_nhdl_above_100_TG_above_150 = 1
