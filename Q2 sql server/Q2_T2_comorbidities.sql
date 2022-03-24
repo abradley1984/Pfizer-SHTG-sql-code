@@ -242,7 +242,7 @@ WHEN dx in ('440.20',
                   INNER JOIN cdm_60_etl.diagnosis como using (patid)
 
 
-         WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
+         WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2020-08-31'
 */
 
              (como.dx IN (
@@ -550,7 +550,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                     INNER JOIN cdm_60_etl.diagnosis como using (patid)
 
 
-                           WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
+                           WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2020-08-31'
                               and*/ Como.dx like
                                     ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                            group by patid, cohort),
