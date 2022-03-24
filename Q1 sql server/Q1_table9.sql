@@ -113,10 +113,7 @@ with pat_list as (select patid, cohort, TG_DATE
          where (dx LIKE 'G45%' --'TIA'
              OR dx LIKE '435%' --'TIA'
              )
-           and admit_date BETWEEN TO_DATE('09/30/2016'
-             , 'MM/DD/YYYY')
-             AND TO_DATE('09/30/2021'
-                 , 'MM/DD/YYYY')
+           and admit_date BETWEEN '2020-09-30' AND '2021-09-30'
          group by patid, cohort
      ),
      PAD as (
@@ -134,10 +131,7 @@ with pat_list as (select patid, cohort, TG_DATE
                  'I70.292', 'I70.293', 'I70.298', 'I70.299', 'I70.3', 'I70.4', 'I70.5', 'I70.8', 'I70.90', 'I70.91',
                  'I70.92')-- PAD
                    )
-             /* and admit_date BETWEEN TO_DATE('09/30/2016'
-                , 'MM/DD/YYYY')
-                AND TO_DATE('09/30/2021'
-                    , 'MM/DD/YYYY')*/
+             /* and admit_date BETWEEN '2020-09-30' AND '2021-09-30'*/
          group by patid, cohort
      ),
      CAD as (
@@ -262,10 +256,7 @@ with pat_list as (select patid, cohort, TG_DATE
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
 
-         where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
-             , 'MM/DD/YYYY')
-                   AND TO_DATE('09/30/2021'
-                 , 'MM/DD/YYYY')
+         where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and rxnorm_cui in
                  ('83366', '153165', '617312', '617314', '83366', '83367', '153165', '617310', '617318', '83366',
                   '83367', '153165', '617311', '617320', '83366', '83367', '153165', '259255', '262095', '83366',
@@ -407,10 +398,7 @@ with pat_list as (select patid, cohort, TG_DATE
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
 
-         where prescribing.rx_order_Date BETWEEN TO_DATE('08/01/2020'
-             , 'MM/DD/YYYY')
-             AND TO_DATE('09/30/2021'
-                 , 'MM/DD/YYYY')
+         where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('5459', '5856', '7405', '11160', '51428', '86009', '92877', '92879', '92880', '92881', '92942', '93108',
                 '93332', '93398', '93555', '93557', '93558', '93560', '106888', '106889', '106891', '106892', '106893',

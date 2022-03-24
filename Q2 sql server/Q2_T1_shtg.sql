@@ -86,7 +86,7 @@ when Age BETWEEN 65 and 75
      insurance as (select *
                    from pat_list
                             left join CDM_60_ETL.encounter e using (patid)
-                   where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                   where e.admit_date BETWEEN '2020-09-30' AND '2021-09-30'
                      and raw_payer_type_primary is not null),
      insurance_type as (select patid,
                                COHORT,
