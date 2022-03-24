@@ -153,7 +153,7 @@ when Age BETWEEN 65 and 75
                 '207QA0505X', '207R00000X', '207RA0000X', '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X',
                 '364SF0001X')
            And encounter.admit_date BETWEEN '2020-09-30' AND '2021-09-30'
-  ))
+  )
         ,
      --Both cariology and endocrinology
      cardio_plus_endo as (select patid, 'both_endo_cardio' as both_endo_cardio, cohort
@@ -307,4 +307,3 @@ when Age BETWEEN 65 and 75
 select *
 from percentages
 order by cohort, order1;
-;

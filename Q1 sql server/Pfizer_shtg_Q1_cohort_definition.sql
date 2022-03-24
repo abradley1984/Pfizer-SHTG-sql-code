@@ -70,7 +70,8 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                 WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+  AND
                    AND lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
@@ -92,7 +93,8 @@ with TG_all as (select lab_result_cm.patid,
                                lab_result_cm.result_date result_date
 
                         FROM cdm_60_etl.lab_result_cm
-                        WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                        WHERE lab_result_cm.result_date BETWEEN '2020-08-31' AND '2021-09-30'
+  AND
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
                           and lab_result_cm.result_num >= 0
@@ -114,7 +116,8 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                 WHERE lab_result_cm.result_date BETWEEN '2020-08-31' AND '2021-09-30'
+  AND
                    AND lab_result_cm.lab_loinc in ('2085-9')
                    and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
