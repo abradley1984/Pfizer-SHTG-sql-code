@@ -93,7 +93,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                             'I24.1',
                             'I25.2',*/
                         )
-                      and como.admit_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and como.admit_date BETWEEN '2020-09-30' AND '2021-09-30'
                     group by patid
      ),
      --one ASCVD event - MI, stroke, PCI
@@ -394,7 +394,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE -- lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                 WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+  AND
                      lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
@@ -456,7 +457,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
 
-         where /*prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2010', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+         where /*prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and*/ rxnorm_cui in
                    ('83366', '153165', '617312', '617314', '83366', '83367', '153165', '617310', '617318', '83366',
                     '83367', '153165', '617311', '617320', '83366', '83367', '153165', '259255', '262095', '83366',
@@ -793,7 +794,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                        lab_result_cm.result_date
 
                 FROM cdm_60_etl.lab_result_cm
-                WHERE -- lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+  AND
                     lab_result_cm.lab_loinc in ('2571-8')
                   --and lab_result_cm.patid in pat_list
                   and lab_result_cm.result_num is not null
