@@ -1,8 +1,8 @@
---drop table  MI_subsequent_test;
+/* T9 - risk factors, only for Q1.
+   This is currently saving to file but could be.
+ */
 
---drop table  test_MI_multiple_dx;
 
---create table test_MI_multiple_dx as
 with pat_list as (select patid, cohort, TG_DATE
                   from shtg_Q1_cohorts_with_exclusions
     -- fetch first 100 rows only
@@ -222,12 +222,6 @@ with pat_list as (select patid, cohort, TG_DATE
          group by patid, cohort
      )
 
-    /* select count (distinct patid), pdx ,'a' from MI group by pdx
-union
-select count (distinct patid), pdx,'b' from MI
-where pdx='P'
-group by pdx*/
-/*union*/
         ,
      stroke as (
          select patid,
@@ -268,31 +262,7 @@ group by pdx*/
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
          group by patid, cohort),
-     /*multiple_PCI as (
-         select patid, gap, case when encounter_count > 1 then 1 end as multiple_PCI
-         from (select patid,
-                      count(encounterid)                                           as encounter_count,
-                      max(encounter.admit_date),
-                      min(encounter.admit_date),
-                      trunc(max(encounter.admit_date) - min(encounter.admit_date)) as gap
-               from cdm_60_etl.encounter
---join cdm_60_etl.diagnosis  Como using (patid, encounterid)
 
-               where patid in (Select patid From pat_list)
-                 and encounter.enc_Type in ('EI', 'IP')
-                 and DRG in ('246',
-                             '247',
-                             '248',
-                             '249',
-                             '250',
-                             '251')
-               group by patid
-               having count(encounterid) > 1)
-
-
-         where gap
-                   > 30)
-        ,*/
      statins as (
          select distinct patid, cohort, 1 as Statin
          from pat_list
@@ -562,28 +532,7 @@ group by pdx*/
 
 
         ,
-     /*MI_DRG as (
-         select distinct patid, 1 as MI_DRG
 
-         from cdm_60_etl.encounter
---join cdm_60_etl.diagnosis  Como using (patid, encounterid)
-
-         where patid in (Select patid From pat_list)
-           and encounter.enc_Type in ('EI', 'IP')
-           and DRG in ('280',
-                       '281',
-                       '282',
-                       '283',
-                       '284',
-                       '285')
-     )
-
-
-
-
-
-,
-*/
      combined as (
          select distinct patid,
 
@@ -673,10 +622,7 @@ group by pdx*/
                        ,
                       case when current_smoker = 1 then 1 else 0 end        as current_smoker,
                       case when age_over_65 = 1 then 1 else 0 end           as age_over_65
-                      --case when stroke_gap > 180 then 1 else 0 end as more_than_1_stroke,
-                      --case when MI_gap > 180 then 1 else 0 end as more_than_1_MI,
-                      --case when PCI_gap > 180 then 1 else 0 end as more_than_1_PCI
-               from stroke
+                         from stroke
                         full outer join MI using (patid)
                         full outer join PCI using (patid)
                         full outer join statins using (patid)
@@ -737,5 +683,3 @@ group by pat_list.cohort, Statin
 order by pat_list.cohort
 
 /*
-group by cohort, stroke.Comorbidity_name, MI.Comorbidity_name
-order by cohort*/
