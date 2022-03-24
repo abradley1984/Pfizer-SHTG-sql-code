@@ -1,4 +1,4 @@
-/* Q1 step 1
+/* Q1 step 1 -editing for sql server version
 This code defines the overall cohort for the first section of the SHTG qery (Q1) as patients who
    -had a TG value in the one year study period (30-Sep-2020 to 30-Sep-2021)
    -had a TG>500, or had an LDL within the study period if their TG was <500,
@@ -34,7 +34,6 @@ drop table shtg_Q1_cohorts_with_exclusions
   */
 
 
-
 --list of patients who have triglycerides in study period
 create table shtg_cohort_definition as
 with TG_all as (select lab_result_cm.patid,
@@ -49,13 +48,13 @@ with TG_all as (select lab_result_cm.patid,
                        LAB_RESULT_CM.RAW_RESULT
 
                 FROM cdm_60_etl.lab_result_cm
-                WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
                   AND lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                   and lab_result_cm.result_num is not null
                   and lab_result_cm.result_num >= 0
     --AND lab_result_cm.result_num < 1000
-   -- fetch first 1000 rows only
+    -- fetch first 1000 rows only
 
 ),
      TG as (select *
@@ -76,7 +75,7 @@ with TG_all as (select lab_result_cm.patid,
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
-        --  AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         --  AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
          --AND lab_result_cm.result_num < 1000
 
      ),
@@ -97,7 +96,8 @@ with TG_all as (select lab_result_cm.patid,
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
                           and lab_result_cm.result_num >= 0
-           AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+                          AND not lab_result_cm.result_unit in
+                                  ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 
      ),
@@ -116,9 +116,10 @@ with TG_all as (select lab_result_cm.patid,
                  FROM cdm_60_etl.lab_result_cm
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
-                 and lab_result_cm.result_num is not null
+                   and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
-         AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+                   AND not lab_result_cm.result_unit in
+                           ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 
      ),
@@ -159,36 +160,36 @@ with TG_all as (select lab_result_cm.patid,
                                   on total_chol.patid = HDL.patid),
 
 
-lab_list as (
-select PATID,
-       LDL.LDL_RESULT_NUM,
-       NHDL,
-       TG.TG_RESULT_NUM,
-       CHOL_RESULT_NUM,
-       HDL_RESULT_NUM,
-       TG.RESULT_DATE                 as TG_date,
-       LDL.RESULT_DATE                as LDL_date,
-       HDL_DATE                       as nHDL_date,
-       TG.RESULT_DATE - HDL_DATE as nHDL_gap
+     lab_list as (
+         select PATID,
+                LDL.LDL_RESULT_NUM,
+                NHDL,
+                TG.TG_RESULT_NUM,
+                CHOL_RESULT_NUM,
+                HDL_RESULT_NUM,
+                TG.RESULT_DATE            as TG_date,
+                LDL.RESULT_DATE           as LDL_date,
+                HDL_DATE                  as nHDL_date,
+                TG.RESULT_DATE - HDL_DATE as nHDL_gap
 
 
-from TG
-         left join NHDL USING (PATID)
-         left join LDL USING (PATID)
+         from TG
+                  left join NHDL USING (PATID)
+                  left join LDL USING (PATID)
 
-     where  TG.RESULT_DATE - HDL_DATE <=30
+         where TG.RESULT_DATE - HDL_DATE <= 30
 
-       --Note:this is allowing for LDL to be null if TG>500
+           --Note:this is allowing for LDL to be null if TG>500
 
-    and( (TG_RESULT_NUM<=500 and LDL_result_num is not null and nhdl is not null)
-        or (TG_RESULT_NUM>500))
-      ),
+           and ((TG_RESULT_NUM <= 500 and LDL_result_num is not null and nhdl is not null)
+             or (TG_RESULT_NUM > 500))
+     ),
 
      --patients over 18
 --patients with at least one encounter > 6 months ago
 
 --This code adds columnns needed for exclusions including age and  first_encounter date
-pat_list as (select patid from lab_list),
+     pat_list as (select patid from lab_list),
 
 
      age_gender_race_ethnicity AS (
@@ -227,44 +228,53 @@ pat_list as (select patid from lab_list),
                         where row_num = 1
      ),
 
- joined as
+     joined as
          (
              select *
              from lab_list labs
                       left join first_encounter e using (patid)
                       left join last_encounter e using (patid)
                       left join age_gender_race_ethnicity dem using (patid)
-
          )
 
 
 --sql server age: floor(datediff(day, demographic.birth_date, '2020-08-31') / 365.25) as age
 
 select joined.*,
-       round(TG_DATE - first_admit_date)         as pre_index_days,
-         round( last_admit_date-TG_DATE )         as post_index_days,
-       round((TG_DATE - birth_date) / 365.25, 2) as age
+       round(TG_DATE - first_admit_date)                  as pre_index_days,
+       round(last_admit_date - TG_DATE)                   as post_index_days,
+       round(datediff(day, birth_date, TG_Date) / 365.25) as age
 from joined;
 
 --Counts for table 0
 
 create table shtg_Q1_total_counts as
-(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm_60_etl.demographic
+(
+select count(distinct patid) as N, 'Total system population' as label1, 1 as order1
+from cdm_60_etl.demographic
 union
-select count(distinct patid) ,'Have lab data',2 from shtg_cohort_definition
-    union
-select count(distinct patid) ,'Have lab data and over 18',3 from shtg_cohort_definition
-where age>=18
+select count(distinct patid), 'Have lab data', 2
+from shtg_cohort_definition
 union
-select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from shtg_cohort_definition
-where age>=18 and pre_index_days>=180);
+select count(distinct patid), 'Have lab data and over 18', 3
+from shtg_cohort_definition
+where age >= 18
+union
+select count(distinct patid), 'Have lab data, over 18 and at least 180 days since first encounter', 4
+from shtg_cohort_definition
+where age >= 18
+  and pre_index_days >= 180);
 
-select * from shtg_q1_total_counts
+select *
+from shtg_q1_total_counts
 order by order1;
 
 create table shtg_Q1_cohorts_with_exclusions
-as WITH labs as (select * from shtg_cohort_definition
-where age>=18 and pre_index_days>=180),
+as
+WITH labs as (select *
+              from shtg_cohort_definition
+              where age >= 18
+                and pre_index_days >= 180),
 
 
      lab_labels as (select labs.*,
@@ -344,7 +354,7 @@ where age>=18 and pre_index_days>=180),
                                    then 'Age_40_55'
                                when Age BETWEEN 55 and 65
                                    then 'Age_55_65'
- when Age BETWEEN 65 and 75
+                               when Age BETWEEN 65 and 75
                                    then 'Age_65_75'
                                when Age > 75
                                    then 'Age_over_75'
@@ -388,9 +398,9 @@ where age>=18 and pre_index_days>=180),
 
 select *
 from with_cohorts
-
 ;
-select count(distinct patid), cohort from shtg_Q1_cohorts_with_exclusions
+select count(distinct patid), cohort
+from shtg_Q1_cohorts_with_exclusions
 group by cohort;
 
 
