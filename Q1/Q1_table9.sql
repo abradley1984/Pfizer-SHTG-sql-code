@@ -19,8 +19,6 @@ with pat_list as (select patid, cohort, TG_DATE
                      CASE when (hscrp >= 3) THEN 1 else 0 END                   as hscrp_over_3
 
               from labs_all)
-
-
         ,
      smoking AS (
          select patid, case when smoking in ('01', '02', '05', '07', '08') then 1 else 0 end as current_smoker
@@ -52,29 +50,26 @@ with pat_list as (select patid, cohort, TG_DATE
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
          where (Como.dx IN ('H31.021',--RETINOPATHY
-'H31.022',
-'H31.023',
-'H31.029',
-'H35.00',
-'H35.021',
-'H35.022',
-'H35.023',
-'H35.029',
-
-'H35.031',
-
-'H35.032',
-'H35.033',
-
-'H35.039',
-'H35.20',
-'H35.21',
-'H35.22',
-'H35.23',
-'H35.711',
-'H35.712',
-'H35.713',
-'H35.719')
+                            'H31.022',
+                            'H31.023',
+                            'H31.029',
+                            'H35.00',
+                            'H35.021',
+                            'H35.022',
+                            'H35.023',
+                            'H35.029',
+                            'H35.031',
+                            'H35.032',
+                            'H35.033',
+                            'H35.039',
+                            'H35.20',
+                            'H35.21',
+                            'H35.22',
+                            'H35.23',
+                            'H35.711',
+                            'H35.712',
+                            'H35.713',
+                            'H35.719')
                    )
          group by patid, cohort),
      diabetes_10y as (
@@ -138,11 +133,11 @@ with pat_list as (select patid, cohort, TG_DATE
                  'I70.24', 'I70.25', 'I70.26', 'I70.261', 'I70.262', 'I70.263', 'I70.268', 'I70.269', 'I70.291',
                  'I70.292', 'I70.293', 'I70.298', 'I70.299', 'I70.3', 'I70.4', 'I70.5', 'I70.8', 'I70.90', 'I70.91',
                  'I70.92')-- PAD
-             )
-          /* and admit_date BETWEEN TO_DATE('09/30/2016'
-             , 'MM/DD/YYYY')
-             AND TO_DATE('09/30/2021'
-                 , 'MM/DD/YYYY')*/
+                   )
+             /* and admit_date BETWEEN TO_DATE('09/30/2016'
+                , 'MM/DD/YYYY')
+                AND TO_DATE('09/30/2021'
+                    , 'MM/DD/YYYY')*/
          group by patid, cohort
      ),
      CAD as (
@@ -154,9 +149,9 @@ with pat_list as (select patid, cohort, TG_DATE
 
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-         where (Como.dx IN ('Z95.1','Z95.5', 'Z98.61')
+         where (Como.dx IN ('Z95.1', 'Z95.5', 'Z98.61')
 
-          -- MULTIVESSEL CAD
+                   -- MULTIVESSEL CAD
                    )
          group by patid, cohort
      ),
@@ -221,7 +216,6 @@ with pat_list as (select patid, cohort, TG_DATE
 
          group by patid, cohort
      )
-
         ,
      stroke as (
          select patid,
@@ -493,14 +487,14 @@ with pat_list as (select patid, cohort, TG_DATE
 --join cdm_60_etl.diagnosis  Como using (patid, encounterid)
 
                where patid in (Select patid From pat_list)
-                   and diagnosis.enc_Type in ('EI', 'IP')
-                   and (((dx like '410%' -- MI
+                 and diagnosis.enc_Type in ('EI', 'IP')
+                 and (((dx like '410%' -- MI
 
-                       OR dx like 'I21%')-- MI)
+                   OR dx like 'I21%')-- MI)
 
 
-                       and pdx = 'P')
-                  OR dx like 'I22%') -- MI)
+                   and pdx = 'P')
+                   OR dx like 'I22%') -- MI)
 
                group by patid
                having count(encounterid) > 1)
@@ -508,122 +502,121 @@ with pat_list as (select patid, cohort, TG_DATE
 
          where gap
                    > 30)
-                ,
+        ,
      multiple_PCI as (
-
- select patid, PCI_gap, case when encounter_count > 1 then 1 else 0 end as multiple_PCI
+         select patid, PCI_gap, case when encounter_count > 1 then 1 else 0 end as multiple_PCI
          from (select patid,
-                      count(encounterid)                                           as encounter_count,
+                      count(encounterid)                as encounter_count,
 
-                -- 'PCI'                             as Comorbidity_name,
-               -- 1 as PCI--,
-            -- ,   max(admit_date),
-                 min(admit_date),
-                 max(admit_date) - min(admit_date) as PCI_gap
-         from pat_list
-                  left join cdm_60_etl.procedures using (patid)
-         where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
+                      -- 'PCI'                             as Comorbidity_name,
+                      -- 1 as PCI--,
+                      -- ,   max(admit_date),
+                      min(admit_date),
+                      max(admit_date) - min(admit_date) as PCI_gap
+               from pat_list
+                        left join cdm_60_etl.procedures using (patid)
+               where PX in
+                     ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-         group by patid)
-         where PCI_gap>30),
+               group by patid)
+         where PCI_gap > 30),
      CKD as (select patid, case when egfr_2021 < 60 then 1 else 0 end as CKD
              from labs_all)
-
-
         ,
 
      combined as (
          select distinct patid,
 
-                -- stroke_gap,
-                insulin,
-                PCI,
-                MI,
-                diabetes_10y,
-                stroke,
-                TIA,
-                current_smoker,
-                age_over_65,
+                         -- stroke_gap,
+                         insulin,
+                         PCI,
+                         MI,
+                         diabetes_10y,
+                         stroke,
+                         TIA,
+                         current_smoker,
+                         age_over_65,
              /*more_than_1_stroke,
              more_than_1_MI,
              more_than_1_PCI,*/
-                CAD,
-                retinopathy,
-                PAD,
-                multiple_MI,
-                multiple_stroke,
-                multiple_PCI,
-                hscrp_over_3,
-                nhdl_over_130,
-                microvascular_disease,
-                case when Statin = 1 then 'Statin' else 'No Statin' end       as Statin,
-                case when (PCI + MI + stroke) > 1 then 1 else 0 end           as more_than_1_of_PCI_MI_stroke,
-                case
-                    when (PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1 then 1
-                    else 0 end                                                as more_than_1_of_PCI_MI_stroke_allowing_multiples,
-                case when ((CAD + PAD + insulin + TIA) > 1) then 1 else 0 end as more_than_1_of_CAD_insulin_PAD_TIA,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) > 1) then 1
-                    else 0 end                                                as more_than_1_diabetes_insulin_microvascular,
+                         CAD,
+                         retinopathy,
+                         PAD,
+                         multiple_MI,
+                         multiple_stroke,
+                         multiple_PCI,
+                         hscrp_over_3,
+                         nhdl_over_130,
+                         microvascular_disease,
+                         case when Statin = 1 then 'Statin' else 'No Statin' end       as Statin,
+                         case when (PCI + MI + stroke) > 1 then 1 else 0 end           as more_than_1_of_PCI_MI_stroke,
+                         case
+                             when (PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1 then 1
+                             else 0 end                                                as more_than_1_of_PCI_MI_stroke_allowing_multiples,
+                         case when ((CAD + PAD + insulin + TIA) > 1) then 1 else 0 end as more_than_1_of_CAD_insulin_PAD_TIA,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) > 1) then 1
+                             else 0 end                                                as more_than_1_diabetes_insulin_microvascular,
 
-                case
-                    when (microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular,
+                         case
+                             when (microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular,
 
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_age_over_65,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_smoker,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_retinopathy,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
-                case
-                    when ((microvascular_disease + insulin + diabetes_10y) >= 1 and
-                          hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1) then 1
-                    else 0 end                                                as any_diabetes_10y_insulin_microvascular_plus_any,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_age_over_65,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_smoker,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_retinopathy,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1) then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
+                         case
+                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and
+                                   hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1)
+                                 then 1
+                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_plus_any,
 
-                case
-                    when (microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy + nhdl_over_130 +
-                          current_smoker + age_over_65 + PCI + MI + stroke = 0) then 1
-                    else 0 end                                                as no_CV_or_risk_factors
+                         case
+                             when (microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
+                                   nhdl_over_130 +
+                                   current_smoker + age_over_65 + PCI + MI + stroke = 0) then 1
+                             else 0 end                                                as no_CV_or_risk_factors
 
 
          from (select distinct patid,
 
-                      case when microvascular_disease = 1 then 1 else 0 end as microvascular_disease,
-                      case when nhdl_over_130 = 1 then 1 else 0 end         as nhdl_over_130,
-                      case when hscrp_over_3 = 1 then 1 else 0 end          as hscrp_over_3,
+                               case when microvascular_disease = 1 then 1 else 0 end as microvascular_disease,
+                               case when nhdl_over_130 = 1 then 1 else 0 end         as nhdl_over_130,
+                               case when hscrp_over_3 = 1 then 1 else 0 end          as hscrp_over_3,
 
-                      case when retinopathy = 1 then 1 else 0 end           as retinopathy,
+                               case when retinopathy = 1 then 1 else 0 end           as retinopathy,
 
-                      -- stroke_gap,
-                      Statin,
+                               -- stroke_gap,
+                               Statin,
 
-                      case when diabetes_10y = 1 then 1 else 0 end          as diabetes_10y,
-                      case when insulin = 1 then 1 else 0 end               as insulin,
-                      case when TIA = 1 then 1 else 0 end                   as TIA,
-                      case when PAD = 1 then 1 else 0 end                   as PAD,
-                      case when CAD = 1 then 1 else 0 end                   as CAD,
-                      case when PCI = 1 then 1 else 0 end                   as PCI,
-                      case when MI = 1 then 1 else 0 end                    as MI,
-                      case when stroke = 1 then 1 else 0 end                as stroke,
-                      case when multiple_PCI = 1 then 1 else 0 end          as multiple_PCI,
-                      case when multiple_MI = 1 then 1 else 0 end           as multiple_MI,
-                      case when multiple_stroke = 1 then 1 else 0 end       as multiple_stroke
+                               case when diabetes_10y = 1 then 1 else 0 end          as diabetes_10y,
+                               case when insulin = 1 then 1 else 0 end               as insulin,
+                               case when TIA = 1 then 1 else 0 end                   as TIA,
+                               case when PAD = 1 then 1 else 0 end                   as PAD,
+                               case when CAD = 1 then 1 else 0 end                   as CAD,
+                               case when PCI = 1 then 1 else 0 end                   as PCI,
+                               case when MI = 1 then 1 else 0 end                    as MI,
+                               case when stroke = 1 then 1 else 0 end                as stroke,
+                               case when multiple_PCI = 1 then 1 else 0 end          as multiple_PCI,
+                               case when multiple_MI = 1 then 1 else 0 end           as multiple_MI,
+                               case when multiple_stroke = 1 then 1 else 0 end       as multiple_stroke
                        ,
-                      case when current_smoker = 1 then 1 else 0 end        as current_smoker,
-                      case when age_over_65 = 1 then 1 else 0 end           as age_over_65
-                         from stroke
-                        full outer join MI using (patid)
+                               case when current_smoker = 1 then 1 else 0 end        as current_smoker,
+                               case when age_over_65 = 1 then 1 else 0 end           as age_over_65
+               from stroke full outer join MI using (patid)
                         full outer join PCI using (patid)
                         full outer join statins using (patid)
                         full outer join insulin using (patid)
@@ -639,7 +632,6 @@ with pat_list as (select patid, cohort, TG_DATE
                         full outer join age_65 using (patid)
                         full outer join labs using (patid)
               ))
-
 
 
 select pat_list.cohort,
@@ -675,9 +667,10 @@ select pat_list.cohort,
        sum(any_diabetes_10y_insulin_microvascular_hscrp_over_3)  as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
        sum(any_diabetes_10y_insulin_microvascular_plus_any)      as N_any_diabetes_10y_insulin_microvascular_plus_any,
        sum(no_CV_or_risk_factors)                                as N_no_CV_or_risk_factors,
-       count(distinct patid)                                              as total_count_patients
+       count(distinct patid)                                     as total_count_patients
 
-from pat_list left join combined using (patid)
+from pat_list
+         left join combined using (patid)
 group by pat_list.cohort, Statin
 
 order by pat_list.cohort
