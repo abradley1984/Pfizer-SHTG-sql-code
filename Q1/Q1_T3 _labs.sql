@@ -1,5 +1,7 @@
---Running time: 8 mins *2
+/*This query has two parts - table 3a and table 3b, gotten by uncommenting the second line at the end.
 
+Running time: 8 mins *2
+*/
 with pat_list as
          (
              select TG_Date as index_date, shtg_Q1_cohorts_with_exclusions.*
@@ -8,7 +10,7 @@ with pat_list as
              where cohort is not null
              -- fetch first 1000 rows only
          ),
-     all_labs as (select * from Q1_labs_all_test),-- generated in Q1_labs_part1
+     all_labs as (select * from Q1_labs_all),-- generated in Q1_labs_part1
 
      HDL_all as (select distinct patid,
 
@@ -938,5 +940,5 @@ with pat_list as
 
 
                  order by 7, 6, 5)
-select *
-from table3a;
+select * from table3a;
+--select * from table3b;
