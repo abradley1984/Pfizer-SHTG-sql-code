@@ -12,6 +12,7 @@ GROUP (ORDER BY age asc)
 GROUP (ORDER BY age asc) OVER (PARTITION BY cohort)
 
   -Median is percentile 0.5
+   Changing trunc to round
 
  */
 
