@@ -9,12 +9,12 @@ Run time: ~36 mins
 -- drop table Q2_labs_all;*/
 
 
-create table Q2_labs_all as
+create table Q2_labs_all_test as
 with pat_list as
          (
              select LDL_Date as index_date, SHTG_Q2_STEP1_d5.*
              from SHTG_Q2_STEP1_d5
-WHERE COHORT IS NOT NULL
+--WHERE COHORT IS NOT NULL
 
              -- fetch first 1000 rows only
          )
@@ -175,7 +175,7 @@ WHERE COHORT IS NOT NULL
 --a1c
 
 
-     a1c_mass as (select patid,
+     a1c as (select patid,
                     row_number() OVER (
                         PARTITION BY patid
                         ORDER BY lab_result_cm.result_date asc
