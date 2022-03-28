@@ -1,6 +1,14 @@
 /* This query counts comorbidity occurences.
+
+   The output is a table that can be saved to a csv file (Q1_T2.csv)
    Same for Q1 and Q2, with edits to pat_list and changing index date to LDL_date
 Run time: ~ 3 mins
+
+   Edits for sql server:
+   percentile_cont
+   median
+   trunc changed to round
+
  */
 
 with pat_list as (select patid, cohort, TG_DATE as index_date
@@ -733,86 +741,6 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                         cohort
      ),
 
-     /*,
-
-     PCI as (select distinct patid, cohort, 'PCI' as Comorbidity_name
-             from pat_list
-                      left join cdm_60_etl.procedures using (patid)
-             where PX in ('92920',
-                          '92921',
-                          '92924',
-                          '92925',
-                          '92928',
-                          '92929',
-                          '92933',
-                          '92934',
-                          '92937',
-                          '92938',
-                          '92941',
-                          '92943',
-                          '92944',
-                          '92973',
-                          '92974',
-                          '92975',
-                          '92978',
-                          '92979',
-                          '93571',
-                          '93572',
-                          'C9600',
-                          'C9601',
-                          'C9602',
-                          'C9603',
-                          'C9604',
-                          'C9605',
-                          'C9606',
-                          'C9607',
-                          'C9608'))
-        ,
-
-
-     MI as (select distinct patid, cohort, 'MI' as Comorbidity_name
-
-            from pat_list pats
-                     INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-            where (Como.dx like '410%' -- MI
-
-                OR Como.dx = '411.0' -- MI
-
-                OR Como.dx = '411.81' -- MI
-
-                OR Como.dx = '412' -- MI
-
-                OR Como.dx like 'I21%' -- MI
-
-                OR Como.dx like 'I22%' -- MI
-
-                OR Como.dx like '123%' -- MI
-
-
-                -- ?? IN SPREADSHEET FOR I24 AND I25
-
-                OR Como.dx = 'I24.0' -- MI
-
-                OR Como.dx = 'I25.2' -- MI)
-                      )
-     ),
-     stroke as (select distinct patid, cohort, 'stroke' as Comorbidity_name
-
-                from pat_list pats
-                         INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-                where (
-                          Como.dx like '433%' -- STROKE
-
-                          OR Como.dx like '434%' -- STROKE
-
-                          OR Como.dx = '997.02' -- STROKE
-
-                          OR Como.dx like 'I63%' -- STROKE
-
-                          OR Como.dx like 'I97.8%' -- STROKE
-                          )
-     ),
-*/
      comorbidity_count as
          (
              select '2'                   as order1,
@@ -852,23 +780,23 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              group by Comorbidity_name, cohort
              union
              select '8',
-                    trunc(avg(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(avg(time_since_first_lipidemia_diagnosis),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (Mean)'
              from comorbidity_group
              group by cohort
              union
-             select '9'                                                 as order1,
+            /* select '9'                                                 as order1,
 
-                    trunc(median(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(median(time_since_first_lipidemia_diagnosis),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (Median)'
              from comorbidity_group
              group by cohort
-             union
+             union*/
              select '9'                                                 as order1,
 
-                    trunc(STDDEV(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(STDDEV(time_since_first_lipidemia_diagnosis),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (std)'
              from comorbidity_group
@@ -877,37 +805,48 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              select '9' as                                                        order1,
 
                     PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) "pct_25",
+                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort) "pct_25",
                     cohort,
                     'Time since first lipidemia diagnosis (25th pct)'
              from comorbidity_group
-             group by cohort
+
              union
              select '9' as order1,
                     PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc)
+                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort)
                            "pct_75",
                     cohort,
                     'Time since first lipidemia diagnosis (75th pct)'
              from comorbidity_group
-             group by cohort
+
+
+             union
+             select '9' as                                                        order1,
+
+                    PERCENTILE_CONT(0.5) WITHIN
+                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort) "Median",
+                    cohort,
+                    'Time since first lipidemia diagnosis (Median)'
+             from comorbidity_group
+
              union
              select '10'                                         as order1,
-                    trunc(avg(time_since_first_ascvd_diagnosis),2) as N,
+                    round(avg(time_since_first_ascvd_diagnosis),2) as N,
                     cohort,
                     'Time since first ascvd diagnosis (Mean)'
              from ascvd
              group by cohort
-             union
+
+             /*union
              select '10'                                            as order1,
-                    trunc(median(time_since_first_ascvd_diagnosis),2) as N,
+                    round(median(time_since_first_ascvd_diagnosis),2) as N,
                     cohort,
                     'Time since first ascvd diagnosis (Median)'
              from ascvd
-             group by cohort
+             group by cohort*/
              union
              select '10'                                            as order1,
-                    trunc(STDDEV(time_since_first_ascvd_diagnosis),2) as N,
+                    round(STDDEV(time_since_first_ascvd_diagnosis),2) as N,
                     cohort,
                     'Time since first ascvd diagnosis (std)'
              from ascvd
@@ -915,26 +854,35 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              union
              select '10' as order1,
                     PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc) OVER (PARTITION BY cohort)
                             "pct_25",
                     cohort,
                     'Time since first ascvd diagnosis (25th pct)'
              from ascvd
-             group by cohort
+
+             union
+             select '10' as order1,
+                    PERCENTILE_CONT(0.5) WITHIN
+                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc) OVER (PARTITION BY cohort)
+                            "Median",
+                    cohort,
+                    'Time since first ascvd diagnosis (Median)'
+             from ascvd
+
              union
              select '10' as order1,
                     PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc) OVER (PARTITION BY cohort)
                             "pct_75",
                     cohort,
                     'Time since first ascvd diagnosis (75th pct)'
              from ascvd
-             group by cohort
+
          ),
-     table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
+     table2 as (select order1, 'Comorbidity', Comorbidity_name, round(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
                 order by cohort),
-      totals as (select count(distinct patid)as N_cohort_total, cohort From pat_list group by cohort),
+      totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
 
      percentages as (select
                               Cohort,
@@ -952,7 +900,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                     or Comorbidity_name like ('%std%'))
                                     then 0
                                 else
-                                    trunc(100 * N_mean_etc/ N_cohort_total, 2)
+                                    round(100 * N_mean_etc/ N_cohort_total, 2)
                                 end
                                 as percentage1
                      from table2
