@@ -2,7 +2,7 @@
 --Running time: 8 mins *2
 
 with
-joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
+joined1 as (select * from SHTG_Q2_STEP3_d5
     where cohort is not null),
     pat_list as
          (
@@ -12,7 +12,7 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
              where cohort is not null
              -- fetch first 1000 rows only
          ),
-     all_labs as (select Q2_labs_all_Testa.*, cohort from Q2_labs_all_Testa left join joined1 on joined1.patid =Q2_labs_all_Testa.patid),-- generated in Q1_labs_part1
+     all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join joined1 on joined1.patid =Q2_labs_all_Testa.patid),-- generated in Q1_labs_part1
 
  HDL_all as (select distinct patid,
 
