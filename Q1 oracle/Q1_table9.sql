@@ -1,4 +1,5 @@
 /* T9 - risk factors, only for Q1.
+/* T9 - risk factors, only for Q1.
    This is not currently saving to file but could be.
  */
 
@@ -38,7 +39,7 @@ with pat_list as (select patid, cohort, TG_DATE
         ,
      age_65 as (
          select patid, cohort, case when age > 65 then 1 else 0 end as age_over_65
-         from HTG_STEP3_WITH_EXCLUSIONS_D2)
+         from shtg_Q1_cohorts_with_exclusions)
         ,
      retinopathy as (
          select distinct patid,
@@ -673,6 +674,6 @@ from pat_list
          left join combined using (patid)
 group by pat_list.cohort, Statin
 
-order by pat_list.cohort
+order by pat_list.cohort;
 
-/*
+
