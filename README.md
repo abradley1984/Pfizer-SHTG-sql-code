@@ -23,26 +23,30 @@ Pfizer_shtg_Q1_cohort_definition.sql (run time ~25 mins, save Q1_T0 to csv file)
 Run this next: Q1_labs_part 1.sql (run time ~40 mins)
 
 Then the rest of the tables can be run in any order:
-Q1_T1_shtg.sql 
- (run time ~2 mins; save Q1_T1 to csv file)
-Q1_T2_comorbidities.sql 
- (run time ~3 mins; save Q1_T2 to csv file)
-Q1_T3 _labs.sql 
- (run time ~8 mins x2, save Q1_T3a and Q1_T3b to csv files)
-Q1_T4-T6.sql 
- (run time ~1 minute;save Q1_T4, Q1_T5 and Q1_t6 to csv files )
-Q1_T7_T8_meds.sql 
- (run time ~ 4 mins save Q1_T7, Q1_T8  to csv files)
-Q1_table9.sql   
- (run time ~3 mins; save Q1_T9 to csv file)
+
+		Q1_T1_shtg.sql	
+			(run time ~2 mins; save Q1_T1 to csv file)
+		Q1_T2_comorbidities.sql 
+			(run time ~3 mins; save Q1_T2 to csv file)
+		Q1_T3 _labs.sql 
+			(run time ~8 mins x2, save Q1_T3a and Q1_T3b to csv files)
+		Q1_T4-T6.sql 
+ 			(run time ~1 minute;save Q1_T4, Q1_T5 and Q1_t6 to csv files )
+		Q1_T7_T8_meds.sql 
+ 			(run time ~ 4 mins save Q1_T7, Q1_T8  to csv files)
+		Q1_table9.sql   
+ 			(run time ~3 mins; save Q1_T9 to csv file)
 
 
 Q2:
 
-Define Q2 cohorts:
-Q2_cohort_definition_part1.sql (run time ~35 mins)
-Q2_cohort_definition_part2_labs.sql (run time ~35 mins)
-Q2_cohort_definition_part3_cohort_groups.sql (run time ~10 mins)
+		Define Q2 cohorts:
+				Q2_cohort_definition_part1.sql 
+					(run time ~35 mins)
+				Q2_cohort_definition_part2_labs.sql 
+					(run time ~35 mins)
+				Q2_cohort_definition_part3_cohort_groups.sql 
+					(run time ~10 mins)
 
 After that the queries can be run in any order. Q2 doesn’t have T9, but has a T10 that Q1 doesn’t have. 
 Run times as for Q1. 
