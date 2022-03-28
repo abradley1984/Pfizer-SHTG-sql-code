@@ -1,11 +1,11 @@
 --SHTG_Pfizer Q2
 -- Add in data needed for cohorts (Various lab and dx criteria based on AHA guidelines), and get cohort groupings.
 -- Run time:
-create table SHTG_Q2_STEP3_d2 as
+create table SHTG_Q2_STEP3_d6 as
 WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
      where age>=18 and pre_index_days>=180),
 
-     labs_all as (select * from Q2_labs_all),
+     labs_all as (select * from Q2_labs_all_test),
      --Risk status
      --Recent ACS (12 months)
      recent_ACS as (select patid,
@@ -765,7 +765,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                                    else 'other'
                                    end                                      as Age_category,
                                case
-                                   when Age > = 65
+                                   when Age >= 65
                                        then 1
                                    else 0 end                               as age_over_65,
 
@@ -854,7 +854,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                                   )),
      lab_enhancers as (select patid,
                               case
-                                  when (egfr_2021 < 60 or hscrp >= 2 or lpa > 50 or apob > 130) then 1
+                                  when (egfr_2021 < 60 or hscrp >= 2 or lpa_mass > 50 or lpa_mol > 125 or apob > 130) then 1
                                   else 0 end as lab_enhancers
                        from labs_all),
 
