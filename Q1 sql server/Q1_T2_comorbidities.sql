@@ -1,6 +1,7 @@
 /* This query counts comorbidity occurences.
 
    The output is a table that can be saved to a csv file (Q1_T2.csv)
+
    Same for Q1 and Q2, with edits to pat_list and changing index date to LDL_date
 Run time: ~ 3 mins
 
