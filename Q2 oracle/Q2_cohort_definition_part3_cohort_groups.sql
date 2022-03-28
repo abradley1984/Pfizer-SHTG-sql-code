@@ -1,7 +1,7 @@
 --SHTG_Pfizer Q2
 -- Add in data needed for cohorts (Various lab and dx criteria based on AHA guidelines), and get cohort groupings.
--- Run time:
-create table SHTG_Q2_STEP3_d6 as
+-- Run time: ~ 10 minutes
+create table SHTG_Q2_STEP3_d5 as
 WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
      where age>=18 and pre_index_days>=180),
 
