@@ -219,15 +219,15 @@ select '2' as order1, 'Age', Age_category, count(distinct patid) as N, cohort
 from #pat_list
 group by cohort, Age_category
 union
-select '2' as order1, 'age', 'Mean age', trunc(avg(age), 2) as N, cohort
+select '2' as order1, 'age', 'Mean age', round(avg(age), 2) as N, cohort
 from #pat_list
 group by cohort
 /*union
-select '2' as order1, 'age', 'Median age', trunc(median(age), 2) as N, cohort
+select '2' as order1, 'age', 'Median age', round(median(age), 2) as N, cohort
 from #pat_list
 group by cohort*/
 union
-select '2' as order1, 'age', 'STD age', trunc(STDDEV(age), 2) as N, cohort
+select '2' as order1, 'age', 'STD age', round(STDDEV(age), 2) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -289,15 +289,15 @@ from #pat_list
     left join #smoking_category using (patid)
 group by #pat_list.cohort, smoking_category
 union
-select '9' as order1, 'pre-index_days', 'Mean', trunc(avg(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'Mean', round(avg(PRE_INDEX_DAYS)) as N, cohort
 from #pat_list
 group by cohort
 /*union
-select '9' as order1, 'pre-index_days', 'Median', trunc(median(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'Median', round(median(PRE_INDEX_DAYS)) as N, cohort
 from #pat_list
 group by cohort*/
 union
-select '9' as order1, 'pre-index_days', 'STD', trunc(STDDEV(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'STD', round(STDDEV(PRE_INDEX_DAYS)) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -370,7 +370,7 @@ select order1,
     or Table1_pre.label2 like ('STD%'))
     then 0
     else
-    trunc(100 * N / N_cohort_total, 2)
+    round(100 * N / N_cohort_total, 2)
     end
     as percentage1
 into  #percentages
