@@ -20,7 +20,7 @@ This code defines the overall cohort for the first section of the SHTG qery (Q1)
         This is a temporary table needed to get the shtg_Q1_total_counts table prior to applying exclusion criteria to get shtg_Q1_cohorts_with_exclusions.
 
    Running time:
-   running time at Pitt was <17 minutes.
+   running time at Pitt was ~25 minutes.
    */
 
 

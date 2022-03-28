@@ -1,6 +1,6 @@
 /*This code generates a table with all labs for the cohorts, mostly for T3
 The Q2 version is pretty similar, but is run before cohorts are extracted, so there may be slight differences.
-Run time: ~40 mins?
+Run time: ~35 mins
  */
 
 
