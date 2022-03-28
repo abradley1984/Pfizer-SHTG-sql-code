@@ -17,10 +17,13 @@ Queries should be run in  the following order:
 Q1:
 
 Define Q1 cohorts: 
-Pfizer_shtg_Q1_cohort_definition.sql (run time ~25 mins, save Q1_T0 to csv file)
+		
+		Pfizer_shtg_Q1_cohort_definition.sql (run time ~25 mins, save Q1_T0 to csv file)
  
 
-Run this next: Q1_labs_part 1.sql (run time ~40 mins)
+Run this next: 
+
+		Q1_labs_part 1.sql (run time ~40 mins)
 
 Then the rest of the tables can be run in any order:
 
