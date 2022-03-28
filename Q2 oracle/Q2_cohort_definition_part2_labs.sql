@@ -8,7 +8,7 @@ Run time: ~36 mins
 --
 -- drop table Q2_labs_all;*/
 
-select * from Q2_labs_all
+
 create table Q2_labs_all as
 with pat_list as
          (
@@ -99,7 +99,7 @@ WHERE COHORT IS NOT NULL
 
 
 
-                   ('10835-7') and result_unit = 'nmol/L')
+                   ('10835-7') and result_unit = 'nmol/L'))
 
                and lab_result_cm.result_num is not null),
 
@@ -472,7 +472,7 @@ WHERE COHORT IS NOT NULL
                                      LEFT join (select * From apo_b where row_num = 1) using (patid)
                                      LEFT join (select * From nlr where row_num = 1) using (patid)
                                      LEFT join (select * From apo_a1 where row_num = 1) using (patid)
-                                     LEFT join (select * From lpa_mol where row_num = 1) using (patid))
+                                     LEFT join (select * From lpa_mol where row_num = 1) using (patid)
                                       LEFT join (select * From lpa_mass where row_num = 1) using (patid))
          )/*,
 
