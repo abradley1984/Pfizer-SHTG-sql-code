@@ -464,7 +464,7 @@ with pat_list as
                                      full outer join (select * From apo_a1 where row_num = 1) using (patid)
 
                                      full outer join (select * From lpa_mass where row_num = 1) using (patid)
-                                     full outer join (select * From lpa_mol where row_num = 1) using (patid))
+                                     full outer join (select * From lpa_mol where row_num = 1) using (patid)))
 
 --writing labs table
 select *
