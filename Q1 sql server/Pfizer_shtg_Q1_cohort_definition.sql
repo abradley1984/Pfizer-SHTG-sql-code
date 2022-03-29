@@ -35,8 +35,8 @@ select lab.patid,
                            )                     row_num,
                        lab.result_num  TG_result_num,
                        lab.result_unit result_unit,
-                       lab.result_date,
-                       LAB.RAW_RESULT
+                       lab.result_date
+                    --   LAB.RAW_RESULT
                 --FROM @cdm.@cdmschema.lab lab
 into #TG_all
 FROM lab_result_cm lab
@@ -74,8 +74,9 @@ AND lab.lab_loinc in ('13457-7', '18262-6', '2089-1')
          --AND lab.result_num < 1000
      ;
   select *
+   into #LDL
              from #LDL_all
-  into #LDL
+
              where row_num = 1;
 
    select lab.patid,
@@ -96,7 +97,7 @@ FROM lab_result_cm lab
                           and lab.result_num >= 0
                           AND not lab.result_unit in
                                   ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-     );
+     ;
      select *
      into #total_chol
                     from #total_chol_all
@@ -119,12 +120,12 @@ from lab_result_cm lab
                    and lab.result_num >= 0
                    AND not lab.result_unit in
                            ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-     );
+     ;
 
      select *
      into #HDL
              from #HDL_all
-             where row_num = 1);
+             where row_num = 1;
      /*count_labs as (
          select TG.patid,
                 LDL.result_date        as LDL_date,
@@ -150,8 +151,8 @@ select total_chol.patid,
                      total_chol.RESULT_date                                as TC_date,
                      HDL.RESULT_date                                       as hdl_date
 into #NHDL
-              from #total_chol
-                       inner join #HDL
+              from #total_chol total_chol
+                       inner join #HDL HDL
                                   on total_chol.patid = HDL.patid;
 
          select TG.PATID,
@@ -165,16 +166,16 @@ into #NHDL
                 HDL_DATE                  as nHDL_date,
 datediff(dd,HDL_DATE,TG.RESULT_DATE) as nHDL_gap
          into #lab_list
-         from #TG
-                  left join #NHDL on tg.patid = nhdl.patid
-                  left join #LDL on tg.patid  = ldl.patid
+         from #TG tg
+                  left join #NHDL nhdl on tg.patid = nhdl.patid
+                  left join #LDL ldl on tg.patid  = ldl.patid
          where datediff(dd, HDL_DATE,TG.RESULT_DATE) <= 30
 
            --Note:this is allowing for LDL to be null if TG>500
 
            and ((TG_RESULT_NUM <= 500 and LDL_result_num is not null and nhdl is not null)
              or (TG_RESULT_NUM > 500))
-     );
+     ;
 
      --patients over 18
 --patients with at least one encounter > 6 months ago
@@ -195,16 +196,17 @@ into    #age_gender_race_ethnicity
  demographic demo
  ON demo.patid = pats.patid
 
-     ,
+     ;
 --First encounter, to calculate if we have 6 month pre-index.
     select patid, admit_date as first_admit_date
+    into  #first_encounter
                          from (select row_number() OVER (
                              PARTITION BY encounter.patid
                              ORDER BY encounter.admit_date asc
 )                         row_num,
                                       encounter.admit_date as admit_date,
                                       encounter.patid      as patid
-                         into  #first_encounter
+
                                from #pat_list p
                                         left join
 --@cdm.@cdmschema.encounter encounter
@@ -221,7 +223,7 @@ into  #last_encounter
                             )                                row_num,
                                      encounter.admit_date as admit_date,
                                      encounter.patid      as patid
-                               from pat_list p
+                               from #pat_list p
                                         left join
 --@cdm.@cdmschema.encounter encounter
 encounter
@@ -252,21 +254,26 @@ into #joined
                       left join #first_encounter fe on labs.patid = fe.patid
                       left join #last_encounter le on labs.patid = le.patid
                       left join #age_gender_race_ethnicity dem on labs.patid = dem.patid
-         );
+         ;
 
---sql server age: floor(datediff(day, demographic.birth_date, '2020-08-31') / 365.25) as age
 select #joined.*,
 datediff(dd,first_admit_date, TG_DATE) as pre_index_days,
 datediff(dd,TG_Date, last_admit_Date) as post_index_days,
 datediff(dd,birth_date, TG_Date)/365.25 as age
-into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
-HPLDev.dbo.shtg_Q1_cohort_definition_with_exclusions
+into
+#with_exclusions
 from #joined
+;
+select *
+into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
+    --CHECK Database name written to disk for site
+HPLDev.dbo.shtg_Q1_cohort_definition_with_exclusions
+from #with_exclusions
 where age>18 and pre_index_days>180;
 
 --Q1_Table0.csv (basic counts -  save to csv)
 
-(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm_60_etl.demographic
+(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from demographic
 union
 select count(distinct patid) ,'Have lab data',2 from #joined
     union
