@@ -275,12 +275,12 @@ where age>18 and pre_index_days>180;
 
 (select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from demographic
 union
-select count(distinct patid) ,'Have lab data',2 from #joined
+select count(distinct patid) ,'Have lab data',2 from #with_exclusions
     union
-select count(distinct patid) ,'Have lab data and over 18',3 from #joined
+select count(distinct patid) ,'Have lab data and over 18',3 from #with_exclusions
 where age>=18
 union
-select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #joined
+select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
 where age>=18 and pre_index_days>=180);
 
 
