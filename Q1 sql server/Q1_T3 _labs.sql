@@ -20,22 +20,22 @@ select *
 into #HDL_all
 from (select distinct patid,
 
-                      --  lab_result_cm.result_num  total_chol_result_num,
-                      -- lab_result_cm.result_unit result_unit,
+                      --  result_num  total_chol_result_num,
+                      -- result_unit result_unit,
                       --CHECK THIS - I want just the date, not the time
-                      cast(lab_result_cm.result_date as date) result_date
+                      cast(b.result_date as date) result_date
 
 
       FROM #pat_list a
                left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
-      WHERE lab_result_cm.result_date BETWEEN '2019-04-01' AND '2021-09-30'
-        AND lab_result_cm.lab_loinc in ('2085-9')
-        and lab_result_cm.result_num is not null
+      WHERE b.result_date BETWEEN '2019-04-01' AND '2021-09-30'
+        AND b.lab_loinc in ('2085-9')
+        and b.result_num is not null
 
-        -- and lab_result_cm.result_num >= 0
-        AND not lab_result_cm.result_unit in
+        -- and result_num >= 0
+        AND not b.result_unit in
                 ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         --AND result_num < 1000
 
      ) c;
 
@@ -44,78 +44,78 @@ into #total_chol_all
 from (select distinct patid,
                       cohort,
 
-                      --  lab_result_cm.result_num  total_chol_result_num,
-                      -- lab_result_cm.result_unit result_unit,
-                     --CHECK THIS - I want just the date, not the time
-                      cast(lab_result_cm.result_date as date) result_date,
+                      --  result_num  total_chol_result_num,
+                      -- result_unit result_unit,
+                      --CHECK THIS - I want just the date, not the time
+                      cast(b.result_date as date) result_date,
                       index_date
 
 
       from #pat_list a
                left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
 
-      WHERE lab_result_cm.result_date BETWEEN '2019-04-01' AND '2021-09-30'
-        AND lab_result_cm.lab_loinc in ('2093-3')
-        and lab_result_cm.result_num is not null
+      WHERE result_date BETWEEN '2019-04-01' AND '2021-09-30'
+        AND lab_loinc in ('2093-3')
+        and result_num is not null
 
-        -- and lab_result_cm.result_num >= 0
-        AND not lab_result_cm.result_unit in
+        -- and result_num >= 0
+        AND not result_unit in
                 ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         --AND result_num < 1000
 
      ) c;
 select *
 into #lipid_panel_date
-from (select *
+from (select a.patid, a.result_date
       from #HDL_all a
-               inner join #total_chol_all b on a.patid = b.patid and a.result_date = b.result_date ) c;
+               inner join #total_chol_all b on a.patid = b.patid and a.result_date = b.result_date) c;
 --CHECK possible issue: I'm getting "Column alias required for 'patid, result_date:date'" but I don't know what that means
 
 
 select *
 into #lipid_panel_next_closest
 from (
-         select patid,
-                cohort,
-                result_date,
-                index_date,
+         select c.patid,
+                c.cohort,
+                c.result_date,
+                c.index_date,
                 time_from_index,
                 row_num,
-                case when abs(time_from_index) < 90 then 1 else 0 end  as less_than_90_days,
-                case when abs(time_from_index) < 456 then 1 else 0 end as less_than_15_months
-         from (select patid,
-                      cohort,
-                      result_date,
-                      index_date,
-                      datediff(dd, result_date, index_date) as time_from_index,
+                IIF(abs(time_from_index) < 90, 1, 0)  as less_than_90_days,
+                IIF(abs(time_from_index) < 456, 1, 0) as less_than_15_months
+         from (select a.patid,
+                      a.cohort,
+                      a.result_date,
+                      a.index_date,
+                      datediff(dd, a.result_date, a.index_date) as time_from_index,
                       row_number() OVER (
-                          PARTITION BY patid
-                          ORDER BY datediff(dd, result_date, index_date) ASC
-                          )                       row_num
-               from #lipid_panel_date
+                          PARTITION BY a.patid
+                          ORDER BY datediff(dd, a.result_date, a.index_date) ASC
+                          )                                    row_num
+               from #lipid_panel_date a
               ) c
          where row_num in (2)) d;
 select *
 into #nhdl_after_index
 from (
-         select patid,
-                cohort,
-                result_date,
-                index_date,
+         select c.patid,
+                c.cohort,
+                c.result_date,
+                c.index_date,
                 time_from_index,
                 row_num,
-                case when time_from_index between 1 and 60 then 1 else 0 end  as within_60_days,
-                case when time_from_index between 1 and 180 then 1 else 0 end as within_180_days
-         from (select patid,
-                      cohort,
-                      result_date,
-                      index_date,
-                    datediff(dd, result_date, index_date) as time_from_index,
+                IIF(time_from_index between 1 and 60, 1, 0)  as within_60_days,
+                IIF(time_from_index between 1 and 180, 1, 0) as within_180_days
+         from (select a.patid,
+                      a.cohort,
+                       a.result_date,
+                       a.index_date,
+                      datediff(dd,  a.result_date,  a.index_date) as time_from_index,
                       row_number() OVER (
-                          PARTITION BY patid
-                          ORDER BY abs(datediff(dd, result_date, index_date)) ASC
-                          )                       row_num
-               from #lipid_panel_date
+                          PARTITION BY  a.patid
+                          ORDER BY abs(datediff(dd,  a.result_date,  a.index_date)) ASC
+                          )                                    row_num
+               from #lipid_panel_date a
               ) c
          where row_num > 1
            and time_from_index > 0) d;
@@ -135,120 +135,117 @@ select *
 into #last_TG_above_500
 from (select *
       from (select patid,
-                  result_num         TG_result_num,
-                   result_unit        result_unit,
+                   result_num                                    TG_result_num,
+                   result_unit                                   result_unit,
                    result_date,
                    index_date,
                    abs(datediff(dd, result_date, index_date)) as TG_time_from_index,
                    row_number() OVER (
                        PARTITION BY patid
                        ORDER BY abs(datediff(dd, result_date, index_date)) ASC
-                       )                           row_num
+                       )                                         row_num
 
             from #pat_list a
                      left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
-            WHERE                                                                       --lab_result_cm.result_date '2021-07-31' AND '2021-09-30'
-                lab_result_cm.lab_loinc in ('2571-8', '12951-0')
-              AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
-              and lab_result_cm.result_num is not null
-              and lab_result_cm.result_num >= 500
+            WHERE                                                         --result_date '2021-07-31' AND '2021-09-30'
+                lab_loinc in ('2571-8', '12951-0')
+              AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
+              and result_num is not null
+              and result_num >= 500
               and (datediff(dd, result_date, index_date)) <= (-1)--TG occurs before index_date
            ) c
            --and patid in (select patid from #pat_list)
-           --AND lab_result_cm.result_num < 1000
+           --AND result_num < 1000
       where row_num = 1
      ) d;
 select *
 into #diabetic_control
 from (
-         select count(patid)    OVER (PARTITION BY cohort)                                        count_patients,
-                count(case when a1c is not null then 1 end) OVER (PARTITION BY cohort)as          count_non_null,
+         select count(patid) OVER (PARTITION BY cohort) as              count_patients,
+--
+                count(a1c) OVER (PARTITION BY cohort)   as              count_non_null,
                 --median(a1c)                                             median,
-                round(avg(a1c)OVER (PARTITION BY cohort), 2)                                      mean,
-                round(stdev(a1c)OVER (PARTITION BY cohort), 2)                                   std,
+                round(avg(a1c) OVER (PARTITION BY cohort), 2)           mean,
+                round(stdev(a1c) OVER (PARTITION BY cohort), 2)         std,
                 PERCENTILE_CONT(0.25) WITHIN
                     GROUP (ORDER BY a1c asc) OVER (PARTITION BY cohort) "pct_25",
                 PERCENTILE_CONT(0.75) WITHIN
                     GROUP (ORDER BY a1c asc) OVER (PARTITION BY cohort) "pct_75",
                 PERCENTILE_CONT(0.5) WITHIN
                     GROUP (ORDER BY a1c asc) OVER (PARTITION BY cohort) "Median",
-/*
-                COUNT(CASE WHEN a1c >= 7 THEN 1 END)                                as count_over_7,
-                COUNT(CASE WHEN a1c >= 8 THEN 1 END)                                as count_over_8,
-                round(100 * COUNT(CASE WHEN a1c >= 7 THEN 1 END) / count(patid), 2) as pct_over_7,
-                round(100 * COUNT(CASE WHEN a1c >= 8 THEN 1 END) / count(patid), 2) as pct_over_8
-              */
+
                 'A1C'                                                   measure1,
                 cohort
-         from #all_labs
-         --group by cohort
-         ) c;
+         from #all_labs) as al;
 
 select *
 into #table3a
 from (select *
       from #diabetic_control
       union
-      select count(patid)                                                             count_patients,
-
-             count(case when nhdl_time_from_index is not null then 1 end) as          count_non_null,
-             -- round(median(nhdl_time_from_index), 2)                                           median,
-             round(avg(nhdl_time_from_index), 2)                                      mean,
-             round(stdev(nhdl_time_from_index), 2)                                   std,
-             round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY cohort),
-                   2)                                                                 "pct_25",
-             round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY cohort),
-                   2)                                                                 "pct_75",
+      select count(a.patid) OVER (PARTITION BY a.cohort)              as                count_patients,
+--
+             count(nhdl_time_from_index) OVER (PARTITION BY a.cohort) as                count_non_null,
+             --median(a1c)                                             median,
+             round(avg(nhdl_time_from_index) OVER (PARTITION BY a.cohort), 2)           mean,
+             round(stdev(nhdl_time_from_index) OVER (PARTITION BY a.cohort), 2)         std,
+             round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY a.cohort),
+                   2)                                                                   "pct_25",
+             round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY a.cohort),
+                   2)                                                                   "pct_75",
              PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY nhdl_time_from_index asc) OVER (PARTITION BY a.cohort) "Median",
              'time to next nHDL (days)',
-             cohort
+             a.cohort
 
       from #pat_list a
                left join #next_nhdl b on a.patid = b.patid
-      group by cohort
-      union
-      select count(patid)                                                           count_patients,
 
-             count(case when TG_time_from_index is not null then 1 end) as          count_non_null,
-             --  round(median(TG_time_from_index), 2)                                           median,
-             round(avg(TG_time_from_index), 2)                                      mean,
-             round(stdev(TG_time_from_index), 2)                                   std,
-             round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY cohort),
-                   2)                                                               "pct_25",
-             round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY cohort),
-                   2)                                                               "pct_75",
+      union
+      select count(a.patid) OVER (PARTITION BY a.cohort)            as                count_patients,
+--
+             count(TG_time_from_index) OVER (PARTITION BY a.cohort) as                count_non_null,
+
+             round(avg(TG_time_from_index) OVER (PARTITION BY a.cohort), 2)           mean,
+             round(stdev(TG_time_from_index) OVER (PARTITION BY a.cohort), 2)         std,
+
+             round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY a.cohort),
+                   2)                                                                 "pct_25",
+             round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY a.cohort),
+                   2)                                                                 "pct_75",
              PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY a.cohort) "Median",
              'time to last TG  (days)',
              cohort
 
       from #pat_list a
                left join #last_TG_above_500 b on a.patid = b.patid
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                            count_patients,
-             count(case when ggt is not null then 1 end) as          count_non_null,
-             -- median(ggt)                                    median,
-             round(avg(ggt), 2)                                      mean,
-             round(stdev(ggt), 2)                                   std,
+
+      select count(patid) OVER (PARTITION BY cohort) as              count_patients,
+--
+             count(ggt) OVER (PARTITION BY cohort)   as              count_non_null,
+
+             round(avg(ggt) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(ggt) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY ggt asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY ggt asc) OVER (PARTITION BY cohort) "pct_75",
              PERCENTILE_CONT(0.5) WITHIN
                  GROUP (ORDER BY ggt asc) OVER (PARTITION BY cohort) "Median",
-             'ggt'                                       as          measure1,
+             'ggt'                                   as              measure1,
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                                                   count_patients,
-             count(case when albumin is not null then 1 end) as                                             count_non_null
+      select count(patid) OVER (PARTITION BY cohort)   as                                                   count_patients,
+             count(albumin) OVER (PARTITION BY cohort) as                                                   count_non_null
               ,
              -- round(median(albumin), 2)                                           median,
-             round(avg(albumin), 2)                                                                         mean,
-             round(stdev(albumin), 2)                                                                      std,
+             round(avg(albumin) OVER (PARTITION BY cohort), 2)                                              mean,
+             round(stdev(albumin) OVER (PARTITION BY cohort), 2)                                            std,
              round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY albumin asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY albumin asc) OVER (PARTITION BY cohort), 2) "pct_75",
 
@@ -257,13 +254,15 @@ from (select *
              'albumin',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                            count_patients,
-             count(case when ast is not null then 1 end) as          count_non_null,
-             -- median(ast)                                    median,
-             round(avg(ast), 2)                                      mean,
-             round(stdev(ast), 2)                                   std,
+      select count(patid) OVER (PARTITION BY cohort) as              count_patients,
+             count(ast) OVER (PARTITION BY cohort)   as              count_non_null
+              ,
+             -- round(median(albumin), 2)                                           median,
+             round(avg(ast) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(ast) OVER (PARTITION BY cohort), 2)         std,
+
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY ast asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -273,13 +272,16 @@ from (select *
                  GROUP (ORDER BY ast asc) OVER (PARTITION BY cohort) "Median",
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                            count_patients,
-             count(case when alt is not null then 1 end) as          count_non_null,
-             -- median(alt)                                    median,
-             round(avg(alt), 2)                                      mean,
-             round(stdev(alt), 2)                                   std,
+
+      select count(patid) OVER (PARTITION BY cohort) as              count_patients,
+             count(alt) OVER (PARTITION BY cohort)   as              count_non_null
+              ,
+             -- round(median(albumin), 2)                                           median,
+             round(avg(alt) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(alt) OVER (PARTITION BY cohort), 2)         std,
+
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY alt asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -289,13 +291,13 @@ from (select *
              'alt',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                            count_patients,
-             count(case when alp is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                 count_patients,
+             count(alp) OVER (PARTITION BY cohort) as                count_non_null,
              -- median(alp)                                    median,
-             round(avg(alp), 2)                                      mean,
-             round(stdev(alp), 2)                                   std,
+             round(avg(alp) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(alp) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY alp asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -305,141 +307,140 @@ from (select *
              'alp',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
       select count(patid)                                                  count_patients,
-             count(case when FIB_4 is not null then 1 end) as              count_non_null,
+             count(FIB_4) OVER (PARTITION BY cohort) as                    count_non_null,
              -- median(FIB_4)                                    median,
-             round(avg(FIB_4), 2)                                          mean,
-             round(stdev(FIB_4), 2)                                       std,
+             round(avg(FIB_4) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(FIB_4), 2) OVER (PARTITION BY cohort)             std,
              round(PERCENTILE_CONT(0.25) WITHIN
-                 GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort) , 2) "pct_25",
+                 GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
-                 GROUP (ORDER BY FIB_4 asc)OVER (PARTITION BY cohort), 2)  "pct_75",
+                 GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort), 2) "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
                  GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort), 2) "Median",
              'FIB_4',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                count_patients,
-             count(case when BMI is not null then 1 end) as              count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                     count_patients,
+             count(BMI) OVER (PARTITION BY cohort) as                    count_non_null,
              -- median(BMI)                                    median,
-             round(avg(BMI), 2)                                          mean,
-             round(stdev(BMI), 2)                                       std,
+             round(avg(BMI) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(BMI), 2) OVER (PARTITION BY cohort)             std,
              round(PERCENTILE_CONT(0.25) WITHIN
-                 GROUP (ORDER BY BMI asc), 2) OVER (PARTITION BY cohort) "pct_25",
+                 GROUP (ORDER BY BMI asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
-                 GROUP (ORDER BY BMI asc), 2) OVER (PARTITION BY cohort) "pct_75",
+                 GROUP (ORDER BY BMI asc) OVER (PARTITION BY cohort), 2) "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY BMI asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY BMI asc) OVER (PARTITION BY cohort), 2) "Median",
              'BMI',
              cohort
       from #all_labs
-      group by cohort
+           ----group by cohort
       union
-      select count(patid)                                                   count_patients,
-             count(case when weight is not null then 1 end) as              count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                        count_patients,
+             count(weight) OVER (PARTITION BY cohort) as                    count_non_null,
              --   median(weight)                                    median,
-             round(avg(weight), 2)                                          mean,
-             round(stdev(weight), 2)                                       std,
+             round(avg(weight) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(weight) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY weight asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY weight asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY weight asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY weight asc) OVER (PARTITION BY cohort), 2) "Median",
              'weight',
              cohort
       from #all_labs
-      group by cohort
+           ----group by cohort
       union
-      select count(patid)                                                   count_patients,
-             count(case when apob is not null then 1 end) as                count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                      count_patients,
+             count(apob) OVER (PARTITION BY cohort) as                    count_non_null,
              --median(apob)                                    median,
-             round(avg(apob), 2)                                            mean,
-             round(stdev(apob), 2)                                         std,
+             round(avg(apob) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(apob) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
-                 GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort)       "pct_25",
+                 GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
-                 GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort)       "pct_75",
+                 GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY height asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort), 2) "Median",
              'apob',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                               count_patients,
-             count(case when TG is not null then 1 end) as              count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                    count_patients,
+             count(TG) OVER (PARTITION BY cohort) as                    count_non_null,
              -- median(TG)                                    median,
-             round(avg(TG), 2)                                          mean,
-             round(stdev(TG), 2)                                       std,
+             round(avg(TG) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(TG) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY TG asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY TG asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY TG asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY TG asc) OVER (PARTITION BY cohort), 2) "Median",
              'TG',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                count_patients,
-             count(case when LDL is not null then 1 end) as              count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                     count_patients,
+             count(LDL) OVER (PARTITION BY cohort) as                    count_non_null,
              --median(LDL)                                    median,
-             round(avg(LDL), 2)                                          mean,
-             round(stdev(LDL), 2)                                       std,
+             round(avg(LDL) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(LDL) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY LDL asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY LDL asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY LDL asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY LDL asc) OVER (PARTITION BY cohort), 2) "Median",
              'LDL',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                count_patients,
-             count(case when HDL is not null then 1 end) as              count_non_null,
-            -- median(HDL)                                                 median,
-             round(avg(HDL), 2)                                          mean,
-             round(stdev(HDL), 2)                                       std,
+      select count(patid) OVER (PARTITION BY cohort)                     count_patients,
+             count(HDL) OVER (PARTITION BY cohort) as                    count_non_null,
+             -- median(HDL)                                                 median,
+             round(avg(HDL) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(HDL) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY HDL asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY HDL asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY HDL asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY HDL asc) OVER (PARTITION BY cohort), 2) "Median",
              'HDL',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                 count_patients,
-             count(case when nhdl is not null then 1 end) as              count_non_null,
-            -- median(nhdl)                                                 median,
-             round(avg(nhdl), 2)                                          mean,
-             round(stdev(nhdl), 2)                                       std,
+      select count(patid) OVER (PARTITION BY cohort)                      count_patients,
+             count(nhdl) OVER (PARTITION BY cohort) as                    count_non_null,
+             -- median(nhdl)                                                 median,
+             round(avg(nhdl) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(nhdl) OVER (PARTITION BY cohort), 2)             std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY nhdl asc) OVER (PARTITION BY cohort)     "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY nhdl asc) OVER (PARTITION BY cohort)     "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY nhdl asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY nhdl asc) OVER (PARTITION BY cohort), 2) "Median",
              'nhdl',
              cohort
       from #all_labs
-      group by cohort
       union
-      select count(patid)                                             count_patients,
-             count(case when vldl is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                  count_patients,
+             count(vldl) OVER (PARTITION BY cohort) as                count_non_null,
              --median(vldl)                                    median,
-             round(avg(vldl), 2)                                      mean,
-             round(stdev(vldl), 2)                                   std,
+             round(avg(vldl) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(vldl) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY vldl asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -449,13 +450,13 @@ from (select *
              'vldl',
              cohort
       from #all_labs
-      group by cohort
+           ----group by cohort
       union
       select count(patid)                                             count_patients,
-             count(case when apob is not null then 1 end) as          count_non_null,
+             count(apob) OVER (PARTITION BY cohort) as                count_non_null,
              -- median(apob)                                    median,
-             round(avg(apob), 2)                                      mean,
-             round(stdev(apob), 2)                                   std,
+             round(avg(apob) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(apob) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY apob asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -465,13 +466,13 @@ from (select *
              'apob',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                            count_patients,
-             count(case when nlr is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                 count_patients,
+             count(nlr) OVER (PARTITION BY cohort) as                count_non_null,
              -- median(nlr)                                    median,
-             round(avg(nlr), 2)                                      mean,
-             round(stdev(nlr), 2)                                   std,
+             round(avg(nlr) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(nlr) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY nlr asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -481,13 +482,13 @@ from (select *
              'nlr',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                              count_patients,
-             count(case when hscrp is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                   count_patients,
+             count(hscrp) OVER (PARTITION BY cohort) as                count_non_null,
              --  median(hscrp)                                    median,
-             round(avg(hscrp), 2)                                      mean,
-             round(stdev(hscrp), 2)                                   std,
+             round(avg(hscrp) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(hscrp) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY hscrp asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -497,13 +498,13 @@ from (select *
              'hscrp',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                               count_patients,
-             count(case when apo_a1 is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                    count_patients,
+             count(apo_a1) OVER (PARTITION BY cohort) as                count_non_null,
              --   median(apo_a1)                                    median,
-             round(avg(apo_a1), 2)                                      mean,
-             round(stdev(apo_a1), 2)                                   std,
+             round(avg(apo_a1) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(apo_a1) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY apo_a1 asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -513,13 +514,13 @@ from (select *
              'apo_a1',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                count_patients,
-             count(case when lpa_mol is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                     count_patients,
+             count(lpa_mol) OVER (PARTITION BY cohort) as                count_non_null,
              --  median(lpa_mol)                                    median,
-             round(avg(lpa_mol), 2)                                      mean,
-             round(stdev(lpa_mol), 2)                                   std,
+             round(avg(lpa_mol) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(lpa_mol) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY lpa_mol asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -529,13 +530,13 @@ from (select *
              'lpa mol',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                 count_patients,
-             count(case when lpa_mass is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                      count_patients,
+             count(lpa_mass) OVER (PARTITION BY cohort) as                count_non_null,
              --median(lpa_mass)                                    median,
-             round(avg(lpa_mass), 2)                                      mean,
-             round(stdev(lpa_mass), 2)                                   std,
+             round(avg(lpa_mass) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(lpa_mass) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY lpa_mass asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -545,13 +546,13 @@ from (select *
              'lpa mass',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                             count_patients,
-             count(case when TRLC is not null then 1 end) as          count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                  count_patients,
+             count(TRLC) OVER (PARTITION BY cohort) as                count_non_null,
              -- median(TRLC)                                    median,
-             round(avg(TRLC), 2)                                      mean,
-             round(stdev(TRLC), 2)                                   std,
+             round(avg(TRLC) OVER (PARTITION BY cohort), 2)           mean,
+             round(stdev(TRLC) OVER (PARTITION BY cohort), 2)         std,
              PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY TRLC asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
@@ -561,25 +562,25 @@ from (select *
              'TRLC',
              cohort
       from #all_labs
-      group by cohort
+           --group by cohort
       union
-      select count(patid)                                                      count_patients,
-             count(case when egfr_2021 is not null then 1 end) as              count_non_null,
+      select count(patid) OVER (PARTITION BY cohort)                           count_patients,
+             count(egfr_2021) OVER (PARTITION BY cohort) as                    count_non_null,
              --round(median(egfr_2021), 2)                          median,
-             round(avg(egfr_2021), 2)                                          mean,
-             round(stdev(egfr_2021), 2)                                       std,
+             round(avg(egfr_2021) OVER (PARTITION BY cohort), 2)               mean,
+             round(stdev(egfr_2021) OVER (PARTITION BY cohort), 2)             std,
              round(PERCENTILE_CONT(0.25) WITHIN
-                 GROUP (ORDER BY egfr_2021 asc), 2) OVER (PARTITION BY cohort) "pct_25",
+                 GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
-                 GROUP (ORDER BY egfr_2021 asc), 2) OVER (PARTITION BY cohort) "pct_75",
+                 GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY egfr_2021 asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "Median",
              'egfr_2021',
              cohort
-      from #all_labs
-      group by cohort) d;
+      from #all_labs) as "dc*ab"
+--group by cohort) d;
 
-
+--CHECK
 select *
 into #table3b
 from (select count(patid),
@@ -999,30 +1000,30 @@ from (select count(patid),
       from #next_nhdl
       group by cohort
       union
-      select count(patid),
-             COUNT(CASE when less_than_90_days = 1 THEN 1 END)                                count1,
+      select count(a.patid),
+             COUNT(CASE when less_than_90_days = 1 THEN 1 END)                                  count1,
              'N lipid panel within 90 days',
-             round(100 * COUNT(CASE when less_than_90_days = 1 THEN 1 END) / count(patid), 2) pct1,
+             round(100 * COUNT(CASE when less_than_90_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
              'pct lipid panel within 90 days',
-             'lipid panel within 90 days'                                                     measure1,
-             cohort
+             'lipid panel within 90 days'                                                       measure1,
+             a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-      group by cohort
+           --group by cohort
       union
-      select count(patid),
-             COUNT(CASE when less_than_15_months = 1 THEN 1 END)                                count1,
+      select count(a.patid),
+             COUNT(CASE when less_than_15_months = 1 THEN 1 END)                                  count1,
              'N lipid panel within 15 months',
-             round(100 * COUNT(CASE when less_than_15_months = 1 THEN 1 END) / count(patid), 2) pct1,
+             round(100 * COUNT(CASE when less_than_15_months = 1 THEN 1 END) / count(a.patid), 2) pct1,
              'pct lipid panel within 15 months',
-             'lipid panel within 15 months'                                                     measure1,
-             cohort
+             'lipid panel within 15 months'                                                       measure1,
+             a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-      group by cohort
+         --group by cohort
 
 
-      /*order by 7, 6, 5*/) c;
+         /*order by 7, 6, 5*/) c;
 select *
 from #table3a;
 select *
