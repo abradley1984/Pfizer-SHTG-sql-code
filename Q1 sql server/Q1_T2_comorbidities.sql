@@ -1,6 +1,6 @@
 /* This query counts comorbidity occurences.
 
-   The output is a table that can be saved to a csv file (Q1_T2.csv)
+   The output is a table that can be saved to a csv file (Q1_T2.csv) listing counts of patients with specific diagnoses
 
    Same for Q1 and Q2, with edits to pat_list and changing index date to LDL_date
 Run time: ~ 3 mins
@@ -10,6 +10,7 @@ Run time: ~ 3 mins
    median
    trunc changed to round
 
+   I've left this as a CTE since it doesn't require writing to a table
  */
 
 with pat_list as (select patid, cohort, TG_DATE as index_date
@@ -251,10 +252,10 @@ WHEN dx in ('440.20',
 
 
 
-         FROM pat_list pats
+         FROM pat_list a
 
 
-                  INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                  INNER JOIN cdm_60_etl.diagnosis b on a.patid = b.patid
 
 
          WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-09-30'
@@ -550,19 +551,19 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
 
      ),
    Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
-                        from pat_list
-                                 left join cdm_60_etl.procedures using (patid)
+                        from pat_list a
+                                 left join cdm_60_etl.procedures b on a.patid = b.patid
                         where PX =
                               '36514'),
      comorbidity_group as (select patid,
                                   cohort,
 
-                                  max(index_date - admit_date) / 365.25              as time_since_first_lipidemia_diagnosis,
+                                  max( datediff(dd,  index_date, admit_date)) / 365.25              as time_since_first_lipidemia_diagnosis,
                                   'Disorders of lipoprotein metabolism and other' as Comorbidity_name
-                           FROM pat_list pats
+                           FROM pat_list a
 
 
-                                    INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                                    INNER JOIN cdm_60_etl.diagnosis  b on a.patid = b.patid
 
 
                            WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-08-31'
@@ -573,8 +574,8 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                       cohort,
                       max(index_date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
                       'ASCVD'                            as Comorbidity_name
-               FROM pat_list pats
-                        INNER JOIN cdm_60_etl.diagnosis como using (patid)
+               FROM pat_list a
+                        INNER JOIN cdm_60_etl.diagnosis b on a.patid = b.patid
                WHERE dx in ('413.9',
                             'I20.9',
                             'I23.7',
@@ -797,7 +798,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              union*/
              select '9'                                                 as order1,
 
-                    round(STDDEV(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(stdev(time_since_first_lipidemia_diagnosis),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (std)'
              from comorbidity_group
@@ -847,7 +848,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              group by cohort*/
              union
              select '10'                                            as order1,
-                    round(STDDEV(time_since_first_ascvd_diagnosis),2) as N,
+                    round(stdev(time_since_first_ascvd_diagnosis),2) as N,
                     cohort,
                     'Time since first ascvd diagnosis (std)'
              from ascvd
@@ -882,11 +883,11 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
          ),
      table2 as (select order1, 'Comorbidity', Comorbidity_name, round(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
-                order by cohort),
+              /*  order by cohort*/),
       totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
 
      percentages as (select
-                              Cohort,
+                              a.Cohort,
                             order1,
                              Comorbidity_name,
 
@@ -904,8 +905,8 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                     round(100 * N_mean_etc/ N_cohort_total, 2)
                                 end
                                 as percentage1
-                     from table2
-                              left join totals using (cohort)
+                     from table2 a
+                              left join totals b on a.cohort= b.cohort
      )
 
 

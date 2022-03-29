@@ -13,7 +13,7 @@ GROUP (ORDER BY age asc) OVER (PARTITION BY cohort)
 
   -Median is percentile 0.5
    Changing trunc to round
-
+--Possible issue marked with CHECK
  */
 
 
@@ -30,13 +30,13 @@ from (
     ) row_num,
     vital.smoking as smoking,
     cohort
-    FROM #pat_list
-    left join cdm_60_etl.vital using (patid)
+    FROM #pat_list a
+    left join cdm_60_etl.vital  b on a.patid = b.patid
     WHERE vital.smoking IS NOT NULL
-    AND not vital.smoking in ('NI', 'OT', 'UN'))
+    AND not vital.smoking in ('NI', 'OT', 'UN')) c
 where row_num = 1;
-select patid,
-       pat_list.cohort,
+select a.patid,
+       a.cohort,
        smoking,
        case
            when smoking in ('01', '02', '07', '08') then 'Current smoker'
@@ -50,8 +50,8 @@ select patid,
            end as smoking_category
 
 into #smoking_category
-from #pat_list
-    left join #smoking using (patid);
+from #pat_list a
+    left join #smoking  b on a.patid = b.patid;
 
 select patid,
        cohort,
@@ -88,7 +88,7 @@ select patid,
            as sex_category
 
 into #sex_category
-from #pat_list);
+from #pat_list ;
 /* age_Category as (select patid, case
                       when Age < 18
                           then 'Age_under_18'
@@ -108,8 +108,8 @@ when Age BETWEEN 65 and 75
 
 select *
 into #insurance
-from #pat_list
-    left join CDM_60_ETL.encounter e using (patid)
+from #pat_list a
+    left join CDM_60_ETL.encounter e  on a.patid = e.patid
 where e.admit_date BETWEEN '2020-09-30'
   AND '2021-09-30'
   and payer_type_primary is not null
@@ -164,8 +164,8 @@ select patid,
     else 'other'
     end as provider_specialty
 into #providers
-from #pat_list
-    left join cdm_60_etl.encounter using (patid)
+from #pat_list a
+    left join cdm_60_etl.encounter  e on a.patid = e.patid
     left join cdm_60_etl.provider
 on encounter.providerid = provider.providerid
 where provider_specialty_primary in
@@ -200,15 +200,15 @@ where provider_specialty_primary in
     , '364SF0001X')
   And encounter.admit_date BETWEEN '2020-09-30'
   AND '2021-09-30'
-    );
+    ;
 
---Both cariology and endocrinology
-
-select patid, 'both_endo_cardio' as both_endo_cardio, cohort
+--Both cardiology and endocrinology
+--CHECK - I'm getting an issue here, but I don't know what it means. I want a list of patients that have both a cardiology and endo provider
+select e.patid as patid, 'both_endo_cardio' as both_endo_cardio, e.cohort
 into   #cardio_plus_endo
-from (select * from #providers where provider_specialty = 'endo')
-    inner join (select * from #providers where provider_specialty = 'cardiology')
-    using (patid, cohort));
+from ((select */*, provider_specialty as provider_specialty_a*/ from #providers a where a.provider_specialty = 'endo') b
+    inner join (select * /*, provider_specialty as provider_specialty_b*/ from #providers c where c.provider_specialty = 'cardiology') d
+ on b.patid =d.patid ) e;
 
   select * into #Table1_pre from
     (
@@ -228,7 +228,7 @@ select '2' as order1, 'age', 'Median age', round(median(age), 2) as N, cohort
 from #pat_list
 group by cohort*/
 union
-select '2' as order1, 'age', 'STD age', round(STDDEV(age), 2) as N, cohort
+select '2' as order1, 'age', 'STD age', round(stdev(age), 2) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -285,10 +285,10 @@ from #insurance
 
 group by cohort
 union
-select '6' as order1, 'Smoking', smoking_category, count(distinct patid), #pat_list.cohort
-from #pat_list
-    left join #smoking_category using (patid)
-group by #pat_list.cohort, smoking_category
+select '6' as order1, 'Smoking', smoking_category, count(distinct a.patid), a.cohort
+from #pat_list a
+    left join #smoking_category  b on a.patid = b.patid
+group by a.cohort, smoking_category
 union
 select '9' as order1, 'pre-index_days', 'Mean', round(avg(PRE_INDEX_DAYS)) as N, cohort
 from #pat_list
@@ -298,7 +298,7 @@ select '9' as order1, 'pre-index_days', 'Median', round(median(PRE_INDEX_DAYS)) 
 from #pat_list
 group by cohort*/
 union
-select '9' as order1, 'pre-index_days', 'STD', round(STDDEV(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'STD', round(stdev(PRE_INDEX_DAYS)) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -349,35 +349,35 @@ select '2' as order1, 'Age', 'has_age_info', count(distinct patid), cohort
 from #pat_list
 where Age is not null
 group by cohort
-    );
+    ) c;
 
 
 select N as N_cohort_total, cohort
 into #totals
 From #Table1_pre
-where label1 = 'Total');
+where label1 = 'Total';
 
 
 select order1,
-    Cohort,
+    a.Cohort,
     label1,
     label2,
     N,
     N_cohort_total,
     case
-    when (Table1_pre.label2 in ('pct_75', 'pct_25')
-    or Table1_pre.label2 like ('Mean%')
-    or Table1_pre.label2 like ('Median%')
-    or Table1_pre.label2 like ('STD%'))
+    when (a.label2 in ('pct_75', 'pct_25')
+    or a.label2 like ('Mean%')
+    or a.label2 like ('Median%')
+    or a.label2 like ('STD%'))
     then 0
     else
     round(100 * N / N_cohort_total, 2)
     end
     as percentage1
 into  #percentages
-from #Table1_pre
-    left join #totals using (cohort)
-    );
+from #Table1_pre a
+    left join #totals b on a.Cohort = b.Cohort
+    ;
 
 --Table 1 with percentages - save to file.
 select *

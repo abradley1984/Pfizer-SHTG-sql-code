@@ -1,4 +1,6 @@
-
+/* This outputs 3 tables, T4, T5 and T6
+   Run time ~1 minute
+ */
 
  --Q1_T4.csv
 with pat_list as (select * from shtg_Q1_cohorts_with_exclusions)

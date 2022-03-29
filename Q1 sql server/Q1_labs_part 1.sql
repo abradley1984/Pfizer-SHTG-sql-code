@@ -9,7 +9,7 @@ Run time: ~40 mins
   date format
  */
 
- */
+
 
 
 
@@ -43,7 +43,7 @@ Run time: ~40 mins
               WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
                 AND lab_result_cm.lab_loinc in ('46986-6', '13458-5', '2091-7')
-                and lab_result_cm.result_num is not null),
+                and lab_result_cm.result_num is not null);
 
 
 --apo_b

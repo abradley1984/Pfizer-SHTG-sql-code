@@ -4,21 +4,19 @@
 
 
 
-create table shtg_meds_Q1 as
+--create table shtg_meds_Q1 as
 
- with
 
- pat_list as
+
+ select * into #pat_list from
          (
            select * from shtg_Q1_cohorts_with_exclusions
-         )
-
-        ,
+         ) dummy;
 --statins
-     statins as (
+     select * into #statins from (
          select distinct patid, cohort, 1 as Statin
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and rxnorm_cui in
@@ -26,13 +24,13 @@ create table shtg_meds_Q1 as
             OR rxnorm_cui IN
                ('83367', '1422085', '1422101', '341248', '404914', '750224', '597987', '750228', '750231', '750232', '750196', '750236', '750200', '17767', '750204', '83366', '750208', '750212', '104416', '750220', '404773', '597977', '750203', '750215', '1422092', '1422087', '597980', '750216', '750219', '597967', '876514', '597993', '1422086', '1422096', '750235', '750207', '1422098', '597984', '597990', '750211', '750239', '1422093', '153165', '1422095', '404013', '750223', '617310', '404011', '597971', '617318', '750227', '597974', '750199', '1422099')
          group by patid, cohort
-     )
-        ,
+     ) c
+        ;
 
 
 -- high_intensity_statins
 
-     high_intensity_statin as (
+      select * into #high_intensity_statin from (
          select distinct patid,
                          cohort,
                          1                                                         as High_Intensity_Statin,
@@ -96,8 +94,8 @@ create table shtg_meds_Q1 as
                                                  '750211',
                                                  '597993',
                                                  '750215') then 'dose_over_40' end as level1
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in --only including >40 rxnorms right now.
@@ -142,98 +140,98 @@ create table shtg_meds_Q1 as
                 '750211',
                 '597993',
                 '750215')
-     ),
+     ) c ;
     /*('83366', '83367', '320864', '859421', '2167558', '1422087', '2536062', '404011', '597990', '750211', '259255', '262095', '301542', '859419', '323828', '341248', '104416', '404914', '153165', '2167565', '1422099', '404773', '750207', '17767', '617311', '859751', '2167567', '1422101', '876514', '617320', '859753', '750239', '1422096', '2535748', '597984', '2167569', '1422098', '2535749', '750235', '2167571', '1422085', '2535745', '2536055', '2536064', '404013', '597993', '750215')*/
 
 
 
 -- ezetimibe
-     ezetimibe as (
+    select * into #ezetimibe from (
          select distinct patid, cohort, 1 as Ezetimibe
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('1422085', '341248', '1422098', '301542', '2535748', '2536055', '476345', '36567', '495215', '2282403', '2283229', '2283231', '2283236', '2283230', '349556', '352304', '353099', '83366', '1422087', '323828', '2535749', '2536066', '484211', '476351', '83367', '1422096', '2536060', '1245430', '1422095', '2535745', '2536064', '1245420', '1422093', '476350', '1422086', '1422092', '1422099', '2536062', '2535750', '476349', '1245441', '1422101', '2535747', '1245449')
-         group by patid, cohort),
+         group by patid, cohort) c;
 
 --bile_acid_sequestrant
-     bile_acid_sequestrant as (
+    select * into  #bile_acid_sequestrant from (
          select distinct patid, cohort, 1 as bile_acid_sequestrant
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('202582', '848949', '848943', '1801279', '2447', '1801280', '848951', '141625', '104485', '2685', '151533', '10159', '848946', '1311524', '219397', '93918', '284918', '866907', '218059', '141626', '866905', '1048452', '1048450', '218060', '866910', '866912', '1048447', '1048445')
-         group by patid, cohort),
+         group by patid, cohort) c;
 
 
 --fibrate
-     fibrate as (
+     select * into #fibrate from (
          select distinct patid, cohort, 1 as fibrate
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('8703', '578784', '220456', '352747', '351133', '477562', '583110', '1442170', '583093', '225591', '310288', '477560', '221100', '197522', '603834', '351909', '201517', '483427', '1442163', '349287', '352031', '544518', '352744', '261295', '200311', '1442165', '352030', '615906', '310289', '213276', '603836', '351842', '763253', '1442168', '261357', '540281', '2594', '616852', '763247', '577031', '578799', '749804', '749802', '483425', '351898', '583096', '702169', '404348', '226346', '616853', '702055', '763252', '763250', '578797', '583122', '151389', '763258', '763256', '583113', '103920')
-         group by patid, cohort),
+         group by patid, cohort) c ;
 
 
 --icosapent_ethyl
-     icosapent_ethyl as (
+     select * into #icosapent_ethyl from (
          select distinct patid, cohort, 1 as icosapent_ethyl
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('90', '1304979', '4419', '1811182', '1304980', '1811180', '1304985', '1304974')
-         group by patid, cohort),
+         group by patid, cohort) c;
 
 
 --niacin
-     niacin as (
+     select * into #niacin from (
          select distinct patid, cohort, 1 as niacin
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('7393', '346366', '215511', '1088776', '218731', '202711', '218729', '211683', '202713', '218733', '247747', '215526', '314131', '311958', '311960', '219957', '311946', '212579', '311963', '27604', '791831', '791835', '791843', '582041', '2001487', '763228', '803516', '1372731', '763232', '36567', '763229', '311959', '218728', '582042', '1007270', '6472', '327008', '2001486', '2001475', '260852', '198760', '211684', '198024', '317015', '207664', '791834', '791839', '757745', '32863', '763225', '999935', '999942', '761909', '205247', '207663', '198759', '311951', '647346', '1098135', '1088779', '2001480', '352387', '757736', '999943', '999946', '999936', '311944', '1098134', '207662', '791846', '791842', '757733', '763233', '311955', '2001474', '200015', '881376', '644112', '791838', '582043', '763236', '1098144', '212576', '796544', '2001492', '761907', '1098143', '199143', '2001472', '311949', '11358', '236738', '757748', '762970', '1098141', '213275', '89795', '999939', '1098142', '212577', '212578', '211682', '311945', '2121691', '7414', '235354')
-         group by patid, cohort),
+         group by patid, cohort) c;
 
 
 --omega_3
-     omega_3 as (
+     select * into #omega_3 from (
          select distinct patid, cohort, 1 as omega_3
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('4511', '144450', '452601', '1426444', '1314214', '4885', '9060', '259265', '21406', '1151', '999536', '1193036', '607044', '60761', '24941', '90', '4301', '9641', '1895', '476847', '90176', '317841', '11246', '1008282', '684879', '11359', '1310463', '236608', '89905', '968498', '11416', '203164', '278346', '577208', '39918', '236871', '23247', '659476', '11256', '484348', '5463', '24942', '283579', '8310', '11248', '4845', '283567', '19143', '1114513', '999533', '18451', '259274', '4509', '880350', '260019', '4847', '253172', '9906', '236809', '830736', '1193041', '1302206', '237116', '2837', '2418', '1193046', '236649', '9346', '1193037', '1302201')
-         group by patid, cohort),
+         group by patid, cohort) c;
 
 
 --pcsk9
-     pcsk9 as (
+     select * into #pcsk9 from (
          select distinct patid, cohort, 1 as pcsk9
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('1659152', '1659183', '1659157', '1801322', '1665684', '1665896', '1659156', '1659177', '1665904', '1659161', '1659179', '1659182', '1665906', '1801319', '1665895', '1659165', '1665900', '1659167')
-         group by patid, cohort)
-        ,
-     first_therapy_date as (
+         group by patid, cohort) c;
+
+     select * into #first_therapy_date from (
          select patid, cohort, min(prescribing.rx_order_Date) as first_therapy_date
 
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
          where rxnorm_cui in
                ('1007270',
                 '1008282',
@@ -754,13 +752,13 @@ create table shtg_meds_Q1 as
                 '1659152',
                 '7393'
                    )
-         group by patid, cohort),
+         group by patid, cohort) c;
 
-     last_therapy_date as (
+     select * into #last_therapy_date from (
          select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_study_period
 
-         from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+         from #pat_list a
+                  left join cdm_60_etl.prescribing b on a.patid=b.patid
          where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('1007270',
@@ -1284,11 +1282,11 @@ create table shtg_meds_Q1 as
                 '1659152',
                 '7393'
                    )
-         group by patid, cohort),
+         group by patid, cohort) c;
 
-     all_meds as (
-         select distinct patid,
-                         cohort,
+     select * into #all_meds from (
+         select distinct a.patid,
+                         a.cohort,
                          ldl_result_num,
                          nhdl,
                          TG_result_num,
@@ -1308,21 +1306,21 @@ create table shtg_meds_Q1 as
                          icosapent_ethyl,
                          first_therapy_date,
                          last_therapy_date_in_study_period
-         from pat_list
-                  full outer join high_intensity_statin using (patid, cohort)
-                  full outer join statins using (patid, cohort)
-                  full outer join ezetimibe using (patid, cohort)
-                  full outer join bile_acid_sequestrant using (patid, cohort)
-                  full outer join fibrate using (patid, cohort)
-                  full outer join pcsk9 using (patid, cohort)
-                  full outer join omega_3 using (patid, cohort)
-                  full outer join niacin using (patid, cohort)
-                  full outer join icosapent_ethyl using (patid, cohort)
-                  full outer join first_therapy_date using (patid, cohort)
-                  full outer join last_therapy_date using (patid, cohort)
-         order by cohort)
-        ,
-     all_meds_with_labs as (
+         from #pat_list a
+                  full outer join #high_intensity_statin b on a.patid=b.patid
+                  full outer join #statins  c on a.patid=c.patid
+                  full outer join #ezetimibe d on a.patid=d.patid
+                  full outer join #bile_acid_sequestrant e on a.patid=e.patid
+                  full outer join #fibrate  f on a.patid=f.patid
+                  full outer join #pcsk9  g on a.patid=g.patid
+                  full outer join #omega_3 h on a.patid=h.patid
+                  full outer join #niacin  i on a.patid=i.patid
+                  full outer join #icosapent_ethyl  j on a.patid=j.patid
+                  full outer join #first_therapy_date  k on a.patid=k.patid
+                  full outer join #last_therapy_date l on a.patid=l.patid
+        ) m
+        ;
+     select * into #all_meds_with_labs from (
          SELECT distinct patid,
                          cohort,
                          coalesce(Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl, niacin, omega_3,
@@ -1355,9 +1353,11 @@ create table shtg_meds_Q1 as
                              when (last_therapy_date_in_study_period - first_therapy_date < 90) then 1
                              else 0 end                                                                            as less_than_3_months_therapy
 
-         FROM all_meds)
-select *
-from all_meds_with_labs;
+         FROM #all_meds) n;
+
+-- This is a table that will be used in later queries
+    select * into shtg_meds_Q1
+from #all_meds_with_labs ;
 
 --table 7
 select
