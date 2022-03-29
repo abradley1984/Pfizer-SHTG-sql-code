@@ -262,7 +262,7 @@ where age>=18 and pre_index_days>=180);
 select * from shtg_q1_total_counts
 order by order1;
 
-create table shtg_Q1_cohorts_with_exclusions
+create table shtg_Q1_cohorts_with_ex
 as WITH labs as (select * from shtg_cohort_definition
 where age>=18 and pre_index_days>=180),
 
@@ -390,7 +390,7 @@ select *
 from with_cohorts
 
 ;
-select count(distinct patid), cohort from shtg_Q1_cohorts_with_exclusions
+select count(distinct patid), cohort from shtg_Q1_cohorts_with_ex
 group by cohort;
 
 
