@@ -143,7 +143,7 @@ from (select *
                    row_number() OVER (
                        PARTITION BY patid
                        ORDER BY abs(datediff(dd, result_date, index_date)) ASC
-                       )                            row_num
+                       )                           row_num
 
             from #pat_list a
                      left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
@@ -161,11 +161,11 @@ from (select *
 select *
 into #diabetic_control
 from (
-         select count(patid)                                            count_patients,
-                count(case when a1c is not null then 1 end) as          count_non_null,
+         select count(patid)    OVER (PARTITION BY cohort)                                        count_patients,
+                count(case when a1c is not null then 1 end) OVER (PARTITION BY cohort)as          count_non_null,
                 --median(a1c)                                             median,
-                round(avg(a1c), 2)                                      mean,
-                round(stdev(a1c), 2)                                   std,
+                round(avg(a1c)OVER (PARTITION BY cohort), 2)                                      mean,
+                round(stdev(a1c)OVER (PARTITION BY cohort), 2)                                   std,
                 PERCENTILE_CONT(0.25) WITHIN
                     GROUP (ORDER BY a1c asc) OVER (PARTITION BY cohort) "pct_25",
                 PERCENTILE_CONT(0.75) WITHIN
@@ -181,7 +181,8 @@ from (
                 'A1C'                                                   measure1,
                 cohort
          from #all_labs
-         group by cohort) c;
+         --group by cohort
+         ) c;
 
 select *
 into #table3a
@@ -312,11 +313,11 @@ from (select *
              round(avg(FIB_4), 2)                                          mean,
              round(stdev(FIB_4), 2)                                       std,
              round(PERCENTILE_CONT(0.25) WITHIN
-                 GROUP (ORDER BY FIB_4 asc), 2) OVER (PARTITION BY cohort) "pct_25",
+                 GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort) , 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
-                 GROUP (ORDER BY FIB_4 asc), 2) OVER (PARTITION BY cohort) "pct_75",
+                 GROUP (ORDER BY FIB_4 asc)OVER (PARTITION BY cohort), 2)  "pct_75",
              round(PERCENTILE_CONT(0.5) WITHIN
-                 GROUP (ORDER BY FIB_4 asc), 2) OVER (PARTITION BY cohort) "Median",
+                 GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort), 2) "Median",
              'FIB_4',
              cohort
       from #all_labs
