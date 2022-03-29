@@ -922,7 +922,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
 select *
 from
-    cohorts;
+    pat_list left join cohorts using (patid) where cohort is not null;
 
 
 

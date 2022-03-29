@@ -208,12 +208,12 @@
      ) as pP
         ;
      select * into #multiple_stroke from (
-         select patid, case when encounter_count > 1 then 1 else 0 end as multiple_stroke
+         select patid, IIF(encounter_count > 1, 1, 0) as multiple_stroke
          from (select patid,
                       count(encounterid)                                                       as encounter_count,
                       max(encounter.admit_date),
                       min(encounter.admit_date),
-                      round((max(encounter.admit_date) - min(encounter.admit_date)) / 10) * 10 as gap
+                      (datediff(dd,max(encounter.admit_date), min(encounter.admit_date)) / 10) * 10 as gap
                from cdm_60_etl.encounter e
                         join cdm_60_etl.diagnosis Como on (e.patid = Como.patid and  e.encounterid = Como.encounterid)
 
@@ -237,12 +237,12 @@
          where gap
                    > 30) as pms;
      select * into #multiple_MI from (
-         select patid, gap, case when encounter_count > 1 then 1 else 0 end as multiple_MI
+         select patid, gap, IIF(encounter_count > 1, 1, 0) as multiple_MI
          from (select patid,
                       count(encounterid)                                           as encounter_count,
                       max(diagnosis.admit_date),
                       min(diagnosis.admit_date),
-                      round(max(diagnosis.admit_date) - min(diagnosis.admit_date)) as gap
+                      datediff(dd,max(diagnosis.admit_date), min(diagnosis.admit_date)) as gap
                from cdm_60_etl.diagnosis
 
 
@@ -264,7 +264,7 @@
                    > 30) as pgmM;
      select * into #multiple_PCI from (
 
- select patid, PCI_gap, case when encounter_count > 1 then 1 else 0 end as multiple_PCI
+ select patid, PCI_gap, IIF(encounter_count > 1, 1, 0) as multiple_PCI
          from (select patid,
                       count(encounterid)                                           as encounter_count,
 
@@ -280,7 +280,7 @@
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
          group by patid) as ab
          where PCI_gap>30) as pPgmP;
-     select * into #CKD from (select patid, case when egfr_2021 < 60 then 1 else 0 end as CKD
+     select * into #CKD from (select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
              from #labs_all) as pC
         ;
 
@@ -288,7 +288,7 @@
      --hypercholesterolemia or max_LDL>190
 
      select * into #hypercholesterolemia from (select distinct patid,
-                                              case when (dx = 'E78.01' or max_ldl_above_190 = 1) then 1 else 0 end as hypercholesterolemia
+                                                               IIF((dx = 'E78.01' or max_ldl_above_190 = 1), 1, 0) as hypercholesterolemia
 
                               from #pat_list pats
                                        left JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
@@ -311,7 +311,7 @@
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
          group by patid) as pP;
 
-     select * into #hypertension from (select distinct patid, case when dx = 'I10' then 1 else 0 end as hypertension
+     select * into #hypertension from (select distinct patid, IIF(dx = 'I10', 1, 0) as hypertension
 
                       from #pat_list pats
                                INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
@@ -322,7 +322,7 @@
 
      --current smoker
      select * into #smoking from (
-         select patid, case when smoking in ('01', '02', '05', '07', '08') then 1 else 0 end as current_smoker
+         select patid, IIF(smoking in ('01', '02', '05', '07', '08'), 1, 0) as current_smoker
          from (
                   select patid,
                          row_number() OVER (
@@ -425,12 +425,12 @@
         ;
 
      --second most recent, over 3 months since first
-     select * into #LDL_second_most_recent_100 from (select patid,
+     select * into #LDL_second_most_recent_100 from (select a.patid,
                                            first_result_date,
                                            first_result_num,
                                            LDL_result_num as second_result_num,
                                            row_number() OVER (
-                                               PARTITION BY patid
+                                               PARTITION BY a.patid
                                                ORDER BY result_date desc
                                                )             row_num,
                                            result_date
@@ -439,12 +439,12 @@
                                     where not row_num = 1
                                       and first_result_date - LDL_all.result_date > 90 --over 3 months since first
      ) as aLa
-         select * into #LDL_second_most_recent_160 from (select patid,
+         select * into #LDL_second_most_recent_160 from (select a.patid,
                                            first_result_date,
                                            first_result_num,
                                            LDL_result_num as second_result_num,
                                            row_number() OVER (
-                                               PARTITION BY patid
+                                               PARTITION BY a.patid
                                                ORDER BY result_date desc
                                                )             row_num,
                                            result_date
@@ -639,27 +639,27 @@
                                    and second_result_num > 160
      ) as p;
 
-     select * into #v_high_risk_combined from (select  abcdefghijklmnp.patid as patid,
-                                     case when LDL_persistent_high_100 = 1 then 1 else 0 end as LDL_persistent_high_100,
-                                     case when recent_ACS = 1 then 1 else 0 end              as recent_ACS,
-                                     case when PAD = 1 then 1 else 0 end                     as PAD,
-                                     case when MI = 1 then 1 else 0 end                      as MI,
-                                     case when stroke = 1 then 1 else 0 end                  as stroke,
-                                     case when multiple_MI = 1 then 1 else 0 end             as multiple_MI,
-                                     case when multiple_stroke = 1 then 1 else 0 end  as multiple_stroke,
-                                    case when multiple_PCI = 1 then 1 else 0 end as multiple_PCI,
-                                     case when (age >= 65) then 1 else 0 end                 as age_over_65,
-                                     case when hypercholesterolemia = 1 then 1 else 0 end    as hypercholesterolemia,
-                                     case when PCI = 1 then 1 else 0 end                     as PCI,
+     select * into #v_high_risk_combined from (select  abcdefghijklmnp.patid                  as patid,
+                                                       IIF(LDL_persistent_high_100 = 1, 1, 0) as LDL_persistent_high_100,
+                                                       IIF(recent_ACS = 1, 1, 0)              as recent_ACS,
+                                                       IIF(PAD = 1, 1, 0)                     as PAD,
+                                                       IIF(MI = 1, 1, 0)                      as MI,
+                                                       IIF(stroke = 1, 1, 0)                  as stroke,
+                                                       IIF(multiple_MI = 1, 1, 0)             as multiple_MI,
+                                                       IIF(multiple_stroke = 1, 1, 0)         as multiple_stroke,
+                                                       IIF(multiple_PCI = 1, 1, 0)            as multiple_PCI,
+                                                       IIF((age >= 65), 1, 0)                 as age_over_65,
+                                                       IIF(hypercholesterolemia = 1, 1, 0)    as hypercholesterolemia,
+                                                       IIF(PCI = 1, 1, 0)                     as PCI,
 
-                                     coalesce(diabetes, 0)                                   as diabetes,
-                                     case when hypertension = 1 then 1 else 0 end            as hypertension,
-                                     case when CKD = 1 then 1 else 0 end                     as CKD,
+                                     coalesce(diabetes, 0)                                    as diabetes,
+                                                       IIF(hypertension = 1, 1, 0)            as hypertension,
+                                                       IIF(CKD = 1, 1, 0)                     as CKD,
 
-                                     case when current_smoker = 1 then 1 else 0 end          as current_smoker,
+                                                       IIF(current_smoker = 1, 1, 0)          as current_smoker,
 
                                      --persistently elevated LDL-C
-                                     case when congestive_HF = 1 then 1 else 0 end           as congestive_HF
+                                                       IIF(congestive_HF = 1, 1, 0)           as congestive_HF
 
 
                               from #pat_list a
@@ -766,10 +766,7 @@
                                        then 'Age_over_75'
                                    else 'other'
                                    end                                      as Age_category,
-                               case
-                                   when Age >= 65
-                                       then 1
-                                   else 0 end                               as age_over_65,
+                                                IIF(Age >= 65, 1, 0)        as age_over_65,
 
                                coalesce(ASCVD, MI, stroke, PAD, TIA_IHD, 0) as ASCVD,
                                coalesce(diabetes, 0)                        as diabetes,
@@ -817,12 +814,12 @@
         ;
 
      --second most recent, over 3 months since first
-     select * into #TG_second_most_recent_175 from (select patid,
+     select * into #TG_second_most_recent_175 from (select a.patid,
                                           first_result_date,
                                           first_result_num,
                                           TG_result_num as second_result_num,
                                           row_number() OVER (
-                                              PARTITION BY patid
+                                              PARTITION BY a.patid
                                               ORDER BY result_date desc
                                               )            row_num,
                                           result_date
@@ -855,9 +852,9 @@
                                       or Como.dx = 'E28.31' -- premature menopause
                                   )) as pdre;
      select * into #lab_enhancers from (select patid,
-                              case
-                                  when (egfr_2021 < 60 or hscrp >= 2 or lpa_mass > 50 or lpa_mass > 125  or apob > 130) then 1
-                                  else 0 end as lab_enhancers
+                                               IIF(
+                                                       (egfr_2021 < 60 or hscrp >= 2 or lpa_mass > 50 or lpa_mass > 125 or apob > 130),
+                                                       1, 0) as lab_enhancers
                        from #labs_all) as ple;
 
 
@@ -877,10 +874,9 @@
      ) as abcdef
         ;
     select * into #enhanced_category from (select patid,
-                                  case
-                                      when diagnosis_risk_enhanced + lab_enhancers + CKD + LDL_persistent_high_160 +
-                                           TG_persistent_high_175 > 0 then 'enhanced_risk'
-                                      else 'no_enhanced_risk' end as enhanced_risk --need to add "persistent" labs
+                                                  IIF(diagnosis_risk_enhanced + lab_enhancers + CKD +
+                                                      LDL_persistent_high_160 +
+                                                      TG_persistent_high_175 > 0, 'enhanced_risk', 'no_enhanced_risk') as enhanced_risk --need to add "persistent" labs
 
                                   --case when(hypertension=1) then 1 else 0 end as high_risk
                            from #enhanced) as per;
@@ -925,7 +921,7 @@
 select *
 into SHTG_Q2_STEP3
 from
-    #cohorts;
+    #PAT_LIST a  join #cohorts b on a.patid = b.patid where cohort is not null;
 
 
 
