@@ -4,7 +4,7 @@
 
 --with pat_list as (select * from htg_step3_with_exclusions_d1),
 with pat_list as ( select * from
-                                  SHTG_Q2_STEP3_d5 ),
+                                 SHTG_Q2_STEP3_d5),
      smoking AS (select *
                  from (
                           select patid,

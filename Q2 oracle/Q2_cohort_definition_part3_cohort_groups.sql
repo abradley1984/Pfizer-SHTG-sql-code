@@ -5,7 +5,7 @@ create table SHTG_Q2_STEP3_d5 as
 WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
      where age>=18 and pre_index_days>=180),
 
-     labs_all as (select * from Q2_labs_all_test),
+     labs_all as (select * from Q2_labs_all),
      --Risk status
      --Recent ACS (12 months)
      recent_ACS as (select patid,

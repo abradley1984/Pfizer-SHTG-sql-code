@@ -4,7 +4,7 @@
 create table shtg_meds_Q2_d2 as
 --statins
  with
-    joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
+    joined1 as (select * from SHTG_Q2_STEP3_d5
     where cohort is not null),
  pat_list as
          (
@@ -1287,8 +1287,8 @@ create table shtg_meds_Q2_d2 as
          group by patid, cohort),
 
      all_meds as (
-         select distinct patid,
-                         cohort,
+         select distinct pat_list.patid,
+                         pat_list.cohort,
                          ldl_result_num,
                          nhdl,
                          TG_result_num,
@@ -1309,17 +1309,17 @@ create table shtg_meds_Q2_d2 as
                          first_therapy_date,
                          last_therapy_date_in_study_period
          from pat_list
-                  full outer join high_intensity_statin using (patid, cohort)
-                  full outer join statins using (patid, cohort)
-                  full outer join ezetimibe using (patid, cohort)
-                  full outer join bile_acid_sequestrant using (patid, cohort)
-                  full outer join fibrate using (patid, cohort)
-                  full outer join pcsk9 using (patid, cohort)
-                  full outer join omega_3 using (patid, cohort)
-                  full outer join niacin using (patid, cohort)
-                  full outer join icosapent_ethyl using (patid, cohort)
-                  full outer join first_therapy_date using (patid, cohort)
-                  full outer join last_therapy_date using (patid, cohort)
+                  full outer join high_intensity_statin using (patid)
+                  full outer join statins using (patid)
+                  full outer join ezetimibe using (patid)
+                  full outer join bile_acid_sequestrant using (patid)
+                  full outer join fibrate using (patid)
+                  full outer join pcsk9 using (patid)
+                  full outer join omega_3 using (patid)
+                  full outer join niacin using (patid)
+                  full outer join icosapent_ethyl using (patid)
+                  full outer join first_therapy_date using (patid)
+                  full outer join last_therapy_date using (patid)
          order by cohort)
         ,
      all_meds_with_labs as (
@@ -1358,9 +1358,7 @@ create table shtg_meds_Q2_d2 as
          FROM all_meds)
 select *
 from all_meds_with_labs;
-/*
-select patid, statin_plus_other_lipid_lowering,cohort, statin_plus_other_lipid_lowering from all_labs2 where cohort = 'cohort_F'; group by cohort,statin_plus_other_lipid_lowering ;
-*/
+
 --table 7
 select
        cohort,
@@ -1382,34 +1380,7 @@ select
 
 from shtg_meds_Q2_d2
 group by cohort;
---table 8 - old version
 
-select sum(Statin)                                              Statin,
-       sum(High_Intensity_Statin)                               High_Intensity_Statin,
-       sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
-     sum(fibrate)                            fibrate,
-     sum(pcsk9)                              pcsk9,
-     sum(omega_3)                            omega_3,
-     sum(niacin)                             niacin,
-     sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
-       sum(Statin * pcsk9)                               as     statin_pcsk9,
-       sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
-       sum(no_lipid_lowering)                            as     no_lipid_lowering,
-       sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
-       ldl_above_70,
-       ldl_above_100,
-       nhdl_above_100,
-       nhdl_above_130,
-       TG_above_150
-
-
-       --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q2_d2
-group by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150;
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
