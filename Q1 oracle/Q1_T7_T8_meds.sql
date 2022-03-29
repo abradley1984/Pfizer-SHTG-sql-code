@@ -10,7 +10,7 @@ create table shtg_meds_Q1 as
 
  pat_list as
          (
-           select * from shtg_Q1_cohorts_with_exclusions
+           select * from shtg_Q1_cohorts_with_ex
          )
 
         ,

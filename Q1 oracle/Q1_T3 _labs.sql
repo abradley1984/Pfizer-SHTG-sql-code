@@ -4,8 +4,8 @@ Running time: 8 mins *2
 */
 with pat_list as
          (
-             select TG_Date as index_date, shtg_Q1_cohorts_with_exclusions.*
-             from shtg_Q1_cohorts_with_exclusions
+             select TG_Date as index_date, shtg_Q1_cohorts_with_ex.*
+             from shtg_Q1_cohorts_with_ex
 
              where cohort is not null
              -- fetch first 1000 rows only

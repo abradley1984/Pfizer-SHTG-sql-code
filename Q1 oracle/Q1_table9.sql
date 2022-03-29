@@ -5,7 +5,7 @@
 
 
 with pat_list as (select patid, cohort, TG_DATE
-                  from shtg_Q1_cohorts_with_exclusions
+                  from shtg_Q1_cohorts_with_ex
     -- fetch first 100 rows only
 ),
      labs_all as (select * from Q1_labs_all),
@@ -39,7 +39,7 @@ with pat_list as (select patid, cohort, TG_DATE
         ,
      age_65 as (
          select patid, cohort, case when age > 65 then 1 else 0 end as age_over_65
-         from shtg_Q1_cohorts_with_exclusions)
+         from shtg_Q1_cohorts_with_ex)
         ,
      retinopathy as (
          select distinct patid,

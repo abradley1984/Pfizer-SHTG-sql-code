@@ -3,7 +3,7 @@
 --combine race, smoking categories
 
 --with pat_list as (select * from htg_step3_with_exclusions_d1),
-with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
+with pat_list as (select * from shtg_Q1_cohorts_with_ex),
      smoking AS (select *
                  from (
                           select patid,

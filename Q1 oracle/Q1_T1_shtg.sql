@@ -4,7 +4,7 @@
  */
 
 
-with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
+with pat_list as (select * from shtg_Q1_cohorts_with_ex),
      smoking AS (select *
                  from (
                           select patid,
