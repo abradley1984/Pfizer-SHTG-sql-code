@@ -1,6 +1,7 @@
 --SHTG_Pfizer Q2
 -- Add in data needed for cohorts (Various lab and dx criteria based on AHA guidelines), and get cohort groupings.
--- Run time: ~ 10 minutes
+-- Run time: ~ 13 minutes
+--drop table SHTG_Q2_STEP3_d5
 create table SHTG_Q2_STEP3_d5 as
 WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
      where age>=18 and pre_index_days>=180),
@@ -920,9 +921,14 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                   left join add_categories using (patid))
 
 
-select *
+select pat_list.*, cohort, TG_CATEGORY,
+                LDL_category2,
+                nhdl_category2,
+                v_high_risk,
+               enhanced_risk
+
 from
-    pat_list left join cohorts using (patid) where cohort is not null;
+    pat_list left join cohorts on pat_list.patid = cohorts.patid where cohort is not null;
 
 
 

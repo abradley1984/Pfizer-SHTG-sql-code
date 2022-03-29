@@ -14,7 +14,7 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
              where cohort is not null
              -- fetch first 1000 rows only
          ),
-     all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join joined1 on joined1.patid =Q2_labs_all_Testa.patid),-- generated in Q1_labs_part1
+     all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join joined1 on joined1.patid =Q2_labs_all.patid),-- generated in Q2_labs_part1
 
  HDL_all as (select distinct patid,
 
@@ -464,17 +464,33 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
                  group by cohort
                  union
                  select count(patid)                                   count_patients,
-                        count(case when lpa is not null then 1 end) as count_non_null,
-                        median(lpa)                                    median,
-                        trunc(avg(lpa), 2)                             mean,
-                        trunc(STDDEV(lpa), 2)                          std,
+                        count(case when lpa_mass is not null then 1 end) as count_non_null,
+                        median(lpa_mass)                                    median,
+                        trunc(avg(lpa_mass), 2)                             mean,
+                        trunc(STDDEV(lpa_mass), 2)                          std,
                         PERCENTILE_CONT(0.25) WITHIN
-                            GROUP (ORDER BY lpa asc)                   "pct_25",
+                            GROUP (ORDER BY lpa_mass asc)                   "pct_25",
                         PERCENTILE_CONT(0.75) WITHIN
-                            GROUP (ORDER BY lpa asc)                   "pct_75",
+                            GROUP (ORDER BY lpa_mol asc)                   "pct_75",
 
 
-                        'lpa',
+                        'lpa mass',
+                        cohort
+                 from all_labs
+                 group by cohort
+                 union
+     select count(patid)                                   count_patients,
+                        count(case when lpa_mol is not null then 1 end) as count_non_null,
+                        median(lpa_mol)                                    median,
+                        trunc(avg(lpa_mol), 2)                             mean,
+                        trunc(STDDEV(lpa_mol), 2)                          std,
+                        PERCENTILE_CONT(0.25) WITHIN
+                            GROUP (ORDER BY lpa_mol asc)                   "pct_25",
+                        PERCENTILE_CONT(0.75) WITHIN
+                            GROUP (ORDER BY lpa_mol asc)                   "pct_75",
+
+
+                        'lpa_mol',
                         cohort
                  from all_labs
                  group by cohort
@@ -510,7 +526,9 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
                         cohort
                  from all_labs
                  group by cohort)
-        ,
+
+       select *
+from table3a; ,
 
 
      table3b as (
@@ -952,6 +970,5 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
                  group by cohort
 
 
-                 order by 7, 6, 5)
-select *
-from table3b;
+                 order by 7, 6, 5))
+

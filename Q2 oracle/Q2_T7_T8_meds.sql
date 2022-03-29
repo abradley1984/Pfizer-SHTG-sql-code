@@ -1,17 +1,16 @@
 --For Q1 T7 and T8
 --drop table shtg_meds_q1;
-
+--select * from shtg_meds_Q2_d2;
 create table shtg_meds_Q2_d2 as
 --statins
- with
-    joined1 as (select * from SHTG_Q2_STEP3_d5
-    where cohort is not null),
+with
  pat_list as
          (
-             select distinct *
+             select distinct * from
 
-             from joined1
+             SHTG_Q2_STEP3_d5 where cohort is not null
          )
+
 
         ,
 
@@ -27,7 +26,9 @@ create table shtg_meds_Q2_d2 as
                ('83367', '1422085', '1422101', '341248', '404914', '750224', '597987', '750228', '750231', '750232', '750196', '750236', '750200', '17767', '750204', '83366', '750208', '750212', '104416', '750220', '404773', '597977', '750203', '750215', '1422092', '1422087', '597980', '750216', '750219', '597967', '876514', '597993', '1422086', '1422096', '750235', '750207', '1422098', '597984', '597990', '750211', '750239', '1422093', '153165', '1422095', '404013', '750223', '617310', '404011', '597971', '617318', '750227', '597974', '750199', '1422099')
          group by patid, cohort
      )
+
         ,
+
 
 
 -- high_intensity_statins
@@ -179,7 +180,9 @@ create table shtg_meds_Q2_d2 as
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
                ('8703', '578784', '220456', '352747', '351133', '477562', '583110', '1442170', '583093', '225591', '310288', '477560', '221100', '197522', '603834', '351909', '201517', '483427', '1442163', '349287', '352031', '544518', '352744', '261295', '200311', '1442165', '352030', '615906', '310289', '213276', '603836', '351842', '763253', '1442168', '261357', '540281', '2594', '616852', '763247', '577031', '578799', '749804', '749802', '483425', '351898', '583096', '702169', '404348', '226346', '616853', '702055', '763252', '763250', '578797', '583122', '151389', '763258', '763256', '583113', '103920')
-         group by patid, cohort),
+         group by patid, cohort)
+
+ ,
 
 
 --icosapent_ethyl
@@ -754,7 +757,8 @@ create table shtg_meds_Q2_d2 as
                 '1659152',
                 '7393'
                    )
-         group by patid, cohort),
+         group by patid, cohort)
+        ,
 
      last_therapy_date as (
          select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_study_period
@@ -1284,10 +1288,11 @@ create table shtg_meds_Q2_d2 as
                 '1659152',
                 '7393'
                    )
-         group by patid, cohort),
+         group by patid, cohort)
+     ,
 
      all_meds as (
-         select distinct pat_list.patid,
+         select distinct patid,
                          pat_list.cohort,
                          ldl_result_num,
                          nhdl,
@@ -1320,8 +1325,9 @@ create table shtg_meds_Q2_d2 as
                   full outer join icosapent_ethyl using (patid)
                   full outer join first_therapy_date using (patid)
                   full outer join last_therapy_date using (patid)
-         order by cohort)
-        ,
+         order by pat_list.cohort)
+
+    ,
      all_meds_with_labs as (
          SELECT distinct patid,
                          cohort,
@@ -1356,6 +1362,7 @@ create table shtg_meds_Q2_d2 as
                              else 0 end                                                                            as less_than_3_months_therapy
 
          FROM all_meds)
+
 select *
 from all_meds_with_labs;
 
@@ -1403,7 +1410,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q2
+from shtg_meds_Q2_d2
 group by ldl_above_70
 having ldl_above_70 = 1
 union

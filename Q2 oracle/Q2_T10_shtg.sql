@@ -3,7 +3,7 @@
 
 with pat_list as
          (select *
-          from SHTG_Q2_STEP3_d2
+          from SHTG_Q2_STEP3_d5
           where cohort is not null),
 
     /* diabetes as ( select patid ,diabetes from SHTG_Q2_STEP3_d2),*/
