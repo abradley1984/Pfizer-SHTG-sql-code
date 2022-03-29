@@ -267,7 +267,7 @@ from #joined
 select *
 into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
     --CHECK Database name written to disk for site
-HPLDev.dbo.shtg_Q1_cohort_definition_with_exclusions
+HPLDev.dbo.shtg_Q1_cohort_definition2
 from #with_exclusions
 where age>18 and pre_index_days>180;
 
@@ -282,6 +282,132 @@ where age>=18
 union
 select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
 where age>=18 and pre_index_days>=180);
+
+select * into #labs from (select * from shtg_Q1_cohort_definition2
+) as [sQ1cd2*];
+   select * into  #lab_labels from (select labs.*,
+                           case
+                               when TG_result_num < 150
+                                   then 'TG_under_150'
+                               when TG_result_num BETWEEN 150 and 500
+                                   then 'TG_150_500'
+                               when TG_result_num BETWEEN 500 and 880
+                                   then 'TG_500_880'
+                               when TG_result_num BETWEEN 880 and 2000
+                                   then 'TG_880_2000'
+                               when TG_result_num > 2000
+                                   then 'TG_over_2000'
+                               else 'other'
+                               end as TG_category,
+                           case
+                               when LDL_result_num < 70
+                                   then 'LDL_low'
+
+                               when LDL_result_num >= 70
+                                   then 'LDL_high'
+                               when LDL_result_num < 0
+                                   then 'LDL_below_0'
+                               else 'other'
+                               end as LDL_category,
+                           case
+                               when nHDL < 100
+                                   then 'nHDL_low'
+
+                               when nHDL >= 100
+                                   then 'nHDL_high'
+                               when LDL_result_num < 0
+                                   then 'nHDL_below_0'
+                               else 'other'
+                               end as nHDL_category,
+                           case
+                               when LDL_result_num < 70
+                                   then 'LDL_under_70'
+
+                               when LDL_result_num between 70 and 100
+                                   then 'LDL_70_to_100'
+
+                               when LDL_result_num between 100 and 130
+                                   then 'LDL_100_to_130'
+                               when LDL_result_num between 130 and 160
+                                   then 'LDL_130_to_160'
+                               when LDL_result_num > 160
+                                   then 'LDL_above 160'
+
+                               else 'other'
+                               end as LDL_category2,
+                           case
+                               when NHDL < 70
+                                   then 'NHDL_under_70'
+
+                               when NHDL between 70 and 100
+                                   then 'NHDL_70_to_100'
+
+                               when NHDL between 100 and 130
+                                   then 'NHDL_100_to_130'
+                               when NHDL between 130 and 160
+                                   then 'NHDL_130_to_160'
+                               when NHDL between 160 and 190
+                                   then 'NHDL_160_to_190'
+                               when NHDL > 190
+                                   then 'NHDL_above 190'
+
+                               else 'other'
+                               end as NHDL_category2,
+                           case
+                               when Age < 18
+                                   then 'Age_under_18'
+                               when Age BETWEEN 18 and 40
+                                   then 'Age_18_40'
+                               when Age BETWEEN 40 and 55
+                                   then 'Age_40_55'
+                               when Age BETWEEN 55 and 65
+                                   then 'Age_55_65'
+ when Age BETWEEN 65 and 75
+                                   then 'Age_65_75'
+                               when Age > 75
+                                   then 'Age_over_75'
+                               else 'other'
+                               end as Age_category
+                    from #labs) as l;
+     select * into #with_cohorts from (select case
+                                 when TG_category = 'TG_over_2000' then 'cohort_1K'
+
+                                 when TG_category = 'TG_880_2000' then 'cohort_1J'
+
+                                 when TG_category = 'TG_500_880' then 'cohort_1I'
+
+                                 when (TG_category = 'TG_150_500') AND (nHDL_category = 'nHDL_high') AND
+                                      (LDL_category = 'LDL_high') then 'cohort_1E'
+
+                                 when TG_category = 'TG_150_500' AND (nHDL_category = 'nHDL_low') AND
+                                      (LDL_category = 'LDL_high') then 'cohort_1F'
+
+                                 when TG_category = 'TG_150_500' AND (nHDL_category = 'nHDL_high') AND
+                                      (LDL_category = 'LDL_low') then 'cohort_1H'
+
+                                 when TG_category = 'TG_150_500' AND (nHDL_category = 'nHDL_low') AND
+                                      (LDL_category = 'LDL_low') then 'cohort_1G'
+
+                                 when (TG_category = 'TG_under_150') AND (nHDL_category = 'nHDL_high') AND
+                                      (LDL_category = 'LDL_high') then 'cohort_1A'
+
+                                 when TG_category = 'TG_under_150' AND (nHDL_category = 'nHDL_low') AND
+                                      (LDL_category = 'LDL_high') then 'cohort_1B'
+
+                                 when TG_category = 'TG_under_150' AND (nHDL_category = 'nHDL_high') AND
+                                      (LDL_category = 'LDL_low') then 'cohort_1D'
+
+                                 when TG_category = 'TG_under_150' AND (nHDL_category = 'nHDL_low') AND
+                                      (LDL_category = 'LDL_low') then 'cohort_1C'
+                                 end as COHORT,
+                             lab_labels.*
+                      from #lab_labels lab_labels) as [Cll.*]
+
+
+select * into shtg_Q1_cohort_with_exclusions
+from #with_cohorts
+
+;
 
 
 
