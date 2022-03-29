@@ -5,25 +5,25 @@
  */
 
 
-with pat_list as (select patid, cohort, TG_DATE
+select * into #pat_list from (select patid, cohort, TG_DATE
+
                   from shtg_Q1_cohorts_with_exclusions
     -- fetch first 100 rows only
-),
-     labs_all as (select * from Q1_labs_all),
-     labs as (select patid,
+);
+     select * into #labs_all from (select * from Q1_labs_all);
+     select * into #labs from (select patid,
                      cohort,
                      uacr,
                      egfr_2021,
                      nhdl,
                      hscrp,
-                     CASE when (egfr_2021 < 60 or uacr >= 30) THEN 1 else 0 END as microvascular_disease,
-                     CASE when (nhdl > 130) THEN 1 else 0 END                   as nhdl_over_130,
-                     CASE when (hscrp >= 3) THEN 1 else 0 END                   as hscrp_over_3
+                                      IIF((egfr_2021 < 60 or uacr >= 30), 1, 0) as microvascular_disease,
+                                      IIF((nhdl > 130), 1, 0)                   as nhdl_over_130,
+                                      IIF((hscrp >= 3), 1, 0)                   as hscrp_over_3
 
-              from labs_all)
-        ,
-     smoking AS (
-         select patid, case when smoking in ('01', '02', '05', '07', '08') then 1 else 0 end as current_smoker
+              from #labs_all);
+     select * into #smoking from (
+         select patid, IIF(smoking in ('01', '02', '05', '07', '08'), 1, 0) as current_smoker
          from (
                   select patid,
                          row_number() OVER (
@@ -32,24 +32,24 @@ with pat_list as (select patid, cohort, TG_DATE
                              )            row_num,
                          vital.smoking as smoking,
                          cohort
-                  FROM pat_list a
+                  from #pat_list a
                            left join cdm_60_etl.vital b on a.patid = b.patid
                   WHERE vital.smoking IS NOT NULL
                     AND not vital.smoking in ('NI', 'OT', 'UN')) a
          where row_num = 1)
-        ,
-     age_65 as (
-         select patid, cohort, case when age > 65 then 1 else 0 end as age_over_65
+        ;
+     select * into #age_65 from (
+         select patid, cohort, IIF(age > 65, 1, 0) as age_over_65
          from shtg_Q1_cohorts_with_exclusions)
-        ,
-     retinopathy as (
+        ;
+     select * into #retinopathy from (
          select distinct patid,
                          cohort,
                          'retinopathy' as Comorbidity_name,
                          1             as retinopathy
 
 
-         from pat_list a
+         from #pat_list a
                   INNER JOIN cdm_60_etl.diagnosis  b on a.patid = b.patid
          where (Como.dx IN ('H31.021',--RETINOPATHY
                             'H31.022',
@@ -73,14 +73,14 @@ with pat_list as (select patid, cohort, TG_DATE
                             'H35.713',
                             'H35.719')
                    )
-         group by patid, cohort),
-     diabetes_10y as (
-         select distinct patid,
-                         cohort,
+         group by patid, cohort);
+  select * into #diabetes_10y from (
+         select distinct pats.patid,
+                         pats.cohort,
                          'diabetes_10y' as Comorbidity_name,
                          1              as diabetes_10y
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis  b on pats.patid = b.patid
          where (Como.dx like 'E08%' -- diabetes
 
@@ -99,32 +99,32 @@ with pat_list as (select patid, cohort, TG_DATE
            and
                admit_date
              < '2019-04-01'
-         group by patid, cohort, admit_date
+         group by pats.patid, pats.cohort, admit_date
      )
-        ,
+        ;
 
 --TIA in last 5 years
-     TIA as (
+     select * into #TIA from (
          select distinct patid,
                          cohort,
                          'TIA' as Comorbidity_name,
                          1     as TIA
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where (dx LIKE 'G45%' --'TIA'
              OR dx LIKE '435%' --'TIA'
              )
            and admit_date BETWEEN '2020-09-30' AND '2021-09-30'
          group by patid, cohort
-     ),
-     PAD as (
+     );
+     select * into #PAD from (
          select distinct patid,
                          cohort,
                          'PAD' as Comorbidity_name,
                          1     as PAD
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where (Como.dx in
                 ('440.20', '440.21', '440.22', '440.23', '440.24', '440.29', '440.30', '440.31', '440.32', '440.4',
@@ -135,23 +135,23 @@ with pat_list as (select patid, cohort, TG_DATE
                    )
              /* and admit_date BETWEEN '2020-09-30' AND '2021-09-30'*/
          group by patid, cohort
-     ),
-     CAD as (
+     );
+     select * into #CAD from (
          select distinct patid,
                          cohort,
                          'CAD' as Comorbidity_name,
                          1     as CAD
 
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where (Como.dx IN ('Z95.1', 'Z95.5', 'Z98.61')
 
                    -- MULTIVESSEL CAD
                    )
          group by patid, cohort
-     ),
-     MI as (
+     );
+     select * into #MI from (
          select distinct patid,
                          cohort,
                          'MI'                              as Comorbidity_name,
@@ -161,7 +161,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          max(admit_date) - min(admit_date) as MI_gap,
                          count(distinct admit_date)
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where (Como.dx like '410%' -- MI
 
@@ -185,8 +185,8 @@ with pat_list as (select patid, cohort, TG_DATE
              OR Como.dx = 'I25.2' -- MI)
                    )
          group by patid, cohort
-     ),
-     subsequent_MI as (
+     );
+     select * into #subsequent_MI from (
          select distinct patid,
                          cohort,
                          'MI'                                                 as Comorbidity_name,
@@ -195,9 +195,9 @@ with pat_list as (select patid, cohort, TG_DATE
                          min(admit_date),
                          max(admit_date) - min(admit_date)                    as MI_gap,
                          count(distinct admit_date),
-                         max(case when Como.dx like 'I22%' then 1 else 0 end) as subsequent_MI_I22
+                         max(IIF(Como.dx like 'I22%', 1, 0)) as subsequent_MI_I22
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where /*((Como.dx like '410%' -- MI
 
@@ -212,8 +212,8 @@ with pat_list as (select patid, cohort, TG_DATE
 
          group by patid, cohort
      )
-        ,
-     stroke as (
+        ;
+     select * into #stroke from (
          select patid,
                 cohort,
                 'stroke'                          as Comorbidity_name,
@@ -222,7 +222,7 @@ with pat_list as (select patid, cohort, TG_DATE
                 min(admit_date),
                 max(admit_date) - min(admit_date) as stroke_gap
 
-         from pat_list pats
+         from #pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
          where (
                        Como.dx like '433%' -- STROKE
@@ -237,8 +237,8 @@ with pat_list as (select patid, cohort, TG_DATE
 
                    )
          group by patid, cohort
-     ),
-     PCI as (
+     );
+    select * into #PCI from (
          select patid,
                 cohort,
                 'PCI'                             as Comorbidity_name,
@@ -246,19 +246,18 @@ with pat_list as (select patid, cohort, TG_DATE
                 max(admit_date),
                 min(admit_date),
                 max(admit_date) - min(admit_date) as PCI_gap
-         from pat_list a
+         from #pat_list a
                   left join cdm_60_etl.procedures b on a.patid = b.patid
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-         group by patid, cohort),
-
-     statins as (
+         group by patid, cohort);
+    select * into #statins from (
          select distinct patid, cohort, 1 as Statin
-         from pat_list a
+         from #pat_list a
                   left join cdm_60_etl.prescribing b on a.patid = b.patid
 
-         where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
+         where b.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and rxnorm_cui in
                  ('83366', '153165', '617312', '617314', '83366', '83367', '153165', '617310', '617318', '83366',
                   '83367', '153165', '617311', '617320', '83366', '83367', '153165', '259255', '262095', '83366',
@@ -394,13 +393,13 @@ with pat_list as (select patid, cohort, TG_DATE
                 '750215')
          group by patid, cohort
      )
-        ,
-     insulin as (
+       ;
+     select * into #insulin from (
          select patid, '1' as insulin, cohort
-         from pat_list a
+         from #pat_list a
                   left join cdm_60_etl.prescribing b on a.patid = b.patid
 
-         where prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
+         where b.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
                ('5459', '5856', '7405', '11160', '51428', '86009', '92877', '92879', '92880', '92881', '92942', '93108',
                 '93332', '93398', '93555', '93557', '93558', '93560', '106888', '106889', '106891', '106892', '106893',
@@ -436,9 +435,9 @@ with pat_list as (select patid, cohort, TG_DATE
                 '2100029', '2107520', '2107522', '2179744', '2179745', '2179749', '2205454', '2206090', '2206092',
                 '2206096', '2206099', '2376838', '2377130', '2377134', '2377231', '2380231', '2380232', '2380236',
                 '2380254', '2380256', '2380259', '2380260', '2563969', '2563971', '2563973', '2563976', '2563977'))
-        ,
-     multiple_stroke as (
-         select patid, case when encounter_count > 1 then 1 else 0 end as multiple_stroke
+        ;
+     select * into #multiple_stroke from (
+         select patid, IIF(encounter_count > 1, 1, 0) as multiple_stroke
          from (select patid,
                       count(encounterid)                                                       as encounter_count,
                       max(encounter.admit_date),
@@ -446,9 +445,9 @@ with pat_list as (select patid, cohort, TG_DATE
                       --CHECK this may be a problem... I'm trying to find the time between then first and last inpatient diagnosis
                       round((max(encounter.admit_date) - min(encounter.admit_date)) )  as gap
                from cdm_60_etl.encounter a
-                        join cdm_60_etl.diagnosis Como on patid, encounterid
+                        join cdm_60_etl.diagnosis Como on a.encounterid = Como.encounterid
 
-               where patid in (Select patid From pat_list)
+               where patid in (Select patid from #pat_list)
                  and (
                        Como.dx like '433%' -- STROKE
 
@@ -466,9 +465,9 @@ with pat_list as (select patid, cohort, TG_DATE
                having count(encounterid) > 1) b
 
          where gap
-                   > 30),
-     multiple_MI as (
-         select patid, gap, case when encounter_count > 1 then 1 else 0 end as multiple_MI
+                   > 30);
+    select * into #multiple_MI from (
+         select patid, gap, IIF(encounter_count > 1, 1, 0) as multiple_MI
          from (select patid,
                       count(encounterid)                                           as encounter_count,
                       max(diagnosis.admit_date),
@@ -477,7 +476,7 @@ with pat_list as (select patid, cohort, TG_DATE
                from cdm_60_etl.diagnosis
 --join cdm_60_etl.diagnosis  Como using (patid, encounterid)
 
-               where patid in (Select patid From pat_list)
+               where patid in (Select patid from #pat_list)
                  and diagnosis.enc_Type in ('EI', 'IP')
                  and (((dx like '410%' -- MI
 
@@ -493,9 +492,9 @@ with pat_list as (select patid, cohort, TG_DATE
 
          where gap
                    > 30)
-        ,
-     multiple_PCI as (
-         select patid, PCI_gap, case when encounter_count > 1 then 1 else 0 end as multiple_PCI
+        ;
+     select * into #multiple_PCI from (
+         select patid, PCI_gap, IIF(encounter_count > 1, 1, 0) as multiple_PCI
          from (select patid,
                       count(encounterid)                as encounter_count,
 
@@ -504,19 +503,19 @@ with pat_list as (select patid, cohort, TG_DATE
                       -- ,   max(admit_date),
                       min(admit_date),
                       max(admit_date) - min(admit_date) as PCI_gap
-               from pat_list a
+               from #pat_list a
                         left join cdm_60_etl.procedures b on a.patid = b.patid
                where PX in
                      ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
                group by patid) d
-         where PCI_gap > 30),
-     CKD as (select patid, case when egfr_2021 < 60 then 1 else 0 end as CKD
-             from labs_all)
-        ,
+         where PCI_gap > 30);
+select * into #CKD from(select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
+             from #labs_all)
+        ;
 
-     combined as (
+     select * into #combined from (
          select distinct patid,
 
                          -- stroke_gap,
@@ -540,92 +539,71 @@ with pat_list as (select patid, cohort, TG_DATE
                          hscrp_over_3,
                          nhdl_over_130,
                          microvascular_disease,
-                         case when Statin = 1 then 'Statin' else 'No Statin' end       as Statin,
-                         case when (PCI + MI + stroke) > 1 then 1 else 0 end           as more_than_1_of_PCI_MI_stroke,
-                         case
-                             when (PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1 then 1
-                             else 0 end                                                as more_than_1_of_PCI_MI_stroke_allowing_multiples,
-                         case when ((CAD + PAD + insulin + TIA) > 1) then 1 else 0 end as more_than_1_of_CAD_insulin_PAD_TIA,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) > 1) then 1
-                             else 0 end                                                as more_than_1_diabetes_insulin_microvascular,
+                         IIF(Statin = 1, 'Statin', 'No Statin')                                                      as Statin,
+                         IIF((PCI + MI + stroke) > 1, 1, 0)                                                          as more_than_1_of_PCI_MI_stroke,
+                         IIF((PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1, 1, 0)           as more_than_1_of_PCI_MI_stroke_allowing_multiples,
+                         IIF(((CAD + PAD + insulin + TIA) > 1), 1, 0)                                                as more_than_1_of_CAD_insulin_PAD_TIA,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) > 1), 1, 0)                           as more_than_1_diabetes_insulin_microvascular,
 
-                         case
-                             when (microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular,
+                         IIF((microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1), 1, 0)                   as any_diabetes_10y_insulin_microvascular,
 
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_age_over_65,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_smoker,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_retinopathy,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
-                         case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and
-                                   hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1)
-                                 then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_plus_any,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1), 1, 0)      as any_diabetes_10y_insulin_microvascular_age_over_65,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1), 1, 0)   as any_diabetes_10y_insulin_microvascular_smoker,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1), 1, 0)    as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1), 1, 0)      as any_diabetes_10y_insulin_microvascular_retinopathy,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1), 1, 0)     as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and
+                              hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1), 1, 0) as any_diabetes_10y_insulin_microvascular_plus_any,
 
-                         case
-                             when (microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
-                                   nhdl_over_130 +
-                                   current_smoker + age_over_65 + PCI + MI + stroke = 0) then 1
-                             else 0 end                                                as no_CV_or_risk_factors
+                         IIF((microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
+                              nhdl_over_130 +
+                              current_smoker + age_over_65 + PCI + MI + stroke = 0), 1, 0)                           as no_CV_or_risk_factors
 
 
          from (select distinct a.patid,
 
-                               case when microvascular_disease = 1 then 1 else 0 end as microvascular_disease,
-                               case when nhdl_over_130 = 1 then 1 else 0 end         as nhdl_over_130,
-                               case when hscrp_over_3 = 1 then 1 else 0 end          as hscrp_over_3,
+                               IIF(microvascular_disease = 1, 1, 0) as microvascular_disease,
+                               IIF(nhdl_over_130 = 1, 1, 0)         as nhdl_over_130,
+                               IIF(hscrp_over_3 = 1, 1, 0)          as hscrp_over_3,
 
-                               case when retinopathy = 1 then 1 else 0 end           as retinopathy,
+                               IIF(retinopathy = 1, 1, 0)           as retinopathy,
 
                                -- stroke_gap,
                                Statin,
 
-                               case when diabetes_10y = 1 then 1 else 0 end          as diabetes_10y,
-                               case when insulin = 1 then 1 else 0 end               as insulin,
-                               case when TIA = 1 then 1 else 0 end                   as TIA,
-                               case when PAD = 1 then 1 else 0 end                   as PAD,
-                               case when CAD = 1 then 1 else 0 end                   as CAD,
-                               case when PCI = 1 then 1 else 0 end                   as PCI,
-                               case when MI = 1 then 1 else 0 end                    as MI,
-                               case when stroke = 1 then 1 else 0 end                as stroke,
-                               case when multiple_PCI = 1 then 1 else 0 end          as multiple_PCI,
-                               case when multiple_MI = 1 then 1 else 0 end           as multiple_MI,
-                               case when multiple_stroke = 1 then 1 else 0 end       as multiple_stroke
+                               IIF(diabetes_10y = 1, 1, 0)          as diabetes_10y,
+                               IIF(insulin = 1, 1, 0)               as insulin,
+                               IIF(TIA = 1, 1, 0)                   as TIA,
+                               IIF(PAD = 1, 1, 0)                   as PAD,
+                               IIF(CAD = 1, 1, 0)                   as CAD,
+                               IIF(PCI = 1, 1, 0)                   as PCI,
+                               IIF(MI = 1, 1, 0)                    as MI,
+                               IIF(stroke = 1, 1, 0)                as stroke,
+                               IIF(multiple_PCI = 1, 1, 0)          as multiple_PCI,
+                               IIF(multiple_MI = 1, 1, 0)           as multiple_MI,
+                               IIF(multiple_stroke = 1, 1, 0)       as multiple_stroke
                        ,
-                               case when current_smoker = 1 then 1 else 0 end        as current_smoker,
-                               case when age_over_65 = 1 then 1 else 0 end           as age_over_65
-               from stroke a  full outer join MI b on a.patid = b.patid
-                        full outer join PCI c on a.patid = c.patid
-                        full outer join statins d on a.patid = d.patid
-                        full outer join insulin e on a.patid = e.patid
-                        full outer join CAD f on a.patid = f.patid
-                        full outer join TIA g on a.patid = g.patid
-                        full outer join PAD h on a.patid = h.patid
-                        full outer join diabetes_10y i on a.patid = i.patid
-                        full outer join retinopathy j on a.patid =j.patid
-                        full outer join multiple_stroke k on a.patid = k.patid
-                        full outer join multiple_MI l on a.patid = l.patid
-                        full outer join multiple_PCI m on a.patid = m.patid
-                        full outer join smoking n on a.patid =n.patid
-                        full outer join age_65 o on a.patid = o.patid
-                        full outer join labs p on a.patid = p.patid
-              ) f)
+                               IIF(current_smoker = 1, 1, 0)        as current_smoker,
+                               IIF(age_over_65 = 1, 1, 0)           as age_over_65
+               from #stroke a  full outer join #MI b on a.patid = b.patid
+                        full outer join #PCI c on a.patid = c.patid
+                        full outer join #statins d on a.patid = d.patid
+                        full outer join #insulin e on a.patid = e.patid
+                        full outer join #CAD f on a.patid = f.patid
+                        full outer join #TIA g on a.patid = g.patid
+                        full outer join #PAD h on a.patid = h.patid
+                        full outer join #diabetes_10y i on a.patid = i.patid
+                        full outer join #retinopathy j on a.patid =j.patid
+                        full outer join #multiple_stroke k on a.patid = k.patid
+                        full outer join #multiple_MI l on a.patid = l.patid
+                        full outer join #multiple_PCI m on a.patid = m.patid
+                        full outer join #smoking n on a.patid =n.patid
+                        full outer join #age_65 o on a.patid = o.patid
+                        full outer join #labs p on a.patid = p.patid
+              ) f);
 
 
-select pat_list.cohort,
+select a.cohort,
        sum(PCI)                                                  as N_PCI,
        sum(MI)                                                   as N_MI,
        sum(stroke)                                               as N_stroke,
@@ -660,10 +638,10 @@ select pat_list.cohort,
        sum(no_CV_or_risk_factors)                                as N_no_CV_or_risk_factors,
        count(distinct a.patid)                                     as total_count_patients
 
-from pat_list a
-         left join combined b on a.patid = b.patid
-group by pat_list.cohort, Statin
+from #pat_list a
+         left join #combined b on a.patid = b.patid
+group by a.cohort, Statin
 
-order by pat_list.cohort
+order by a.cohort
 
 /*

@@ -3,6 +3,13 @@ Running time: 8 mins *2
 
   Issues to check for sql server version are marked with --CHECK comments
 */
+--I'm not sure if this works, but maybe if we specify this here we can take out the cdm_60_etl. references below?
+USE CDM;
+
+--CDM name should be changed here for your site
+--ALTER USER "username" WITH DEFAULT_SCHEMA = PCORI_CDM_SCHEMA;
+GO
+
 select *
 into #pat_list
 from (
@@ -69,7 +76,6 @@ into #lipid_panel_date
 from (select a.patid, a.result_date
       from #HDL_all a
                inner join #total_chol_all b on a.patid = b.patid and a.result_date = b.result_date) c;
---CHECK possible issue: I'm getting "Column alias required for 'patid, result_date:date'" but I don't know what that means
 
 
 select *

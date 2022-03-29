@@ -15,7 +15,7 @@
 --statins
      select * into #statins from (
          select distinct patid, cohort, 1 as Statin
-         from pat_list a
+         from #pat_list a
                   left join cdm_60_etl.prescribing b on a.patid=b.patid
 
          where rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
@@ -95,7 +95,7 @@
                                                  '597993',
                                                  '750215') then 'dose_over_40' end as level1
          from #pat_list a
-                  left join cdm_60_etl.prescribing on a.patid=b.patid
+                  left join cdm_60_etl.prescribing b  on a.patid=b.patid
 
          where rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in --only including >40 rxnorms right now.
@@ -755,7 +755,7 @@
          group by patid, cohort) c;
 
      select * into #last_therapy_date from (
-         select patid, cohort, max(rx_order_Date) as last_therapy_date_in_study_period
+         select patid, cohort, max(rx_order_Date) as last_therapy_date_in_sp
 
          from #pat_list a
                   left join cdm_60_etl.prescribing b on a.patid=b.patid
@@ -1305,7 +1305,7 @@
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period
+                         last_therapy_date_in_sp
          from #pat_list a
                   full outer join #high_intensity_statin b on a.patid=b.patid
                   full outer join #statins  c on a.patid=c.patid
@@ -1339,19 +1339,17 @@
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period,
+                         last_therapy_date_in_sp,
 
-                         case when LDL_result_num >= 100 then 1 else 0 end                                         as ldl_above_100,
-                         case when LDL_result_num >= 70 then 1 else 0 end                                          as ldl_above_70,
-                          case when (LDL_result_num < 70 and nhdl >= 100) then 1 else 0 end                         as ldl_under_70_nhdl_above_100,
+                         IIF(LDL_result_num >= 100, 1, 0)                                          as ldl_above_100,
+                         IIF(LDL_result_num >= 70, 1, 0)                                           as ldl_above_70,
+                         IIF((LDL_result_num < 70 and nhdl >= 100), 1, 0)                          as ldl_under_70_nhdl_above_100,
 
-                                case when (LDL_result_num < 70 and nhdl >= 100 and TG_result_num >= 150) then 1 else 0 end                         as ldl_under_70_nhdl_above_100_TG_above_150,
-                  case when nhdl >= 100 then 1 else 0 end                                                   as nhdl_above_100,
-                         case when nhdl >= 130 then 1 else 0 end                                                   as nhdl_above_130,
-                         case when TG_result_num >= 150 then 1 else 0 end                                          as TG_above_150,
-                         case
-                             when (last_therapy_date_in_study_period - first_therapy_date < 90) then 1
-                             else 0 end                                                                            as less_than_3_months_therapy
+                         IIF((LDL_result_num < 70 and nhdl >= 100 and TG_result_num >= 150), 1, 0) as ldl_under_70_nhdl_above_100_TG_above_150,
+                         IIF(nhdl >= 100, 1, 0)                                                    as nhdl_above_100,
+                         IIF(nhdl >= 130, 1, 0)                                                    as nhdl_above_130,
+                         IIF(TG_result_num >= 150, 1, 0)                                           as TG_above_150,
+                         IIF(datediff(dd,first_therapy_date ,last_therapy_date_in_sp) < 90, 1, 0)  as less_than_3_months_therapy
 
          FROM #all_meds) n;
 

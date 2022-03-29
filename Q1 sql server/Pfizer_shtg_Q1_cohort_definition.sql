@@ -368,7 +368,7 @@ select * into #labs from (select * from shtg_Q1_cohort_definition2
                                    then 'Age_over_75'
                                else 'other'
                                end as Age_category
-                    from #labs) as l;
+                    from #labs  labs) as l;
      select * into #with_cohorts from (select case
                                  when TG_category = 'TG_over_2000' then 'cohort_1K'
 
