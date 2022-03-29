@@ -11,13 +11,13 @@ This code defines the overall cohort for the first section of the SHTG qery (Q1)
                         patients who have the right lab data,
                         patients who are > 18 and
                         patients with at least 6 months of data.
-     table: shtg_Q1_cohorts_with_exclusions:
+     table: shtg_Q1_cohorts_with_ex:
         This lists all patients that meet inclusion and exclusion criteria, with their sub-cohort,  index lab values and age.
         One row per patient.
         This is used as the cohort definition for the rest of the tables
 
    table: shtg_cohort_definition:
-        This is a temporary table needed to get the shtg_Q1_total_counts table prior to applying exclusion criteria to get shtg_Q1_cohorts_with_exclusions.
+        This is a temporary table needed to get the shtg_Q1_total_counts table prior to applying exclusion criteria to get shtg_Q1_cohorts_with_ex.
 
    Running time:
    running time at Pitt was ~25 minutes.
@@ -30,7 +30,7 @@ This code defines the overall cohort for the first section of the SHTG qery (Q1)
 /*
 drop table shtg_cohort_definition;
 drop table shtg_Q1_total_counts;
-drop table shtg_Q1_cohorts_with_exclusions
+drop table shtg_Q1_cohorts_with_ex
   */
 
 
