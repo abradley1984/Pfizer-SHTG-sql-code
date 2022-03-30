@@ -7,7 +7,7 @@
 
 select * into #pat_list from (select patid, cohort, TG_DATE
 
-                  from shtg_Q1_cohorts_with_exclusions
+                  from foo.dbo.shtg_Q1_cohort_with_exclusions
     -- fetch first 100 rows only
 );
      select * into #labs_all from (select * from Q1_labs_all);
@@ -40,7 +40,7 @@ select * into #pat_list from (select patid, cohort, TG_DATE
         ;
      select * into #age_65 from (
          select patid, cohort, IIF(age > 65, 1, 0) as age_over_65
-         from shtg_Q1_cohorts_with_exclusions)
+         from foo.dbo.shtg_Q1_cohort_with_exclusions)
         ;
      select * into #retinopathy from (
          select distinct patid,

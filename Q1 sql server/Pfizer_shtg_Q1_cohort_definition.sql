@@ -39,7 +39,7 @@ select lab.patid,
                     --   LAB.RAW_RESULT
                 --FROM @cdm.@cdmschema.lab lab
 into #TG_all
-FROM lab_result_cm lab
+FROM cdm.dbo.lab_result_cm lab
                -- WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
                 WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
 AND lab.lab_loinc in ('2571-8', '12951-0')
@@ -63,7 +63,7 @@ AND lab.lab_loinc in ('2571-8', '12951-0')
                         lab.result_date
 into #LDL_all
                  --FROM @cdm.@cdmschema.lab lab
-FROM lab_result_cm lab
+FROM cdm.dbo.lab_result_cm lab
                 -- WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
                   WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
 AND lab.lab_loinc in ('13457-7', '18262-6', '2089-1')
@@ -89,7 +89,7 @@ AND lab.lab_loinc in ('13457-7', '18262-6', '2089-1')
                                lab.result_date result_date
    into #total_chol_all
 --FROM @cdm.@cdmschema.lab lab
-FROM lab_result_cm lab
+FROM cdm.dbo.lab_result_cm lab
                 -- WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
                   WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
                           AND lab.lab_loinc in ('2093-3')
@@ -112,7 +112,7 @@ FROM lab_result_cm lab
                         lab.result_date
 into #HDL_all
 --FROM @cdm.@cdmschema.lab lab
-from lab_result_cm lab
+from cdm.dbo.lab_result_cm lab
                 -- WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
                   WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
                    AND lab.lab_loinc in ('2085-9')
@@ -267,7 +267,7 @@ from #joined
 select *
 into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
     --CHECK Database name written to disk for site
-HPLDev.dbo.shtg_Q1_cohort_definition2
+foo.dbo.shtg_Q1_cohort_definition2
 from #with_exclusions
 where age>18 and pre_index_days>180;
 
@@ -283,7 +283,7 @@ union
 select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
 where age>=18 and pre_index_days>=180);
 
-select * into #labs from (select * from shtg_Q1_cohort_definition2
+select * into #labs from (select * from foo.dbo.shtg_Q1_cohort_definition2
 ) as [sQ1cd2*];
    select * into  #lab_labels from (select labs.*,
                            case
@@ -404,7 +404,7 @@ select * into #labs from (select * from shtg_Q1_cohort_definition2
                       from #lab_labels lab_labels) as [Cll.*]
 
 
-select * into shtg_Q1_cohort_with_exclusions
+select * into foo.dbo.shtg_Q1_cohort_with_exclusions
 from #with_cohorts
 
 ;

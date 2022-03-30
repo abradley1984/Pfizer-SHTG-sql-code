@@ -14,7 +14,7 @@ Run time: ~ 3 mins
  */
 
 with pat_list as (select patid, cohort, TG_DATE as index_date
-                  from shtg_Q1_cohorts_with_exclusions),
+                  from foo.dbo.shtg_Q1_cohort_with_exclusions),
 
 
 
@@ -255,7 +255,7 @@ WHEN dx in ('440.20',
          FROM pat_list a
 
 
-                  INNER JOIN cdm_60_etl.diagnosis b on a.patid = b.patid
+                  INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
 
 
          WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-09-30'
@@ -552,7 +552,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      ),
    Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list a
-                                 left join cdm_60_etl.procedures b on a.patid = b.patid
+                                 left join cdm.dbo.procedures b on a.patid = b.patid
                         where PX =
                               '36514'),
      comorbidity_group as (select patid,
@@ -563,7 +563,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                            FROM pat_list a
 
 
-                                    INNER JOIN cdm_60_etl.diagnosis  b on a.patid = b.patid
+                                    INNER JOIN cdm.dbo.diagnosis  b on a.patid = b.patid
 
 
                            WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-08-31'
@@ -575,7 +575,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                       max(index_date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
                       'ASCVD'                            as Comorbidity_name
                FROM pat_list a
-                        INNER JOIN cdm_60_etl.diagnosis b on a.patid = b.patid
+                        INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
                WHERE dx in ('413.9',
                             'I20.9',
                             'I23.7',

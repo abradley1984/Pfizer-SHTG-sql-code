@@ -20,7 +20,7 @@ GROUP (ORDER BY age asc) OVER (PARTITION BY cohort)
 select *
 into #pat_list
 from
-                                    SHTG_Q2_STEP3 ;
+                                    foo.dbo.SHTG_Q2_STEP3 ;
 select *
 into #smoking
 from (
@@ -32,7 +32,7 @@ from (
     vital.smoking as smoking,
     cohort
     FROM #pat_list a
-    left join cdm_60_etl.vital  b on a.patid = b.patid
+    left join cdm.dbo.vital  b on a.patid = b.patid
     WHERE vital.smoking IS NOT NULL
     AND not vital.smoking in ('NI', 'OT', 'UN')) c
 where row_num = 1;
@@ -110,7 +110,7 @@ when Age BETWEEN 65 and 75
 select *
 into #insurance
 from #pat_list a
-    left join CDM_60_ETL.encounter e  on a.patid = e.patid
+    left join cdm.dbo.encounter e  on a.patid = e.patid
 where e.admit_date BETWEEN '2020-09-30'
   AND '2021-09-30'
   and payer_type_primary is not null
@@ -166,8 +166,8 @@ select patid,
     end as provider_specialty
 into #providers
 from #pat_list a
-    left join cdm_60_etl.encounter  e on a.patid = e.patid
-    left join cdm_60_etl.provider
+    left join cdm.dbo.encounter  e on a.patid = e.patid
+    left join cdm.dbo.provider
 on encounter.providerid = provider.providerid
 where provider_specialty_primary in
     ('208D00000X'

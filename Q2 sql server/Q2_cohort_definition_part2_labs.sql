@@ -4,9 +4,9 @@
 Run time: ~36 mins
 
 
---select * from Q2_labs_all;
+--select * from foo.dbo.Q2_labs_all;
 --
--- drop table Q2_labs_all;*/
+-- drop table foo.dbo.Q2_labs_all;*/
 /*This code generates a table that's written to disk (Q1_labs_all) with all labs for the cohorts, mostly for T3
 
   The Q2 version is pretty similar, but is run before cohorts are extracted, so there may be slight differences.
@@ -27,8 +27,8 @@ Run time: ~40 mins
 select *
 into #pat_list
 from (
-         select LDL_Date as index_date, SHTG_Q2_STEP1.*
-         from SHTG_Q2_STEP1
+         select LDL_Date as index_date, foo.dbo.SHTG_Q2_STEP1.*
+         from foo.dbo.SHTG_Q2_STEP1
 
         -- where cohort is not null
          -- fetch first 1000 rows only
@@ -48,7 +48,7 @@ from (select patid,
 
 
       FROM #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('46986-6', '13458-5', '2091-7')
@@ -70,7 +70,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1884-6', '1871-3', '1881-2')
@@ -92,7 +92,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND (lab_loinc in
@@ -114,7 +114,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND (lab_loinc in
@@ -139,7 +139,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1869-7', '1874-7', '55724-9')
@@ -160,7 +160,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in
@@ -184,7 +184,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('30522-7', '35648-5')
@@ -194,7 +194,7 @@ select *
 into #diabetes
 from (select distinct (patid), 1 as Diabetes
       from #pat_list  pats
-                           JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
+                           JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
       WHERE (dx like 'E13%'
          or
           dx like 'E11%'
@@ -221,7 +221,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
@@ -244,7 +244,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1751-7', '61151-7', '2862-1', '61152-5')
@@ -265,7 +265,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in
@@ -287,7 +287,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1742-6', '1743-4', '1744-2')
@@ -309,7 +309,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1920-8', '30239-8')
@@ -330,7 +330,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('2324-2')
@@ -352,7 +352,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
@@ -374,7 +374,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('2571-8')
@@ -395,7 +395,7 @@ from (select patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm  b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm  b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
@@ -410,7 +410,7 @@ from (select patid,
              wt    weight,
 
              measure_date
-      from cdm_60_etl.vital
+      from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and wt is not null
         and patid in (select patid from #pat_list)) as v;
@@ -424,7 +424,7 @@ from (select patid,
              ht    height,
 
              measure_date
-      from cdm_60_etl.vital
+      from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and ht is not null
         and patid in (select patid from #pat_list)) as v;
@@ -447,7 +447,7 @@ from (select *
                    round(result_num / 0.7, 2) creat_result_num_female
 
             from #pat_list a
-                     left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+                     left join cdm.dbo.lab_result_cm b on a.patid = b.patid
             WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
               AND lab_loinc in ('2160-0', '38483-4')
@@ -549,6 +549,6 @@ from (
 --writing labs table
 --create table Q1_labs_all as
 select *
-into Q2_labs_all
+into foo.dbo.Q2_labs_all
 From #all_labs2;
-select * from Q2_labs_all;
+select * from foo.dbo.Q2_labs_all;

@@ -4,7 +4,7 @@
 --create table SHTG_Q2_STEP3 as
 --WITH
      select * into #PAT_LIST from
-     (SELECT * FROM SHTG_Q2_STEP1
+     (SELECT * FROM foo.dbo.shtg_Q2_STEP1
      where age>=18 and pre_index_days>=180) as id;
 
      select * into #labs_all from (select * from Q2_labs_all) as [Q2la*];
@@ -15,7 +15,7 @@
 
                            1 as recent_ACS
                     from #pat_list pats
-                             INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                             INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
                     WHERE dx in ('413.9', --dealing with MI separately
                                  'I20.9',--Angina codes
                         /*'I23.7',*/
@@ -106,7 +106,7 @@
 
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                  INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
          where (Como.dx like '410%' -- MI
 
              OR Como.dx = '411.0' -- MI
@@ -136,7 +136,7 @@
 
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                  INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
          where (
                        Como.dx like '433%' -- STROKE
 
@@ -161,7 +161,7 @@
 
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                  INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
          where (
                        dx in ('440.20',
                               '440.21',
@@ -214,8 +214,8 @@
                       max(encounter.admit_date),
                       min(encounter.admit_date),
                       (datediff(dd,max(encounter.admit_date), min(encounter.admit_date)) / 10) * 10 as gap
-               from cdm_60_etl.encounter e
-                        join cdm_60_etl.diagnosis Como on (e.patid = Como.patid and  e.encounterid = Como.encounterid)
+               from cdm.dbo.encounter e
+                        join cdm.dbo.diagnosis Como on (e.patid = Como.patid and  e.encounterid = Como.encounterid)
 
                where patid in (Select patid from #pat_list a)
                  and (
@@ -243,7 +243,7 @@
                       max(diagnosis.admit_date),
                       min(diagnosis.admit_date),
                       datediff(dd,max(diagnosis.admit_date), min(diagnosis.admit_date)) as gap
-               from cdm_60_etl.diagnosis
+               from cdm.dbo.diagnosis
 
 
                where patid in (Select patid from #pat_list a)
@@ -274,7 +274,7 @@
                  min(admit_date),
                  max(admit_date) - min(admit_date) as PCI_gap
          from #pat_list a
-                  left join cdm_60_etl.procedures b on a.patid=b.patid
+                  left join cdm.dbo.procedures b on a.patid=b.patid
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
@@ -291,7 +291,7 @@
                                                                IIF((dx = 'E78.01' or max_ldl_above_190 = 1), 1, 0) as hypercholesterolemia
 
                               from #pat_list pats
-                                       left JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                                       left JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
                               where (
                                   dx = 'E78.01' --'familial hypercholesterolemia'
                                   )
@@ -305,7 +305,7 @@
                  min(admit_date),
                  max(admit_date) - min(admit_date) as PCI_gap*/
          from #pat_list a
-                  left join cdm_60_etl.procedures b on a.patid=b.patid
+                  left join cdm.dbo.procedures b on a.patid=b.patid
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
@@ -314,7 +314,7 @@
      select * into #hypertension from (select distinct patid, IIF(dx = 'I10', 1, 0) as hypertension
 
                       from #pat_list pats
-                               INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                               INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
                       where (
                                 Como.dx = 'I10' -- hypertension
 
@@ -331,7 +331,7 @@
                              )            row_num,
                          vital.smoking as smoking
                   from #pat_list a
-                           left join cdm_60_etl.vital b on a.patid=b.patid
+                           left join cdm.dbo.vital b on a.patid=b.patid
                   WHERE vital.smoking IS NOT NULL
                     AND not vital.smoking in ('NI', 'OT', 'UN')) as prns
          where row_num = 1) as pcs
@@ -343,7 +343,7 @@
                          1 as congestive_HF
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                  INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
          where Como.dx in ('I50.20',
                            'I50.21',
                            'I50.22',
@@ -368,7 +368,7 @@
                                  1 as TIA_IHD
 
                  from #pat_list pats
-                          INNER JOIN cdm_60_etl.diagnosis   como on pats.patid=como.patid
+                          INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
                  where Como.dx like 'G45%' -- TIA
                     OR Como.dx like '435%' -- TIA
 
@@ -393,7 +393,7 @@
                         lab_result_cm.result_unit result_unit,
                         lab_result_cm.result_date
 
-                 FROM cdm_60_etl.lab_result_cm
+                 FROM cdm.dbo.lab_result_cm
                  WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
                      lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
@@ -456,7 +456,7 @@
      select * into #statins from (
          select distinct patid, 1 as Statin_ezetimibe
          from #pat_list a
-                  left join cdm_60_etl.prescribing b on a.patid=b.patid
+                  left join cdm.dbo.prescribing b on a.patid=b.patid
 
          where /*prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and*/ rxnorm_cui in
@@ -791,7 +791,7 @@
                        lab_result_cm.result_unit result_unit,
                        lab_result_cm.result_date
 
-                FROM cdm_60_etl.lab_result_cm
+                FROM cdm.dbo.lab_result_cm
                 WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
                     lab_result_cm.lab_loinc in ('2571-8')
@@ -839,7 +839,7 @@
      select * into #risk_enhancers from (select distinct patid, 1 as diagnosis_risk_enhanced
 
                         from #pat_list pats
-                                 INNER JOIN cdm_60_etl.diagnosis Como on pats.patid=Como.patid
+                                 INNER JOIN cdm.dbo.diagnosis Como on pats.patid=Como.patid
                         where (
                                       Como.dx = 'Z82.49' --family_hx_ascvd
                                       or Como.dx = 'E88.1' -- metabolic_syndrome
@@ -919,7 +919,7 @@
 
 
 select *
-into SHTG_Q2_STEP3
+into foo.dbo.shtg_Q2_STEP3
 from
     #PAT_LIST a  join #cohorts b on a.patid = b.patid where cohort is not null;
 

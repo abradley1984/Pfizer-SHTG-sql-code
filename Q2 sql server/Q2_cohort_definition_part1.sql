@@ -17,7 +17,7 @@ from (select patid,
              result_date,
              RAW_RESULT
 
-      FROM cdm_60_etl.lab_result_cm lab
+      FROM cdm.dbo.lab_result_cm lab
        WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
             AND lab_loinc in ('2571-8', '12951-0')
         AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
@@ -42,7 +42,7 @@ from (select patid,
             result_unit result_unit,
             result_date
 
-      FROM cdm_60_etl.lab_result_cm lab
+      FROM cdm.dbo.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
         AND lab_loinc in ('13457-7', '18262-6', '2089-1')
         --andpatid in #pat_list
@@ -75,7 +75,7 @@ from (select patid,
             result_unit result_unit,
             result_date result_date
 
-      FROM cdm_60_etl.lab_result_cm lab
+      FROM cdm.dbo.lab_result_cm lab
 
         WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
         AND lab_loinc in ('2093-3')
@@ -102,7 +102,7 @@ from (select patid,
              result_unit result_unit,
              result_date
 
-      FROM cdm_60_etl.lab_result_cm lab
+      FROM cdm.dbo.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
        AND lab_loinc in ('2085-9')
         --  and result_num is not null
@@ -166,7 +166,7 @@ from (
                 demographic.birth_date
 
          FROM #pat_list pats
-                  INNER JOIN cdm_60_etl.demographic ON demographic.patid = pats.patid
+                  INNER JOIN cdm.dbo.demographic ON demographic.patid = pats.patid
      ) as pd;
 --First encounter, to calculate if we have 6 month pre-index.
 select *
@@ -179,7 +179,7 @@ from (select patid, admit_date as first_admit_date
                    encounter.admit_date as admit_date,
                    encounter.patid      as patid
             from #pat_list p
-                     left join cdm_60_etl.encounter encounter on p.patid = encounter.patid) as rnadp
+                     left join cdm.dbo.encounter encounter on p.patid = encounter.patid) as rnadp
       where row_num = 1
      ) as pfad;
 select *
@@ -192,7 +192,7 @@ from (select patid, admit_date as last_admit_date
                    encounter.admit_date as admit_date,
                    encounter.patid      as patid
             from #pat_list p
-                     left join cdm_60_etl.encounter encounter on p.patid = encounter.patid) as rnadp
+                     left join cdm.dbo.encounter encounter on p.patid = encounter.patid) as rnadp
       where row_num = 1
      ) as plad;
 select *
@@ -202,7 +202,7 @@ from (select patid,
              --    max(LDL_Date - admit_date)over (partition by patid) / 365.25  as time_since_first_diabetes_diagnosis,
              1 as Diabetes
       FROM #pat_list pats
-               INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
+               INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
       where Como.dx like 'E08%' -- diabetes
 
          OR Como.dx like 'E09%' -- diabetes
@@ -226,7 +226,7 @@ from (select patid,
              max(LDL_Date - admit_date) / 365.25 as tx_since_first_ascvd,
              1                                   as ASCVD
       FROM #pat_list pats
-               INNER JOIN cdm_60_etl.diagnosis como on pats.patid= como.patid
+               INNER JOIN cdm.dbo.diagnosis como on pats.patid= como.patid
       WHERE dx in ('413.9'
           , 'I20.9'
           , 'I23.7'
@@ -408,7 +408,7 @@ select distinct #joined.*,
 
             datediff(dd,LDL_date, last_admit_date )        as post_index_days,
                datediff(dd,LDL_date, birth_date )/ 365.25 as age
-into SHTG_Q2_STEP1
+into foo.dbo.SHTG_Q2_STEP1
 from #joined
 Where round(datediff(dd,LDL_date, birth_date )/ 365.25, 2) > 18 --over 18
   And datediff(dd,  first_admit_date,LDL_date) > 180 --at least 6 months pre-index.

@@ -12,15 +12,15 @@ GO
 elect *
 into #pat_list
 from (
-         select LDL_date as index_date, SHTG_Q2_STEP3.*
-         from SHTG_Q2_STEP3
+         select LDL_date as index_date, foo.dbo.SHTG_Q2_STEP3.*
+         from foo.dbo.SHTG_Q2_STEP3
 
          where cohort is not null
          -- fetch first 1000 rows only
      ) a;
 select *
 into #all_labs
-from (select * from Q1_labs_all) a;-- generated in Q1_labs_part1
+from (select * from foo.dbo.Q1_labs_all) a;-- generated in Q1_labs_part1
 
 select *
 into #HDL_all

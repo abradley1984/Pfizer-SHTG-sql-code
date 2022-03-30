@@ -2,12 +2,12 @@
    This table is categorizing patients into Obesity, NASH and Diabetes groups, looking at some labs */
 
 select * into #pat_list from
-    (select * from SHTG_Q2_STEP3
+    (select * from foo.dbo.SHTG_Q2_STEP3
         where cohort is not null) as SQ;
 
-    /* diabetes as ( select patid ,diabetes from SHTG_Q2_STEP3_d2),*/
+    /* diabetes as ( select patid ,diabetes from foo.dbo.SHTG_Q2_STEP3_d2),*/
 
-     select * into #BMI from (select patid,BMI from Q2_LABS_ALL) as pB;
+     select * into #BMI from (select patid,BMI from foo.dbo.Q2_LABS_ALL) as pB;
      select * into #BMI_category from (select patid, BMI,
                              CASE WHEN BMI < 30 then 'BMI under 30'
           WHEN BMI >= 40 THEN 'BMI over 40'
@@ -22,7 +22,7 @@ select * into #pat_list from
 
 
 select * into #nash from (select distinct patid, 1 as NASH from #pat_list a
- INNER JOIN cdm_60_etl.diagnosis como on a.patid=como.patid
+ INNER JOIN cdm.dbo.diagnosis como on a.patid=como.patid
      Where dx in ('K75.81', '571.8', 'K76.0') ) as pN;
 
 
