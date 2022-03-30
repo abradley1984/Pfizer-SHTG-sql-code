@@ -3,7 +3,7 @@ Running time: 8 mins *2
 
   Issues to check for sql server version are marked with --CHECK comments
 */
---I'm not sure if this works, but maybe if we specify this here we can take out the cdm_60_etl. references below?
+--I'm not sure if this works, but maybe if we specify this here we can take out the cdm.dbo. references below?
 USE CDM;
 
 --CDM name should be changed here for your site
@@ -30,11 +30,12 @@ from (select distinct patid,
                       --  result_num  total_chol_result_num,
                       -- result_unit result_unit,
                       --CHECK THIS - I want just the date, not the time
-                      cast(b.result_date as date) result_date
+                      cast(b.result_date as date) result_date,
+                      index_date
 
 
       FROM #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE b.result_date BETWEEN '2019-04-01' AND '2021-09-30'
         AND b.lab_loinc in ('2085-9')
         and b.result_num is not null
@@ -59,7 +60,7 @@ from (select distinct patid,
 
 
       from #pat_list a
-               left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
 
       WHERE result_date BETWEEN '2019-04-01' AND '2021-09-30'
         AND lab_loinc in ('2093-3')
@@ -152,7 +153,7 @@ from (select *
                        )                                         row_num
 
             from #pat_list a
-                     left join cdm_60_etl.lab_result_cm b on a.patid = b.patid
+                     left join cdm.dbo.lab_result_cm b on a.patid = b.patid
             WHERE                                                         --result_date '2021-07-31' AND '2021-09-30'
                 lab_loinc in ('2571-8', '12951-0')
               AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
@@ -583,7 +584,7 @@ from (select *
                  GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "Median",
              'egfr_2021',
              cohort
-      from #all_labs) as "dc*ab"
+      from #all_labs) as "dc*ab";
 --group by cohort) d;
 
 --CHECK
