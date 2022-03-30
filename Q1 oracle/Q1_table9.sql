@@ -15,7 +15,7 @@ with pat_list as (select patid, cohort, TG_DATE
                      egfr_2021,
                      nhdl,
                      hscrp,
-                     CASE when (egfr_2021 < 60 or uacr >= 30) THEN 1 else 0 END as microvascular_disease,
+                     CASE when (egfr_2021 < 60 or uacr >= 30) THEN 1 else 0 END as mv_disease,
                      CASE when (nhdl > 130) THEN 1 else 0 END                   as nhdl_over_130,
                      CASE when (hscrp >= 3) THEN 1 else 0 END                   as hscrp_over_3
 
@@ -549,44 +549,44 @@ with pat_list as (select patid, cohort, TG_DATE
                          multiple_PCI,
                          hscrp_over_3,
                          nhdl_over_130,
-                         microvascular_disease,
+                         mv_disease,
                          case when Statin = 1 then 'Statin' else 'No Statin' end       as Statin,
-                         case when (PCI + MI + stroke) > 1 then 1 else 0 end           as more_than_1_of_PCI_MI_stroke,
+                         case when (PCI + MI + stroke) > 1 then 1 else 0 end           as  m_1_PCI_MI_stroke,
                          case
                              when (PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1 then 1
-                             else 0 end                                                as more_than_1_of_PCI_MI_stroke_allowing_multiples,
-                         case when ((CAD + PAD + insulin + TIA) > 1) then 1 else 0 end as more_than_1_of_CAD_insulin_PAD_TIA,
+                             else 0 end                                                as  m_1_of_PCI_MI_stroke_w_mult,
+                         case when ((CAD + PAD + insulin + TIA) > 1) then 1 else 0 end as  m_1_CAD_insulin_PAD_TIA,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) > 1) then 1
-                             else 0 end                                                as more_than_1_diabetes_insulin_microvascular,
+                             when ((mv_disease + insulin + diabetes_10y) > 1) then 1
+                             else 0 end                                                as more_than_1_dm_insulin_mv,
 
                          case
-                             when (microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular,
+                             when (mv_disease = 1 or insulin = 1 or diabetes_10y = 1) then 1
+                             else 0 end                                                as dm_insulin_mv,
 
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_age_over_65,
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1) then 1
+                             else 0 end                                                as dm_insulin_mv_age_over_65,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_smoker,
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1) then 1
+                             else 0 end                                                as dm_insulin_mv_smoker,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1) then 1
+                             else 0 end                                                as dm_insulin_mv_nhdl_over_130,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_retinopathy,
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1) then 1
+                             else 0 end                                                as dm_insulin_mv_retinopathy,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1) then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1) then 1
+                             else 0 end                                                as dm_insulin_mv_hscrp_over_3,
                          case
-                             when ((microvascular_disease + insulin + diabetes_10y) >= 1 and
+                             when ((mv_disease + insulin + diabetes_10y) >= 1 and
                                    hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1)
                                  then 1
-                             else 0 end                                                as any_diabetes_10y_insulin_microvascular_plus_any,
+                             else 0 end                                                as dm_insulin_mv_plus_any,
 
                          case
-                             when (microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
+                             when (mv_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
                                    nhdl_over_130 +
                                    current_smoker + age_over_65 + PCI + MI + stroke = 0) then 1
                              else 0 end                                                as no_CV_or_risk_factors
@@ -594,7 +594,7 @@ with pat_list as (select patid, cohort, TG_DATE
 
          from (select distinct patid,
 
-                               case when microvascular_disease = 1 then 1 else 0 end as microvascular_disease,
+                               case when mv_disease = 1 then 1 else 0 end as mv_disease,
                                case when nhdl_over_130 = 1 then 1 else 0 end         as nhdl_over_130,
                                case when hscrp_over_3 = 1 then 1 else 0 end          as hscrp_over_3,
 
@@ -639,11 +639,11 @@ select pat_list.cohort,
        sum(PCI)                                                  as N_PCI,
        sum(MI)                                                   as N_MI,
        sum(stroke)                                               as N_stroke,
-       sum(more_than_1_of_PCI_MI_stroke)                         as N_more_than_1_of_PCI_MI_stroke,
+       sum( m_1_PCI_MI_stroke)                         as N_m_1_PCI_MI_stroke,
        sum(multiple_stroke)                                      as N_more_than_1_stroke,
        sum(multiple_MI)                                          as N_more_than_1_MI,
        sum(multiple_PCI)                                         as N_more_than_1_PCI,
-       sum(more_than_1_of_PCI_MI_stroke_allowing_multiples)      as N_more_than_1_of_PCI_MI_stroke_allowing_multiples
+       sum( m_1_of_PCI_MI_stroke_w_mult)      as N_m_1_of_PCI_MI_stroke_w_mult
         ,
        Statin,
        sum(insulin)                                              as N_insulin,
@@ -652,21 +652,21 @@ select pat_list.cohort,
        sum(PAD)                                                  as N_PAD,
        sum(diabetes_10y)                                         as N_diabetes_10y,
        sum(retinopathy)                                          as N_retinopathy,
-       sum(more_than_1_of_CAD_insulin_PAD_TIA)                   as N_more_than_1_of_CAD_insulin_PAD_TIA,
+       sum( m_1_CAD_insulin_PAD_TIA)                   as N_m_1_of_CAD_insulin_PAD_TIA,
        sum(current_smoker)                                       as N_current_smoker,
        sum(age_over_65)                                          as N_age_over_65,
        sum(hscrp_over_3)                                         as N_hscrp_over_3,
        sum(nhdl_over_130)                                        as N_nhdl_over_130,
-       sum(microvascular_disease)                                as N_microvascular_disease,
-       sum(more_than_1_of_CAD_insulin_PAD_TIA)                   as N_more_than_1_of_CAD_insulin_PAD_TIA,
-       sum(more_than_1_diabetes_insulin_microvascular)           as N_more_than_1_diabetes_insulin_microvascular,
-       sum(any_diabetes_10y_insulin_microvascular)               as N_any_diabetes_10y_insulin_microvascular,
-       sum(any_diabetes_10y_insulin_microvascular_age_over_65)   as N_any_diabetes_10y_insulin_microvascular_age_over_65,
-       sum(any_diabetes_10y_insulin_microvascular_smoker)        as N_any_diabetes_10y_insulin_microvascular_smoker,
-       sum(any_diabetes_10y_insulin_microvascular_nhdl_over_130) as N_any_diabetes_10y_insulin_microvascular_nhdl_over_130,
-       sum(any_diabetes_10y_insulin_microvascular_retinopathy)   as any_diabetes_10y_insulin_microvascular_retinopathy,
-       sum(any_diabetes_10y_insulin_microvascular_hscrp_over_3)  as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
-       sum(any_diabetes_10y_insulin_microvascular_plus_any)      as N_any_diabetes_10y_insulin_microvascular_plus_any,
+       sum(mv_disease)                                as N_mv_disease,
+
+       sum(more_than_1_dm_insulin_mv)           as N_more_than_1_dm_insulin_mv,
+       sum(dm_insulin_mv)               as N_dm_insulin_mv,
+       sum(dm_insulin_mv_age_over_65)   as N_dm_insulin_mv_age_over_65,
+       sum(dm_insulin_mv_smoker)        as N_dm_insulin_mv_smoker,
+       sum(dm_insulin_mv_nhdl_over_130) as N_dm_insulin_mv_nhdl_over_130,
+       sum(dm_insulin_mv_retinopathy)   as dm_insulin_mv_retinopathy,
+       sum(dm_insulin_mv_hscrp_over_3)  as dm_insulin_mv_hscrp_over_3,
+       sum(dm_insulin_mv_plus_any)      as N_dm_insulin_mv_plus_any,
        sum(no_CV_or_risk_factors)                                as N_no_CV_or_risk_factors,
        count(distinct patid)                                     as total_count_patients
 

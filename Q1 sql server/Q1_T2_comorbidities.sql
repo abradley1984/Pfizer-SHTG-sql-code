@@ -558,7 +558,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      comorbidity_group as (select patid,
                                   cohort,
 
-                                  max( datediff(dd,  index_date, admit_date)) / 365.25              as time_since_first_lipidemia_diagnosis,
+                                  max( datediff(dd,  index_date, admit_date)) / 365.25              as tx_since_first_lip,
                                   'Disorders of lipoprotein metabolism and other' as Comorbidity_name
                            FROM pat_list a
 
@@ -782,7 +782,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              group by Comorbidity_name, cohort
              union
              select '8',
-                    round(avg(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(avg(tx_since_first_lip),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (Mean)'
              from comorbidity_group
@@ -790,7 +790,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              union
             /* select '9'                                                 as order1,
 
-                    round(median(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(median(tx_since_first_lip),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (Median)'
              from comorbidity_group
@@ -798,7 +798,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              union*/
              select '9'                                                 as order1,
 
-                    round(stdev(time_since_first_lipidemia_diagnosis),2) as N,
+                    round(stdev(tx_since_first_lip),2) as N,
                     cohort,
                     'Time since first lipidemia diagnosis (std)'
              from comorbidity_group
@@ -807,7 +807,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              select '9' as                                                        order1,
 
                     PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort) "pct_25",
+                        GROUP (ORDER BY tx_since_first_lip asc) OVER (PARTITION BY cohort) "pct_25",
                     cohort,
                     'Time since first lipidemia diagnosis (25th pct)'
              from comorbidity_group
@@ -815,7 +815,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              union
              select '9' as order1,
                     PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort)
+                        GROUP (ORDER BY tx_since_first_lip asc) OVER (PARTITION BY cohort)
                            "pct_75",
                     cohort,
                     'Time since first lipidemia diagnosis (75th pct)'
@@ -826,7 +826,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
              select '9' as                                                        order1,
 
                     PERCENTILE_CONT(0.5) WITHIN
-                        GROUP (ORDER BY time_since_first_lipidemia_diagnosis asc) OVER (PARTITION BY cohort) "Median",
+                        GROUP (ORDER BY tx_since_first_lip asc) OVER (PARTITION BY cohort) "Median",
                     cohort,
                     'Time since first lipidemia diagnosis (Median)'
              from comorbidity_group

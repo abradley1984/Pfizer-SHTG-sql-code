@@ -3,16 +3,13 @@
  */
 
 
-
 create table shtg_meds_Q1 as
 
- with
-
- pat_list as
+with pat_list as
          (
-           select * from shtg_Q1_cohorts_with_ex
+             select *
+             from shtg_Q1_cohorts_with_ex
          )
-
         ,
 --statins
      statins as (
@@ -22,9 +19,38 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
              and rxnorm_cui in
-                 ('83366', '83367', '215567', '596723', '309123', '41127', '72875', '541841', '997007', '1233871', '6472', '352420', '206258', '433849', '997004', '359732', '861612', '2001255', '861652', '2001252', '861634', '2001264', '203144', '323828', '2167558', '301542', '2167563', '213319', '36567', '196503', '312961', '1944257', '1312423', '621590', '1312424', '1312410', '1189805', '593411', '1189809', '1189821', '644112', '791835', '791839', '791846', '327008', '582041', '1372731', '999939', '803516', '1422093', '1422085', '341248', '2535748', '495215', '476351', '904669', '1897', '215436', '904477', '904460', '404914', '750231', '104416', '791831', '791843', '761907', '999935', '7393', '761909', '762970', '1422087', '6574', '904665', '42463', '484211', '1191', '904664', '404773', '597980', '17767', '320864', '859749', '314231', '198211', '313936', '221072', '310405', '687048', '884383', '224938', '197905', '861650', '861646', '861640', '617318', '262095', '617314', '309124', '151972', '360507', '359731', '206257', '433848', '861648', '861643', '2001262', '904483', '904469', '859747', '2167571', '1944262', '104491', '1312417', '1189822', '1372754', '582042', '791834', '757745', '999943', '999946', '763236', '1422098', '2536060', '2535747', '1245449', '476349', '904660', '203333', '750199', '617310', '259255', '617312', '153302', '103919', '197904', '2001260', '904467', '904481', '859753', '859426', '2167557', '2167567', '2167569', '200345', '104490', '152923', '1312415', '1189818', '1189803', '582043', '757733', '1422096', '2536055', '2535750', '1245441', '904661', '597987', '153165', '2001266', '1944734', '859751', '859424', '2167565', '1790679', '1312429', '1189808', '352387', '757748', '999936', '1422101', '2536062', '750203', '153303', '261244', '209013', '2001254', '2001268', '1189827', '1312422', '791838', '999942', '763233', '1422099', '1245420', '597967', '617311', '103918', '1233869', '1233883', '197903', '904458', '904475', '859421', '2167575', '1944264', '312962', '791842', '763228', '763232', '763229', '1422086', '2535749', '2536066', '476345', '750227', '750219', '617320', '309125', '284424', '310404', '1233878', '859419', '1944266', '208220', '1189804', '1312409', '1189814', '763225', '2535745', '597971', '997006', '1233870', '861654', '2167573', '1422095', '1245430', '904668', '597977', '597974', '284764', '1233888', '1312416', '757736', '1422092', '2536064', '476350', '750223')
+                 ('83366', '83367', '215567', '596723', '309123', '41127', '72875', '541841', '997007', '1233871',
+                  '6472', '352420', '206258', '433849', '997004', '359732', '861612', '2001255', '861652', '2001252',
+                  '861634', '2001264', '203144', '323828', '2167558', '301542', '2167563', '213319', '36567', '196503',
+                  '312961', '1944257', '1312423', '621590', '1312424', '1312410', '1189805', '593411', '1189809',
+                  '1189821', '644112', '791835', '791839', '791846', '327008', '582041', '1372731', '999939', '803516',
+                  '1422093', '1422085', '341248', '2535748', '495215', '476351', '904669', '1897', '215436', '904477',
+                  '904460', '404914', '750231', '104416', '791831', '791843', '761907', '999935', '7393', '761909',
+                  '762970', '1422087', '6574', '904665', '42463', '484211', '1191', '904664', '404773', '597980',
+                  '17767', '320864', '859749', '314231', '198211', '313936', '221072', '310405', '687048', '884383',
+                  '224938', '197905', '861650', '861646', '861640', '617318', '262095', '617314', '309124', '151972',
+                  '360507', '359731', '206257', '433848', '861648', '861643', '2001262', '904483', '904469', '859747',
+                  '2167571', '1944262', '104491', '1312417', '1189822', '1372754', '582042', '791834', '757745',
+                  '999943', '999946', '763236', '1422098', '2536060', '2535747', '1245449', '476349', '904660',
+                  '203333', '750199', '617310', '259255', '617312', '153302', '103919', '197904', '2001260', '904467',
+                  '904481', '859753', '859426', '2167557', '2167567', '2167569', '200345', '104490', '152923',
+                  '1312415', '1189818', '1189803', '582043', '757733', '1422096', '2536055', '2535750', '1245441',
+                  '904661', '597987', '153165', '2001266', '1944734', '859751', '859424', '2167565', '1790679',
+                  '1312429', '1189808', '352387', '757748', '999936', '1422101', '2536062', '750203', '153303',
+                  '261244', '209013', '2001254', '2001268', '1189827', '1312422', '791838', '999942', '763233',
+                  '1422099', '1245420', '597967', '617311', '103918', '1233869', '1233883', '197903', '904458',
+                  '904475', '859421', '2167575', '1944264', '312962', '791842', '763228', '763232', '763229', '1422086',
+                  '2535749', '2536066', '476345', '750227', '750219', '617320', '309125', '284424', '310404', '1233878',
+                  '859419', '1944266', '208220', '1189804', '1312409', '1189814', '763225', '2535745', '597971',
+                  '997006', '1233870', '861654', '2167573', '1422095', '1245430', '904668', '597977', '597974',
+                  '284764', '1233888', '1312416', '757736', '1422092', '2536064', '476350', '750223')
             OR rxnorm_cui IN
-               ('83367', '1422085', '1422101', '341248', '404914', '750224', '597987', '750228', '750231', '750232', '750196', '750236', '750200', '17767', '750204', '83366', '750208', '750212', '104416', '750220', '404773', '597977', '750203', '750215', '1422092', '1422087', '597980', '750216', '750219', '597967', '876514', '597993', '1422086', '1422096', '750235', '750207', '1422098', '597984', '597990', '750211', '750239', '1422093', '153165', '1422095', '404013', '750223', '617310', '404011', '597971', '617318', '750227', '597974', '750199', '1422099')
+               ('83367', '1422085', '1422101', '341248', '404914', '750224', '597987', '750228', '750231', '750232',
+                '750196', '750236', '750200', '17767', '750204', '83366', '750208', '750212', '104416', '750220',
+                '404773', '597977', '750203', '750215', '1422092', '1422087', '597980', '750216', '750219', '597967',
+                '876514', '597993', '1422086', '1422096', '750235', '750207', '1422098', '597984', '597990', '750211',
+                '750239', '1422093', '153165', '1422095', '404013', '750223', '617310', '404011', '597971', '617318',
+                '750227', '597974', '750199', '1422099')
          group by patid, cohort
      )
         ,
@@ -146,7 +172,6 @@ create table shtg_meds_Q1 as
     /*('83366', '83367', '320864', '859421', '2167558', '1422087', '2536062', '404011', '597990', '750211', '259255', '262095', '301542', '859419', '323828', '341248', '104416', '404914', '153165', '2167565', '1422099', '404773', '750207', '17767', '617311', '859751', '2167567', '1422101', '876514', '617320', '859753', '750239', '1422096', '2535748', '597984', '2167569', '1422098', '2535749', '750235', '2167571', '1422085', '2535745', '2536055', '2536064', '404013', '597993', '750215')*/
 
 
-
 -- ezetimibe
      ezetimibe as (
          select distinct patid, cohort, 1 as Ezetimibe
@@ -155,7 +180,11 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('1422085', '341248', '1422098', '301542', '2535748', '2536055', '476345', '36567', '495215', '2282403', '2283229', '2283231', '2283236', '2283230', '349556', '352304', '353099', '83366', '1422087', '323828', '2535749', '2536066', '484211', '476351', '83367', '1422096', '2536060', '1245430', '1422095', '2535745', '2536064', '1245420', '1422093', '476350', '1422086', '1422092', '1422099', '2536062', '2535750', '476349', '1245441', '1422101', '2535747', '1245449')
+               ('1422085', '341248', '1422098', '301542', '2535748', '2536055', '476345', '36567', '495215', '2282403',
+                '2283229', '2283231', '2283236', '2283230', '349556', '352304', '353099', '83366', '1422087', '323828',
+                '2535749', '2536066', '484211', '476351', '83367', '1422096', '2536060', '1245430', '1422095',
+                '2535745', '2536064', '1245420', '1422093', '476350', '1422086', '1422092', '1422099', '2536062',
+                '2535750', '476349', '1245441', '1422101', '2535747', '1245449')
          group by patid, cohort),
 
 --bile_acid_sequestrant
@@ -166,7 +195,9 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('202582', '848949', '848943', '1801279', '2447', '1801280', '848951', '141625', '104485', '2685', '151533', '10159', '848946', '1311524', '219397', '93918', '284918', '866907', '218059', '141626', '866905', '1048452', '1048450', '218060', '866910', '866912', '1048447', '1048445')
+               ('202582', '848949', '848943', '1801279', '2447', '1801280', '848951', '141625', '104485', '2685',
+                '151533', '10159', '848946', '1311524', '219397', '93918', '284918', '866907', '218059', '141626',
+                '866905', '1048452', '1048450', '218060', '866910', '866912', '1048447', '1048445')
          group by patid, cohort),
 
 
@@ -178,7 +209,12 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('8703', '578784', '220456', '352747', '351133', '477562', '583110', '1442170', '583093', '225591', '310288', '477560', '221100', '197522', '603834', '351909', '201517', '483427', '1442163', '349287', '352031', '544518', '352744', '261295', '200311', '1442165', '352030', '615906', '310289', '213276', '603836', '351842', '763253', '1442168', '261357', '540281', '2594', '616852', '763247', '577031', '578799', '749804', '749802', '483425', '351898', '583096', '702169', '404348', '226346', '616853', '702055', '763252', '763250', '578797', '583122', '151389', '763258', '763256', '583113', '103920')
+               ('8703', '578784', '220456', '352747', '351133', '477562', '583110', '1442170', '583093', '225591',
+                '310288', '477560', '221100', '197522', '603834', '351909', '201517', '483427', '1442163', '349287',
+                '352031', '544518', '352744', '261295', '200311', '1442165', '352030', '615906', '310289', '213276',
+                '603836', '351842', '763253', '1442168', '261357', '540281', '2594', '616852', '763247', '577031',
+                '578799', '749804', '749802', '483425', '351898', '583096', '702169', '404348', '226346', '616853',
+                '702055', '763252', '763250', '578797', '583122', '151389', '763258', '763256', '583113', '103920')
          group by patid, cohort),
 
 
@@ -202,7 +238,17 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('7393', '346366', '215511', '1088776', '218731', '202711', '218729', '211683', '202713', '218733', '247747', '215526', '314131', '311958', '311960', '219957', '311946', '212579', '311963', '27604', '791831', '791835', '791843', '582041', '2001487', '763228', '803516', '1372731', '763232', '36567', '763229', '311959', '218728', '582042', '1007270', '6472', '327008', '2001486', '2001475', '260852', '198760', '211684', '198024', '317015', '207664', '791834', '791839', '757745', '32863', '763225', '999935', '999942', '761909', '205247', '207663', '198759', '311951', '647346', '1098135', '1088779', '2001480', '352387', '757736', '999943', '999946', '999936', '311944', '1098134', '207662', '791846', '791842', '757733', '763233', '311955', '2001474', '200015', '881376', '644112', '791838', '582043', '763236', '1098144', '212576', '796544', '2001492', '761907', '1098143', '199143', '2001472', '311949', '11358', '236738', '757748', '762970', '1098141', '213275', '89795', '999939', '1098142', '212577', '212578', '211682', '311945', '2121691', '7414', '235354')
+               ('7393', '346366', '215511', '1088776', '218731', '202711', '218729', '211683', '202713', '218733',
+                '247747', '215526', '314131', '311958', '311960', '219957', '311946', '212579', '311963', '27604',
+                '791831', '791835', '791843', '582041', '2001487', '763228', '803516', '1372731', '763232', '36567',
+                '763229', '311959', '218728', '582042', '1007270', '6472', '327008', '2001486', '2001475', '260852',
+                '198760', '211684', '198024', '317015', '207664', '791834', '791839', '757745', '32863', '763225',
+                '999935', '999942', '761909', '205247', '207663', '198759', '311951', '647346', '1098135', '1088779',
+                '2001480', '352387', '757736', '999943', '999946', '999936', '311944', '1098134', '207662', '791846',
+                '791842', '757733', '763233', '311955', '2001474', '200015', '881376', '644112', '791838', '582043',
+                '763236', '1098144', '212576', '796544', '2001492', '761907', '1098143', '199143', '2001472', '311949',
+                '11358', '236738', '757748', '762970', '1098141', '213275', '89795', '999939', '1098142', '212577',
+                '212578', '211682', '311945', '2121691', '7414', '235354')
          group by patid, cohort),
 
 
@@ -214,7 +260,13 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('4511', '144450', '452601', '1426444', '1314214', '4885', '9060', '259265', '21406', '1151', '999536', '1193036', '607044', '60761', '24941', '90', '4301', '9641', '1895', '476847', '90176', '317841', '11246', '1008282', '684879', '11359', '1310463', '236608', '89905', '968498', '11416', '203164', '278346', '577208', '39918', '236871', '23247', '659476', '11256', '484348', '5463', '24942', '283579', '8310', '11248', '4845', '283567', '19143', '1114513', '999533', '18451', '259274', '4509', '880350', '260019', '4847', '253172', '9906', '236809', '830736', '1193041', '1302206', '237116', '2837', '2418', '1193046', '236649', '9346', '1193037', '1302201')
+               ('4511', '144450', '452601', '1426444', '1314214', '4885', '9060', '259265', '21406', '1151', '999536',
+                '1193036', '607044', '60761', '24941', '90', '4301', '9641', '1895', '476847', '90176', '317841',
+                '11246', '1008282', '684879', '11359', '1310463', '236608', '89905', '968498', '11416', '203164',
+                '278346', '577208', '39918', '236871', '23247', '659476', '11256', '484348', '5463', '24942', '283579',
+                '8310', '11248', '4845', '283567', '19143', '1114513', '999533', '18451', '259274', '4509', '880350',
+                '260019', '4847', '253172', '9906', '236809', '830736', '1193041', '1302206', '237116', '2837', '2418',
+                '1193046', '236649', '9346', '1193037', '1302201')
          group by patid, cohort),
 
 
@@ -226,7 +278,8 @@ create table shtg_meds_Q1 as
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
-               ('1659152', '1659183', '1659157', '1801322', '1665684', '1665896', '1659156', '1659177', '1665904', '1659161', '1659179', '1659182', '1665906', '1801319', '1665895', '1659165', '1665900', '1659167')
+               ('1659152', '1659183', '1659157', '1801322', '1665684', '1665896', '1659156', '1659177', '1665904',
+                '1659161', '1659179', '1659182', '1665906', '1801319', '1665895', '1659165', '1665900', '1659167')
          group by patid, cohort)
         ,
      first_therapy_date as (
@@ -757,7 +810,7 @@ create table shtg_meds_Q1 as
          group by patid, cohort),
 
      last_therapy_date as (
-         select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_study_period
+         select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_sp
 
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
@@ -1292,7 +1345,7 @@ create table shtg_meds_Q1 as
                          ldl_result_num,
                          nhdl,
                          TG_result_num,
-                        -- LDL_category,
+                         -- LDL_category,
                          LDL_category2,
                          TG_category,
                          --nhdl_category2,
@@ -1307,7 +1360,7 @@ create table shtg_meds_Q1 as
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period
+                         last_therapy_date_in_sp
          from pat_list
                   full outer join high_intensity_statin using (patid, cohort)
                   full outer join statins using (patid, cohort)
@@ -1326,11 +1379,11 @@ create table shtg_meds_Q1 as
          SELECT distinct patid,
                          cohort,
                          coalesce(Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl, niacin, omega_3,
-                                  0)                                                                               as other_lipid_lowering,
+                                  0)                                                                                as other_lipid_lowering,
                          case
                              when (coalesce(statin, Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl,
                                             niacin, omega_3, 0)) = 0
-                                 then 1 end                                                                        as no_lipid_lowering,
+                                 then 1 end                                                                         as no_lipid_lowering,
                          Statin,
                          High_Intensity_Statin,
                          Ezetimibe,
@@ -1341,40 +1394,41 @@ create table shtg_meds_Q1 as
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period,
+                         last_therapy_date_in_sp,
 
-                         case when LDL_result_num >= 100 then 1 else 0 end                                         as ldl_above_100,
-                         case when LDL_result_num >= 70 then 1 else 0 end                                          as ldl_above_70,
-                          case when (LDL_result_num < 70 and nhdl >= 100) then 1 else 0 end                         as ldl_under_70_nhdl_above_100,
+                         case when LDL_result_num >= 100 then 1 else 0 end                                          as ldl_above_100,
+                         case when LDL_result_num >= 70 then 1 else 0 end                                           as ldl_above_70,
+                         case when (LDL_result_num < 70 and nhdl >= 100) then 1 else 0 end                          as ldl_under_70_nhdl_above_100,
 
-                                case when (LDL_result_num < 70 and nhdl >= 100 and TG_result_num >= 150) then 1 else 0 end                         as ldl_under_70_nhdl_above_100_TG_above_150,
-                  case when nhdl >= 100 then 1 else 0 end                                                   as nhdl_above_100,
-                         case when nhdl >= 130 then 1 else 0 end                                                   as nhdl_above_130,
-                         case when TG_result_num >= 150 then 1 else 0 end                                          as TG_above_150,
                          case
-                             when (last_therapy_date_in_study_period - first_therapy_date < 90) then 1
-                             else 0 end                                                                            as less_than_3_months_therapy
+                             when (LDL_result_num < 70 and nhdl >= 100 and TG_result_num >= 150) then 1
+                             else 0 end                                                                             as ldl_under_70_nhdl_above_100_TG_above_150,
+                         case when nhdl >= 100 then 1 else 0 end                                                    as nhdl_above_100,
+                         case when nhdl >= 130 then 1 else 0 end                                                    as nhdl_above_130,
+                         case when TG_result_num >= 150 then 1 else 0 end                                           as TG_above_150,
+                         case
+                             when (last_therapy_date_in_sp - first_therapy_date < 90) then 1
+                             else 0 end                                                                             as less_than_3_months_therapy
 
          FROM all_meds)
 select *
 from all_meds_with_labs;
 
 --table 7
-select
-       cohort,
-       count(distinct patid) as total_count,
-       sum(Statin)                        Statin,
-       sum(High_Intensity_Statin)         High_Intensity_Statin,
-       sum(Ezetimibe)                     Ezetimibe,
-       sum(bile_acid_sequestrant)         bile_acid_sequestrant,
-       sum(fibrate)                       fibrate,
-       sum(pcsk9)                         pcsk9,
-       sum(omega_3)                       omega_3,
-       sum(niacin)                        niacin,
-       sum(icosapent_ethyl)               icosapent_ethyl,
-       sum(case when Statin =1 and  Ezetimibe=1 then 1 end)              as statin_ezetimibe,
-          sum(case when Statin =1 and  other_lipid_lowering=1 then 1 end)  as statin_plus_other_lipid_lowering,
-       sum(no_lipid_lowering)          as no_lipid_lowering--,--, ldl_above_70
+select cohort,
+       count(distinct patid)                                             as total_count,
+       sum(Statin)                                                          Statin,
+       sum(High_Intensity_Statin)                                           High_Intensity_Statin,
+       sum(Ezetimibe)                                                       Ezetimibe,
+       sum(bile_acid_sequestrant)                                           bile_acid_sequestrant,
+       sum(fibrate)                                                         fibrate,
+       sum(pcsk9)                                                           pcsk9,
+       sum(omega_3)                                                         omega_3,
+       sum(niacin)                                                          niacin,
+       sum(icosapent_ethyl)                                                 icosapent_ethyl,
+       sum(case when Statin = 1 and Ezetimibe = 1 then 1 end)            as statin_ezetimibe,
+       sum(case when Statin = 1 and other_lipid_lowering = 1 then 1 end) as statin_plus_other_lipid_l,
+       sum(no_lipid_lowering)                                            as no_lipid_lowering--,--, ldl_above_70
        --sum(less_than_3_months_therapy) as less_than_3_months_therapy
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
 
@@ -1394,8 +1448,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(ldl_above_70)                                 as     total_count,
@@ -1419,8 +1473,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(ldl_above_100)                                as     total_count,
@@ -1445,8 +1499,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(nhdl_above_100)                               as     total_count,
@@ -1470,8 +1524,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(nhdl_above_130)                               as     total_count,
@@ -1494,8 +1548,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 
@@ -1520,14 +1574,13 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 
-       sum(ldl_under_70_nhdl_above_100_TG_above_150)                                 as     total_count,
+       sum(ldl_under_70_nhdl_above_100_TG_above_150)     as     total_count,
        'ldl_under_70_nhdl_above_100_TG_above_150'
-
 
 
 from shtg_meds_Q1
@@ -1547,12 +1600,12 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 
-       sum(ldl_under_70_nhdl_above_100)                                 as     total_count,
+       sum(ldl_under_70_nhdl_above_100)                  as     total_count,
        'ldl_under_70_nhdl_above_100'
 
 

@@ -761,7 +761,7 @@ with
         ,
 
      last_therapy_date as (
-         select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_study_period
+         select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_sp
 
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
@@ -1312,7 +1312,7 @@ with
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period
+                         last_therapy_date_in_sp
          from pat_list
                   full outer join high_intensity_statin using (patid)
                   full outer join statins using (patid)
@@ -1347,7 +1347,7 @@ with
                          niacin,
                          icosapent_ethyl,
                          first_therapy_date,
-                         last_therapy_date_in_study_period,
+                         last_therapy_date_in_sp,
 
                          case when LDL_result_num >= 100 then 1 else 0 end                                         as ldl_above_100,
                          case when LDL_result_num >= 70 then 1 else 0 end                                          as ldl_above_70,
@@ -1358,7 +1358,7 @@ with
                          case when nhdl >= 130 then 1 else 0 end                                                   as nhdl_above_130,
                          case when TG_result_num >= 150 then 1 else 0 end                                          as TG_above_150,
                          case
-                             when (last_therapy_date_in_study_period - first_therapy_date < 90) then 1
+                             when (last_therapy_date_in_sp - first_therapy_date < 90) then 1
                              else 0 end                                                                            as less_than_3_months_therapy
 
          FROM all_meds)
@@ -1380,7 +1380,7 @@ select
        sum(niacin)                        niacin,
        sum(icosapent_ethyl)               icosapent_ethyl,
        sum(case when Statin =1 and  Ezetimibe=1 then 1 end)              as statin_ezetimibe,
-          sum(case when Statin =1 and  other_lipid_lowering=1 then 1 end)  as statin_plus_other_lipid_lowering,
+          sum(case when Statin =1 and  other_lipid_lowering=1 then 1 end)  as statin_plus_other_lipid_l,
        sum(no_lipid_lowering)          as no_lipid_lowering--,--, ldl_above_70
        --sum(less_than_3_months_therapy) as less_than_3_months_therapy
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
@@ -1401,8 +1401,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(ldl_above_70)                                 as     total_count,
@@ -1426,8 +1426,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(ldl_above_100)                                as     total_count,
@@ -1452,8 +1452,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(nhdl_above_100)                               as     total_count,
@@ -1477,8 +1477,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
        sum(nhdl_above_130)                               as     total_count,
@@ -1501,8 +1501,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 
@@ -1527,8 +1527,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 
@@ -1554,8 +1554,8 @@ select sum(Statin)                                              Statin,
      */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
-       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_lowering,
-       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus_other_lipid_lowering,
+       sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
+       sum(High_Intensity_Statin * other_lipid_lowering) as     high_intensity_statin_plus,
        sum(no_lipid_lowering)                            as     no_lipid_lowering,
        sum(less_than_3_months_therapy)                   as     less_than_3_months_therapy,
 

@@ -225,7 +225,7 @@ select *
 into #ASCVD
 from (select patid,
 
-             max(LDL_Date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
+             max(LDL_Date - admit_date) / 365.25 as tx_since_first_ascvd,
              1                                   as ASCVD
       FROM #pat_list pats
                INNER JOIN cdm_60_etl.diagnosis como on pats.patid= como.patid
