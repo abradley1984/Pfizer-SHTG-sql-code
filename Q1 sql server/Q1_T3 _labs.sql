@@ -1,6 +1,5 @@
 /*This query has two parts - table 3a and table 3b that should be written to csv files.
 Running time: 8 mins *2
-
   Issues to check for sql server version are marked with --CHECK comments
 */
 --I'm not sure if this works, but maybe if we specify this here we can take out the cdm.dbo. references below?
@@ -10,11 +9,13 @@ USE CDM;
 --ALTER USER "username" WITH DEFAULT_SCHEMA = PCORI_CDM_SCHEMA;
 GO
 
+
+
 select *
 into #pat_list
 from (
-         select TG_Date as index_date, shtg_Q1_cohorts_with_exclusions.*
-         from shtg_Q1_cohorts_with_exclusions
+         select TG_Date as index_date, foo.dbo.shtg_Q1_cohort_with_exclusions.*
+         from foo.dbo.shtg_Q1_cohort_with_exclusions
 
          where cohort is not null
          -- fetch first 1000 rows only
@@ -25,13 +26,12 @@ from (select * from Q1_labs_all) a;-- generated in Q1_labs_part1
 
 select *
 into #HDL_all
-from (select distinct patid,
-
+from (select distinct a.patid,
+                      a.index_date,
                       --  result_num  total_chol_result_num,
                       -- result_unit result_unit,
                       --CHECK THIS - I want just the date, not the time
-                      cast(b.result_date as date) result_date,
-                      index_date
+                      cast(b.result_date as date) result_date
 
 
       FROM #pat_list a
@@ -49,7 +49,7 @@ from (select distinct patid,
 
 select *
 into #total_chol_all
-from (select distinct patid,
+from (select distinct a.patid,
                       cohort,
 
                       --  result_num  total_chol_result_num,
@@ -74,7 +74,7 @@ from (select distinct patid,
      ) c;
 select *
 into #lipid_panel_date
-from (select a.patid, a.result_date
+from (select a.patid, a.result_date, a.index_date  
       from #HDL_all a
                inner join #total_chol_all b on a.patid = b.patid and a.result_date = b.result_date) c;
 
@@ -83,7 +83,7 @@ select *
 into #lipid_panel_next_closest
 from (
          select c.patid,
-                c.cohort,
+--                c.cohort,
                 c.result_date,
                 c.index_date,
                 time_from_index,
@@ -91,14 +91,14 @@ from (
                 IIF(abs(time_from_index) < 90, 1, 0)  as less_than_90_days,
                 IIF(abs(time_from_index) < 456, 1, 0) as less_than_15_months
          from (select a.patid,
-                      a.cohort,
+--                      a.cohort,
                       a.result_date,
                       a.index_date,
                       datediff(dd, a.result_date, a.index_date) as time_from_index,
                       row_number() OVER (
                           PARTITION BY a.patid
                           ORDER BY datediff(dd, a.result_date, a.index_date) ASC
-                          )                                    row_num
+                          )                                    row_num   
                from #lipid_panel_date a
               ) c
          where row_num in (2)) d;
@@ -106,7 +106,7 @@ select *
 into #nhdl_after_index
 from (
          select c.patid,
-                c.cohort,
+--                c.cohort,
                 c.result_date,
                 c.index_date,
                 time_from_index,
@@ -114,7 +114,7 @@ from (
                 IIF(time_from_index between 1 and 60, 1, 0)  as within_60_days,
                 IIF(time_from_index between 1 and 180, 1, 0) as within_180_days
          from (select a.patid,
-                      a.cohort,
+--                      a.cohort,
                        a.result_date,
                        a.index_date,
                       datediff(dd,  a.result_date,  a.index_date) as time_from_index,
@@ -130,25 +130,25 @@ from (
 select *
 into #next_nhdl
 from (select patid,
-             cohort,
+--             cohort,
              max(within_60_days)     nhdl_within_60_days,
              max(within_180_days)    nhdl_within_180_days,
-             min(result_date),
+             min(result_date)        result_date,
              min(time_from_index) as nhdl_time_from_index,
              index_date
       from #nhdl_after_index
-      group by patid, cohort, index_date) c;
+      group by patid, index_date) c;
 select *
 into #last_TG_above_500
 from (select *
-      from (select patid,
+      from (select a.patid,
                    result_num                                    TG_result_num,
                    result_unit                                   result_unit,
                    result_date,
                    index_date,
                    abs(datediff(dd, result_date, index_date)) as TG_time_from_index,
                    row_number() OVER (
-                       PARTITION BY patid
+                       PARTITION BY a.patid
                        ORDER BY abs(datediff(dd, result_date, index_date)) ASC
                        )                                         row_num
 
@@ -161,7 +161,7 @@ from (select *
               and result_num >= 500
               and (datediff(dd, result_date, index_date)) <= (-1)--TG occurs before index_date
            ) c
-           --and patid in (select patid from #pat_list)
+           --and patid in (select a.patid from #pat_list)
            --AND result_num < 1000
       where row_num = 1
      ) d;
@@ -274,9 +274,9 @@ from (select *
                  GROUP (ORDER BY ast asc) OVER (PARTITION BY cohort) "pct_25",
              PERCENTILE_CONT(0.75) WITHIN
                  GROUP (ORDER BY ast asc) OVER (PARTITION BY cohort) "pct_75",
-             'ast',
              PERCENTILE_CONT(0.5) WITHIN
                  GROUP (ORDER BY ast asc) OVER (PARTITION BY cohort) "Median",
+             'ast',
              cohort
       from #all_labs
            --group by cohort
@@ -316,11 +316,11 @@ from (select *
       from #all_labs
            --group by cohort
       union
-      select count(patid)                                                  count_patients,
+      select count(patid) OVER (PARTITION BY cohort)                       count_patients,
              count(FIB_4) OVER (PARTITION BY cohort) as                    count_non_null,
              -- median(FIB_4)                                    median,
              round(avg(FIB_4) OVER (PARTITION BY cohort), 2)               mean,
-             round(stdev(FIB_4), 2) OVER (PARTITION BY cohort)             std,
+             round(stdev(FIB_4) OVER (PARTITION BY cohort), 2)             std,
              round(PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY FIB_4 asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
@@ -336,7 +336,7 @@ from (select *
              count(BMI) OVER (PARTITION BY cohort) as                    count_non_null,
              -- median(BMI)                                    median,
              round(avg(BMI) OVER (PARTITION BY cohort), 2)               mean,
-             round(stdev(BMI), 2) OVER (PARTITION BY cohort)             std,
+             round(stdev(BMI) OVER (PARTITION BY cohort), 2)             std,
              round(PERCENTILE_CONT(0.25) WITHIN
                  GROUP (ORDER BY BMI asc) OVER (PARTITION BY cohort), 2) "pct_25",
              round(PERCENTILE_CONT(0.75) WITHIN
@@ -459,7 +459,7 @@ from (select *
       from #all_labs
            ----group by cohort
       union
-      select count(patid)                                             count_patients,
+      select count(patid) OVER (PARTITION BY cohort) as               count_patients,
              count(apob) OVER (PARTITION BY cohort) as                count_non_null,
              -- median(apob)                                    median,
              round(avg(apob) OVER (PARTITION BY cohort), 2)           mean,
@@ -584,13 +584,14 @@ from (select *
                  GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "Median",
              'egfr_2021',
              cohort
-      from #all_labs) as "dc*ab";
+      from #all_labs  
+) as "dc*ab";
 --group by cohort) d;
 
 --CHECK
 select *
 into #table3b
-from (select count(patid),
+from (select count(patid) as count_patients,
              COUNT(CASE WHEN lpa_mol >= 125 THEN 1 END)                                 count1,
              'N_lpa_over_125_nmol'   as                                                 count_label,
              round(100 * COUNT(CASE WHEN lpa_mass >= 125 THEN 1 END) / count(patid), 2) pct1,
@@ -600,7 +601,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END)                                count1,
              'N_lpa_over_50mg'   as                                                    count_label,
              round(100 * COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END) / count(patid), 2) pct1,
@@ -610,7 +611,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN a1c >= 7 THEN 1 END)                                count1,
              'N_a1c_over_7'   as                                                 count_label,
              round(100 * COUNT(CASE WHEN a1c >= 7 THEN 1 END) / count(patid), 2) pct1,
@@ -620,9 +621,9 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN a1c >= 8 THEN 1 END)                                as count2,
-             'N_a1c_over_8',
+             'N_a1c_over_8' as                                                 count_label,
 
              round(100 * COUNT(CASE WHEN a1c >= 8 THEN 1 END) / count(patid), 2) as pct2
               ,
@@ -632,7 +633,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
 
 
              COUNT(CASE WHEN (FIB_4 >= 1.30 and AGE < 65) THEN 1 END),
@@ -645,7 +646,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE >= 65) THEN 1 END),
              'N_fib4_over_2_age_over_65',
              round(100 * COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE >= 65) THEN 1 END) / count(patid),
@@ -656,7 +657,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN FIB_4 >= 2.67 THEN 1 END),
              'N_fib4_over_2_67',
 
@@ -668,7 +669,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI < 20 THEN 1 END)                                count1,
              'N BMI under 20',
              round(100 * COUNT(CASE WHEN BMI < 20 THEN 1 END) / count(patid), 2) pct1,
@@ -678,7 +679,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI >= 40 THEN 1 END),
              'N BMI over 40',
 
@@ -690,7 +691,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI between 20 and 25 THEN 1 END),
              'N BMI 20 to 25',
              round(100 * COUNT(CASE WHEN BMI between 20 and 25 THEN 1 END) / count(patid), 2) pct3,
@@ -700,7 +701,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI between 35 and 40 THEN 1 END),
              'N BMI 35 to 40',
 
@@ -712,7 +713,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI between 25 and 30 THEN 1 END),
              'N BMI 25 to 30',
              round(100 * COUNT(CASE WHEN BMI between 25 and 30 THEN 1 END) / count(patid), 2) pct5,
@@ -722,7 +723,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE WHEN BMI between 30 and 35 THEN 1 END)                                   count1,
              'N BMI 30 to 35',
 
@@ -734,7 +735,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 > 90 THEN 1 END)                                count1,
              'N eGFR over 90',
              round(100 * COUNT(CASE when egfr_2021 > 90 THEN 1 END) / count(patid), 2) pct1,
@@ -744,7 +745,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 < 15 THEN 1 END),
              'N eGFR under 15',
 
@@ -756,7 +757,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 between 60 and 90 THEN 1 END),
              'N eGFR 60 to 90',
              round(100 * COUNT(CASE when egfr_2021 between 60 and 90 THEN 1 END) / count(patid), 2) pct3,
@@ -767,7 +768,7 @@ from (select count(patid),
       group by cohort
 
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 between 45 and 60 THEN 1 END),
              'N eGFR 45 to 60',
              round(100 * COUNT(CASE when egfr_2021 between 45 and 60 THEN 1 END) / count(patid), 2) pct5,
@@ -777,7 +778,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 between 30 and 45 THEN 1 END)                                   count1,
              'N eGFR 30 to 45',
 
@@ -789,7 +790,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when egfr_2021 between 15 and 30 THEN 1 END),
              'N eGFR 15 to 30',
 
@@ -801,7 +802,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when LDL > 160 THEN 1 END)                                count1,
              'N LDL over 160',
              round(100 * COUNT(CASE when LDL > 160 THEN 1 END) / count(patid), 2) pct1,
@@ -811,7 +812,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when LDL < 70 THEN 1 END),
              'N LDL under 70',
 
@@ -823,7 +824,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when LDL between 130 and 160 THEN 1 END),
              'N LDL 130 to 160',
              round(100 * COUNT(CASE when LDL between 130 and 160 THEN 1 END) / count(patid), 2) pct3,
@@ -834,7 +835,7 @@ from (select count(patid),
       group by cohort
 
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when LDL between 100 and 130 THEN 1 END),
              'N LDL 100 to 130',
              round(100 * COUNT(CASE when LDL between 100 and 130 THEN 1 END) / count(patid), 2) pct5,
@@ -844,7 +845,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when LDL between 70 and 100 THEN 1 END)                                   count1,
              'N LDL 70 to 100',
 
@@ -856,7 +857,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG > 2000 THEN 1 END)                                count1,
              'N TG over 2000',
              round(100 * COUNT(CASE when TG > 2000 THEN 1 END) / count(patid), 2) pct1,
@@ -866,7 +867,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG < 500 THEN 1 END),
              'N TG under 500',
 
@@ -878,7 +879,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG between 1000 and 2000 THEN 1 END),
              'N TG 1000 to 2000',
              round(100 * COUNT(CASE when TG between 1000 and 2000 THEN 1 END) / count(patid), 2) pct3,
@@ -889,7 +890,7 @@ from (select count(patid),
       group by cohort
 
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG between 880 and 1000 THEN 1 END),
              'N TG 880 to 1000',
              round(100 * COUNT(CASE when TG between 880 and 1000 THEN 1 END) / count(patid), 2) pct5,
@@ -899,7 +900,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG between 500 and 880 THEN 1 END)                                   count1,
              'N TG 500 to 880 ',
 
@@ -911,7 +912,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when TG between 150 and 500 THEN 1 END)                                   count1,
              'N TG 150 to 500',
 
@@ -923,7 +924,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when nHDL > 190 THEN 1 END)                                count1,
              'N nHDL over 190',
              round(100 * COUNT(CASE when nHDL > 190 THEN 1 END) / count(patid), 2) pct1,
@@ -934,7 +935,7 @@ from (select count(patid),
 
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when nHDL between 160 and 190 THEN 1 END),
              'N nHDL 160 to 190',
              round(100 * COUNT(CASE when nHDL between 160 and 190 THEN 1 END) / count(patid), 2) pct3,
@@ -945,7 +946,7 @@ from (select count(patid),
       group by cohort
 
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when nHDL between 130 and 160 THEN 1 END),
              'N nHDL 130 to 160',
              round(100 * COUNT(CASE when nHDL between 130 and 160 THEN 1 END) / count(patid), 2) pct5,
@@ -955,7 +956,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when nHDL between 100 and 130 THEN 1 END)                                   count1,
              'N nHDL 100 to 130',
 
@@ -967,7 +968,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when apob > 130 THEN 1 END)                                count1,
              'N apob over 130',
              round(100 * COUNT(CASE when apob > 130 THEN 1 END) / count(patid), 2) pct1,
@@ -977,7 +978,7 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(patid) as count_patients,
              COUNT(CASE when vldl > 30 THEN 1 END)                                count1,
              'N vldl over 30',
              round(100 * COUNT(CASE when vldl > 30 THEN 1 END) / count(patid), 2) pct1,
@@ -987,27 +988,29 @@ from (select count(patid),
       from #all_labs
       group by cohort
       union
-      select count(patid),
+      select count(a.patid) as count_patients,
              COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END)                                count1,
              'N repeat NHDL within 60 days',
-             round(100 * COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END) / count(patid), 2) pct1,
+             round(100 * COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
              'pct repeat NHDL within 60 days',
              'repeat NHDL within 60 days'                                                       measure1,
              cohort
-      from #next_nhdl
+      from #next_nhdl b
+	  join #pat_list a on a.patid = b.patid
       group by cohort
       union
-      select count(patid),
+      select count(a.patid) as count_patients,
              COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END)                                count1,
              'N repeat NHDL within 180 days',
-             round(100 * COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END) / count(patid), 2) pct1,
+             round(100 * COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
              'pct repeat NHDL within 180 days',
              'repeat NHDL within 180 days'                                                       measure1,
              cohort
-      from #next_nhdl
+      from #next_nhdl b
+	  join #pat_list a on a.patid = b.patid
       group by cohort
       union
-      select count(a.patid),
+      select count(a.patid) as count_patients,
              COUNT(CASE when less_than_90_days = 1 THEN 1 END)                                  count1,
              'N lipid panel within 90 days',
              round(100 * COUNT(CASE when less_than_90_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
@@ -1016,9 +1019,9 @@ from (select count(patid),
              a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-           --group by cohort
+           group by cohort
       union
-      select count(a.patid),
+      select count(a.patid) as count_patients,
              COUNT(CASE when less_than_15_months = 1 THEN 1 END)                                  count1,
              'N lipid panel within 15 months',
              round(100 * COUNT(CASE when less_than_15_months = 1 THEN 1 END) / count(a.patid), 2) pct1,
@@ -1027,7 +1030,7 @@ from (select count(patid),
              a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-         --group by cohort
+         group by cohort
 
 
          /*order by 7, 6, 5*/) c;
