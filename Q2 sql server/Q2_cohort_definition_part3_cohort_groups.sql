@@ -3,14 +3,15 @@
 -- Run time:
 --create table SHTG_Q2_STEP3 as
 --WITH
+
      select * into #PAT_LIST from
      (SELECT * FROM foo.dbo.shtg_Q2_STEP1
      where age>=18 and pre_index_days>=180) as id;
 
-     select * into #labs_all from (select * from Q2_labs_all) as [Q2la*];
+     select * into #labs_all from (select * from foo.dbo.Q2_labs_all) as [Q2la*];
      --Risk status
      --Recent ACS (12 months)
-     select * into #recent_ACS from (select patid,
+     select * into #recent_ACS from (select pats.patid,
 
 
                            1 as recent_ACS
@@ -96,11 +97,11 @@
                             'I25.2',*/
                         )
                       and como.admit_date BETWEEN '2020-09-30' AND '2021-09-30'
-                    group by patid
+                    group by pats.patid
      ) as prA;
      --one ASCVD event - MI, stroke, PCI
      select * into #MI from (
-         select distinct patid,
+         select distinct pats.patid,
 
                           1 as MI
 
@@ -127,10 +128,10 @@
              OR Como.dx = 'I25.2' -- MI)
 
                    )
-         group by patid
+         group by pats.patid
      ) as pM;
      select * into #stroke from (
-         select patid,
+         select pats.patid,
 
                   1 as stroke--,
 
@@ -151,10 +152,10 @@
              OR Como.dx like 'I97.82%' -- STROKE
 
                    )
-         group by patid
+         group by pats.patid
      ) as ps;
      select * into #PAD from (
-         select distinct patid,
+         select distinct pats.patid,
 
 
                          1 as PAD
@@ -209,15 +210,15 @@
         ;
      select * into #multiple_stroke from (
          select patid, IIF(encounter_count > 1, 1, 0) as multiple_stroke
-         from (select patid,
+         from (select e.patid,
                       count(encounterid)                                                       as encounter_count,
-                      max(encounter.admit_date),
-                      min(encounter.admit_date),
-                      (datediff(dd,max(encounter.admit_date), min(encounter.admit_date)) / 10) * 10 as gap
+                      max(admit_date),
+                      min(admit_date),
+                      (datediff(dd,max(admit_date), min(admit_date)) )  as gap
                from cdm.dbo.encounter e
                         join cdm.dbo.diagnosis Como on (e.patid = Como.patid and  e.encounterid = Como.encounterid)
 
-               where patid in (Select patid from #pat_list a)
+               where e.patid in (Select a.patid from #pat_list a)
                  and (
                        Como.dx like '433%' -- STROKE
 
@@ -229,25 +230,25 @@
 
 
                    )
-                 and encounter.enc_Type in ('EI', 'IP')
+                 and e.enc_Type in ('EI', 'IP')
                  -- and DRG in ('061', '062', '063', '064', '065', '066')
-               group by patid
+               group by e.patid
                having count(encounterid) > 1) as eC
 
          where gap
                    > 30) as pms;
      select * into #multiple_MI from (
-         select patid, gap, IIF(encounter_count > 1, 1, 0) as multiple_MI
-         from (select patid,
+         select d.patid, gap, IIF(encounter_count > 1, 1, 0) as multiple_MI
+         from (select d.patid,
                       count(encounterid)                                           as encounter_count,
-                      max(diagnosis.admit_date),
-                      min(diagnosis.admit_date),
-                      datediff(dd,max(diagnosis.admit_date), min(diagnosis.admit_date)) as gap
-               from cdm.dbo.diagnosis
+                      max(admit_date),
+                      min(admit_date),
+                      datediff(dd,max(admit_date), min(admit_date)) as gap
+               from cdm.dbo.diagnosis d
 
 
-               where patid in (Select patid from #pat_list a)
-                   and diagnosis.enc_Type in ('EI', 'IP')
+               where d.patid in (Select a.patid from #pat_list a)
+                   and enc_Type in ('EI', 'IP')
                    and (((dx like '410%' -- MI
 
                        OR dx like 'I21%')-- MI)
@@ -256,7 +257,7 @@
                        and pdx = 'P')
                   OR dx like 'I22%') -- MI)
 
-               group by patid
+               group by d.patid
                having count(encounterid) > 1) as d
 
 
@@ -265,20 +266,21 @@
      select * into #multiple_PCI from (
 
  select patid, PCI_gap, IIF(encounter_count > 1, 1, 0) as multiple_PCI
-         from (select patid,
+         from (select a.patid,
                       count(encounterid)                                           as encounter_count,
 
                 -- 'PCI'                             as Comorbidity_name,
                -- 1 as PCI--,
             -- ,   max(admit_date),
-                 min(admit_date),
-                 max(admit_date) - min(admit_date) as PCI_gap
+                 min(admit_date) as admit_date,
+                      datediff(dd,max(admit_date), min(admit_date))  as PCI_gap
+
          from #pat_list a
                   left join cdm.dbo.procedures b on a.patid=b.patid
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-         group by patid) as ab
+         group by a.patid) as ab
          where PCI_gap>30) as pPgmP;
      select * into #CKD from (select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
              from #labs_all) as pC
@@ -287,7 +289,7 @@
 
      --hypercholesterolemia or max_LDL>190
 
-     select * into #hypercholesterolemia from (select distinct patid,
+     select * into #hypercholesterolemia from (select distinct pats.patid,
                                                                IIF((dx = 'E78.01' or max_ldl_above_190 = 1), 1, 0) as hypercholesterolemia
 
                               from #pat_list pats
@@ -297,7 +299,7 @@
                                   )
                                  or max_ldl_above_190 = 1) as ph;
      select * into #PCI from (
-         select patid,
+         select a.patid,
 
                 -- 'PCI'                             as Comorbidity_name,
                 1 as PCI--,
@@ -309,9 +311,9 @@
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-         group by patid) as pP;
+         group by a.patid) as pP;
 
-     select * into #hypertension from (select distinct patid, IIF(dx = 'I10', 1, 0) as hypertension
+     select * into #hypertension from (select distinct pats.patid, IIF(dx = 'I10', 1, 0) as hypertension
 
                       from #pat_list pats
                                INNER JOIN cdm.dbo.diagnosis   como on pats.patid=como.patid
@@ -324,20 +326,20 @@
      select * into #smoking from (
          select patid, IIF(smoking in ('01', '02', '05', '07', '08'), 1, 0) as current_smoker
          from (
-                  select patid,
+                  select a.patid,
                          row_number() OVER (
-                             PARTITION BY patid
-                             ORDER BY vital.measure_date desc
+                             PARTITION BY a.patid
+                             ORDER BY measure_date desc
                              )            row_num,
-                         vital.smoking as smoking
+                         smoking as smoking
                   from #pat_list a
                            left join cdm.dbo.vital b on a.patid=b.patid
-                  WHERE vital.smoking IS NOT NULL
-                    AND not vital.smoking in ('NI', 'OT', 'UN')) as prns
+                  WHERE smoking IS NOT NULL
+                    AND not smoking in ('NI', 'OT', 'UN')) as prns
          where row_num = 1) as pcs
         ;
      select * into #congestive_HF from (
-         select distinct patid,
+         select distinct pats.patid,
 
                          --   'congestive_HF' as Comorbidity_name,
                          1 as congestive_HF
@@ -362,7 +364,7 @@
              )
      ) as pcH;
 
-     select * into #TIA_IHD from (select distinct patid,
+     select * into #TIA_IHD from (select distinct pats.patid,
 
                                  --   'congestive_HF' as Comorbidity_name,
                                  1 as TIA_IHD
@@ -384,24 +386,24 @@
 
                     OR Como.dx like 'I25%' -- IHD
      ) as pTI;
-     select * into #LDL_all from (select lab_result_cm.patid,
+     select * into #LDL_all from (select patid,
                         row_number() OVER (
-                            PARTITION BY lab_result_cm.patid
-                            ORDER BY lab_result_cm.result_date desc
+                            PARTITION BY patid
+                            ORDER BY result_date desc
                             )                     row_num,
-                        lab_result_cm.result_num  LDL_result_num,
-                        lab_result_cm.result_unit result_unit,
-                        lab_result_cm.result_date
+                        result_num  LDL_result_num,
+                        result_unit result_unit,
+                        result_date
 
                  FROM cdm.dbo.lab_result_cm
-                 WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+                 WHERE -- WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-                     lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
-                   --and lab_result_cm.patid in pat_list
-                   and lab_result_cm.result_num is not null
-                   --  and lab_result_cm.result_num >= 100
+                     lab_loinc in ('13457-7', '18262-6', '2089-1')
+                   --and patid in pat_list
+                   and result_num is not null
+                   --  and result_num >= 100
                    and patid in (select patid from #pat_list a)
-        AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units   --AND lab_result_cm.result_num < 1000
+        AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units   --AND result_num < 1000
 
      ) as lrc;
      select * into #LDL_most_recent_high_100 from (select patid,
@@ -437,7 +439,8 @@
                                     from #LDL_most_recent_high_100 a
                                              left join #LDL_all LDL_all on a.patid=LDL_all.patid
                                     where not row_num = 1
-                                      and first_result_date - LDL_all.result_date > 90 --over 3 months since first
+                                      and
+                                            abs( datediff(dd,first_result_date, LDL_all.result_date) )  > 90 --over 3 months since first
      ) as aLa
          select * into #LDL_second_most_recent_160 from (select a.patid,
                                            first_result_date,
@@ -451,10 +454,10 @@
                                     from #LDL_most_recent_high_160 a
                                              left join #LDL_all LDL_all  on a.patid=LDL_all.patid
                                     where not row_num = 1
-                                      and first_result_date - LDL_all.result_date > 90 --over 3 months since first
+                                      and   abs( datediff(dd,first_result_date, LDL_all.result_date))  > 90 --over 3 months since first
      ) as aLa;
      select * into #statins from (
-         select distinct patid, 1 as Statin_ezetimibe
+         select distinct a.patid, 1 as Statin_ezetimibe
          from #pat_list a
                   left join cdm.dbo.prescribing b on a.patid=b.patid
 
@@ -623,7 +626,7 @@
                 '352304',
                 '353099')
 
-         group by patid
+         group by a.patid
      ) as pSe;
 
      select * into #LDL_persistent_high_100 from (select a.patid, 1 as LDL_persistent_high_100
@@ -639,7 +642,7 @@
                                    and second_result_num > 160
      ) as p;
 
-     select * into #v_high_risk_combined from (select  abcdefghijklmnp.patid                  as patid,
+     select * into #v_high_risk_combined from (select  a.patid                  as patid,
                                                        IIF(LDL_persistent_high_100 = 1, 1, 0) as LDL_persistent_high_100,
                                                        IIF(recent_ACS = 1, 1, 0)              as recent_ACS,
                                                        IIF(PAD = 1, 1, 0)                     as PAD,
@@ -699,7 +702,7 @@
                               from #v_high_risk_combined v) as [mavhrv.*];
 
 
-     select * into #add_categories from (select amspi.patid,
+     select * into #add_categories from (select a.patid,
                                case
                                    when LDL_result_num < 70
                                        then 'LDL_low'
@@ -782,25 +785,25 @@
 
      --enhanced
 
-     select * into #TG_all from (select lab_result_cm.patid,
+     select * into #TG_all from (select patid,
                        row_number() OVER (
-                           PARTITION BY lab_result_cm.patid
-                           ORDER BY lab_result_cm.result_date desc
+                           PARTITION BY patid
+                           ORDER BY result_date desc
                            )                     row_num,
-                       lab_result_cm.result_num  TG_result_num,
-                       lab_result_cm.result_unit result_unit,
-                       lab_result_cm.result_date
+                       result_num  TG_result_num,
+                       result_unit result_unit,
+                       result_date
 
                 FROM cdm.dbo.lab_result_cm
-                WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+                WHERE -- WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-                    lab_result_cm.lab_loinc in ('2571-8')
-                  --and lab_result_cm.patid in pat_list
-                  and lab_result_cm.result_num is not null
-                  --  and lab_result_cm.result_num >= 100
+                    lab_loinc in ('2571-8')
+                  --and patid in pat_list
+                  and result_num is not null
+                  --  and result_num >= 100
                   and patid in (select patid from #pat_list a)
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         -- AND not result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         --AND result_num < 1000
 
      ) as lrc;
      select * into #TG_most_recent_high_175 from (select patid,
@@ -826,7 +829,8 @@
                                    from #TG_most_recent_high_175 a
                                             left join #TG_all TG_all on a.patid=TG_all.patid
                                    where not row_num = 1
-                                     and first_result_date - TG_all.result_date > 90 --over 3 months since first
+                                     and
+                                           abs( datediff(dd,first_result_date, TG_all.result_date) ) > 90 --over 3 months since first
      ) as aTa;
 
 
@@ -836,7 +840,7 @@
                                 where row_num = 1
                                   and second_result_num > 175
      ) as p;
-     select * into #risk_enhancers from (select distinct patid, 1 as diagnosis_risk_enhanced
+     select * into #risk_enhancers from (select distinct pats.patid, 1 as diagnosis_risk_enhanced
 
                         from #pat_list pats
                                  INNER JOIN cdm.dbo.diagnosis Como on pats.patid=Como.patid
@@ -858,7 +862,7 @@
                        from #labs_all) as ple;
 
 
-     select * into #enhanced from (SELECT abcdef.patid,
+     select * into #enhanced from (SELECT a.patid,
 
                          coalesce(CKD, 0)                     as CKD,
                          coalesce(diagnosis_risk_enhanced, 0) as diagnosis_risk_enhanced,
@@ -873,13 +877,13 @@
                            left join #CKD  f on a.patid=f.patid
      ) as abcdef
         ;
-    select * into #enhanced_category from (select patid,
+    select * into #enhanced_category from (select a.patid,
                                                   IIF(diagnosis_risk_enhanced + lab_enhancers + CKD +
                                                       LDL_persistent_high_160 +
                                                       TG_persistent_high_175 > 0, 'enhanced_risk', 'no_enhanced_risk') as enhanced_risk --need to add "persistent" labs
 
                                   --case when(hypertension=1) then 1 else 0 end as high_risk
-                           from #enhanced) as per;
+                           from #enhanced a ) as per;
      select * into #cohorts from (
          select a.patid,
                 TG_CATEGORY,
@@ -918,7 +922,12 @@
                   left join #add_categories  add_categories on a.patid = add_categories.patid) as aveac;
 
 
-select *
+select a.*, b.cohort, b.TG_CATEGORY,
+                b.LDL_category2,
+                b.nhdl_category2,
+                b.v_high_risk,
+               b.enhanced_risk
+
 into foo.dbo.shtg_Q2_STEP3
 from
     #PAT_LIST a  join #cohorts b on a.patid = b.patid where cohort is not null;

@@ -5,128 +5,142 @@
  */
 
 
-select * into #pat_list from (select patid, cohort, TG_DATE
+select *
+into #pat_list
+from (select patid, cohort, TG_DATE
 
-                  from foo.dbo.shtg_Q1_cohort_with_exclusions
-    -- fetch first 100 rows only
-);
-     select * into #labs_all from (select * from Q1_labs_all);
-     select * into #labs from (select patid,
-                     cohort,
-                     uacr,
-                     egfr_2021,
-                     nhdl,
-                     hscrp,
-                                      IIF((egfr_2021 < 60 or uacr >= 30), 1, 0) as microvascular_disease,
-                                      IIF((nhdl > 130), 1, 0)                   as nhdl_over_130,
-                                      IIF((hscrp >= 3), 1, 0)                   as hscrp_over_3
+      from foo.dbo.shtg_Q1_cohort_with_exclusions
+         -- fetch first 100 rows only
+     ) as pcTD;
+select *
+into #labs_all
+from (select * from foo.dbo.Q1_labs_all) as [Q1la*];
+select *
+into #labs
+from (select patid,
+             cohort,
+             uacr,
+             egfr_2021,
+             nhdl,
+             hscrp,
+             IIF((egfr_2021 < 60 or uacr >= 30), 1, 0) as microvascular_disease,
+             IIF((nhdl > 130), 1, 0)                   as nhdl_over_130,
+             IIF((hscrp >= 3), 1, 0)                   as hscrp_over_3
 
-              from #labs_all);
-     select * into #smoking from (
+      from #labs_all) as la;
+select *
+into #smoking
+from (
          select patid, IIF(smoking in ('01', '02', '05', '07', '08'), 1, 0) as current_smoker
          from (
-                  select patid,
+                  select a.patid,
                          row_number() OVER (
-                             PARTITION BY patid
-                             ORDER BY vital.measure_date desc
-                             )            row_num,
-                         vital.smoking as smoking,
+                             PARTITION BY a.patid
+                             ORDER BY measure_date desc
+                             )      row_num,
+                         smoking as smoking,
                          cohort
                   from #pat_list a
-                           left join cdm_60_etl.vital b on a.patid = b.patid
-                  WHERE vital.smoking IS NOT NULL
-                    AND not vital.smoking in ('NI', 'OT', 'UN')) a
-         where row_num = 1)
-        ;
-     select * into #age_65 from (
+                           left join cdm.dbo.vital b on a.patid = b.patid
+                  WHERE smoking IS NOT NULL
+                    AND not smoking in ('NI', 'OT', 'UN')) a
+         where row_num = 1) as pcs;
+select *
+into #age_65
+from (
          select patid, cohort, IIF(age > 65, 1, 0) as age_over_65
-         from foo.dbo.shtg_Q1_cohort_with_exclusions)
-        ;
-     select * into #retinopathy from (
-         select distinct patid,
-                         cohort,
+         from foo.dbo.shtg_Q1_cohort_with_exclusions) as p;
+select *
+into #retinopathy
+from (
+         select distinct a.patid,
+                         a.cohort,
                          'retinopathy' as Comorbidity_name,
                          1             as retinopathy
 
 
          from #pat_list a
-                  INNER JOIN cdm_60_etl.diagnosis  b on a.patid = b.patid
-         where (Como.dx IN ('H31.021',--RETINOPATHY
-                            'H31.022',
-                            'H31.023',
-                            'H31.029',
-                            'H35.00',
-                            'H35.021',
-                            'H35.022',
-                            'H35.023',
-                            'H35.029',
-                            'H35.031',
-                            'H35.032',
-                            'H35.033',
-                            'H35.039',
-                            'H35.20',
-                            'H35.21',
-                            'H35.22',
-                            'H35.23',
-                            'H35.711',
-                            'H35.712',
-                            'H35.713',
-                            'H35.719')
+                  INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
+         where (dx IN ('H31.021',--RETINOPATHY
+                       'H31.022',
+                       'H31.023',
+                       'H31.029',
+                       'H35.00',
+                       'H35.021',
+                       'H35.022',
+                       'H35.023',
+                       'H35.029',
+                       'H35.031',
+                       'H35.032',
+                       'H35.033',
+                       'H35.039',
+                       'H35.20',
+                       'H35.21',
+                       'H35.22',
+                       'H35.23',
+                       'H35.711',
+                       'H35.712',
+                       'H35.713',
+                       'H35.719')
                    )
-         group by patid, cohort);
-  select * into #diabetes_10y from (
+         group by a.patid, a.cohort) as ab;
+select *
+into #diabetes_10y
+from (
          select distinct pats.patid,
                          pats.cohort,
                          'diabetes_10y' as Comorbidity_name,
                          1              as diabetes_10y
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis  b on pats.patid = b.patid
-         where (Como.dx like 'E08%' -- diabetes
+                  INNER JOIN cdm.dbo.diagnosis b on pats.patid = b.patid
+         where (dx like 'E08%' -- diabetes
 
-             OR Como.dx like 'E09%' -- diabetes
+             OR dx like 'E09%' -- diabetes
 
-             OR Como.dx like 'E10%' -- diabetes
+             OR dx like 'E10%' -- diabetes
 
-             OR Como.dx like 'E11%' -- diabetes
+             OR dx like 'E11%' -- diabetes
 
-             OR Como.dx like 'E13%' -- diabetes
+             OR dx like 'E13%' -- diabetes
 
-             OR Como.dx like '249%' -- diabetes
+             OR dx like '249%' -- diabetes
 
-             OR Como.dx like '250%' -- diabetes
+             OR dx like '250%' -- diabetes
              )
-           and
-               admit_date
+           and b.admit_date
              < '2019-04-01'
-         group by pats.patid, pats.cohort, admit_date
-     )
-        ;
+         group by pats.patid, pats.cohort, b.admit_date
+     ) as pb;
 
 --TIA in last 5 years
-     select * into #TIA from (
-         select distinct patid,
-                         cohort,
+select *
+into #TIA
+from (
+         select distinct pats.patid,
+                         pats.cohort,
                          'TIA' as Comorbidity_name,
                          1     as TIA
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
          where (dx LIKE 'G45%' --'TIA'
              OR dx LIKE '435%' --'TIA'
              )
            and admit_date BETWEEN '2020-09-30' AND '2021-09-30'
-         group by patid, cohort
-     );
-     select * into #PAD from (
-         select distinct patid,
-                         cohort,
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #PAD
+from (
+         select distinct pats.patid,
+                         pats.cohort,
                          'PAD' as Comorbidity_name,
                          1     as PAD
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
-         where (Como.dx in
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+         where (dx in
                 ('440.20', '440.21', '440.22', '440.23', '440.24', '440.29', '440.30', '440.31', '440.32', '440.4',
                  'I70.0', 'I70.1', 'I70.201', 'I70.202', 'I70.203', 'I70.208', 'I70.209', 'I70.21', 'I70.22', 'I70.232',
                  'I70.24', 'I70.25', 'I70.26', 'I70.261', 'I70.262', 'I70.263', 'I70.268', 'I70.269', 'I70.291',
@@ -134,128 +148,139 @@ select * into #pat_list from (select patid, cohort, TG_DATE
                  'I70.92')-- PAD
                    )
              /* and admit_date BETWEEN '2020-09-30' AND '2021-09-30'*/
-         group by patid, cohort
-     );
-     select * into #CAD from (
-         select distinct patid,
-                         cohort,
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #CAD
+from (
+         select distinct pats.patid,
+                         pats.cohort,
                          'CAD' as Comorbidity_name,
                          1     as CAD
 
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
-         where (Como.dx IN ('Z95.1', 'Z95.5', 'Z98.61')
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+         where (dx IN ('Z95.1', 'Z95.5', 'Z98.61')
 
                    -- MULTIVESSEL CAD
                    )
-         group by patid, cohort
-     );
-     select * into #MI from (
-         select distinct patid,
-                         cohort,
-                         'MI'                              as Comorbidity_name,
-                         1                                 as MI,
-                         max(admit_date),
-                         min(admit_date),
-                         max(admit_date) - min(admit_date) as MI_gap,
-                         count(distinct admit_date)
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #MI
+from (
+         select distinct pats.patid,
+                         pats.cohort,
+                         'MI'                                                as Comorbidity_name,
+                         1                                                   as MI,
+                         max(admit_date)                                     as max_admit_date,
+                         min(admit_date)                                     as min_admit_date,
+                         abs(datediff(dd, max(admit_date), min(admit_date))) as MI_gap,
+                         count(distinct admit_date)                          as count_admit
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
-         where (Como.dx like '410%' -- MI
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+         where (dx like '410%' -- MI
 
-             OR Como.dx = '411.0' -- MI
+             OR dx = '411.0' -- MI
 
-             OR Como.dx = '411.81' -- MI
+             OR dx = '411.81' -- MI
 
-             OR Como.dx = '412' -- MI
+             OR dx = '412' -- MI
 
-             OR Como.dx like 'I21%' -- MI
+             OR dx like 'I21%' -- MI
 
-             OR Como.dx like 'I22%' -- MI
+             OR dx like 'I22%' -- MI
 
-             OR Como.dx like '123%' -- MI
+             OR dx like '123%' -- MI
 
 
 -- ?? IN SPREADSHEET FOR I24 AND I25
 
---OR Como.dx = 'I24.0' -- MI
+--OR dx = 'I24.0' -- MI
 
-             OR Como.dx = 'I25.2' -- MI)
+             OR dx = 'I25.2' -- MI)
                    )
-         group by patid, cohort
-     );
-     select * into #subsequent_MI from (
-         select distinct patid,
-                         cohort,
-                         'MI'                                                 as Comorbidity_name,
-                         1                                                    as MI,
-                         max(admit_date),
-                         min(admit_date),
-                         max(admit_date) - min(admit_date)                    as MI_gap,
-                         count(distinct admit_date),
-                         max(IIF(Como.dx like 'I22%', 1, 0)) as subsequent_MI_I22
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #subsequent_MI
+from (
+         select distinct pats.patid,
+                         pats.cohort,
+                         'MI'                                                as Comorbidity_name,
+                         1                                                   as MI,
+                         max(admit_date)                                     as max_admit_date,
+                         min(admit_date)                                     as min_admit_date,
+                         abs(datediff(dd, max(admit_date), min(admit_date))) as MI_gap,
+                         count(distinct admit_date)                          as count_admit,
+                         max(IIF(dx like 'I22%', 1, 0))                      as subsequent_MI_I22
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
-         where /*((Como.dx like '410%' -- MI
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+         where /*((dx like '410%' -- MI
 
-             OR Como.dx like 'I21%' -- MI
+             OR dx like 'I21%' -- MI
                     )
              and not pdx = 'S')
 
-            OR*/ Como.dx like 'I22%' -- MI subsequent
+            OR*/ dx like 'I22%' -- MI subsequent
 
 --removed complications, old MI codes for second MI
 
 
-         group by patid, cohort
-     )
-        ;
-     select * into #stroke from (
-         select patid,
-                cohort,
-                'stroke'                          as Comorbidity_name,
-                1                                 as stroke,
-                max(admit_date),
-                min(admit_date),
-                max(admit_date) - min(admit_date) as stroke_gap
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #stroke
+from (
+         select pats.patid,
+                pats.cohort,
+                'stroke'                                            as Comorbidity_name,
+                1                                                   as stroke,
+                max(admit_date)                                     as max_admit_date,
+                min(admit_date)                                     as min_admit_date,
+                abs(datediff(dd, max(admit_date), min(admit_date))) as stroke_gap
 
          from #pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis como on pats.patid = como.patid
+                  INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
          where (
-                       Como.dx like '433%' -- STROKE
+                       dx like '433%' -- STROKE
 
-                       OR Como.dx like '434%' -- STROKE
+                       OR dx like '434%' -- STROKE
 
-                       OR Como.dx = '997.02' -- STROKE
+                       OR dx = '997.02' -- STROKE
 
-                       OR Como.dx like 'I63%' -- STROKE
+                       OR dx like 'I63%' -- STROKE
 
-                       OR Como.dx like 'I97.8%' -- STROKE
+                       OR dx like 'I97.8%' -- STROKE
 
                    )
-         group by patid, cohort
-     );
-    select * into #PCI from (
-         select patid,
-                cohort,
-                'PCI'                             as Comorbidity_name,
-                1                                 as PCI,
-                max(admit_date),
-                min(admit_date),
-                max(admit_date) - min(admit_date) as PCI_gap
+         group by pats.patid, pats.cohort
+     ) as pc;
+select *
+into #PCI
+from (
+         select a.patid,
+                a.cohort,
+                'PCI'                                               as Comorbidity_name,
+                1                                                   as PCI,
+                max(admit_date)                                     as max_admit_date,
+                min(admit_date)                                     as min_admit_date,
+                abs(datediff(dd, max(admit_date), min(admit_date))) as PCI_gap
          from #pat_list a
-                  left join cdm_60_etl.procedures b on a.patid = b.patid
+                  left join cdm.dbo.procedures b on a.patid = b.patid
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-         group by patid, cohort);
-    select * into #statins from (
-         select distinct patid, cohort, 1 as Statin
+         group by a.patid, a.cohort) as ab;
+select *
+into #statins
+from (
+         select distinct a.patid, a.cohort, 1 as Statin
          from #pat_list a
-                  left join cdm_60_etl.prescribing b on a.patid = b.patid
+                  left join cdm.dbo.prescribing b on a.patid = b.patid
 
          where b.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
              and rxnorm_cui in
@@ -391,13 +416,14 @@ select * into #pat_list from (select patid, cohort, TG_DATE
                 '104416', '404773', '404914', '597971', '750223', '17767', '83366', '83367', '104416', '404773',
                 '404914', '597974', '750219', '17767', '83366', '83367', '104416', '404773', '404914', '597993',
                 '750215')
-         group by patid, cohort
-     )
-       ;
-     select * into #insulin from (
-         select patid, '1' as insulin, cohort
+         group by a.patid, a.cohort
+     ) as pcS;
+select *
+into #insulin
+from (
+         select a.patid, '1' as insulin, cohort
          from #pat_list a
-                  left join cdm_60_etl.prescribing b on a.patid = b.patid
+                  left join cdm.dbo.prescribing b on a.patid = b.patid
 
          where b.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
            and rxnorm_cui in
@@ -434,50 +460,53 @@ select * into #pat_list from (select patid, cohort, TG_DATE
                 '1986356', '1992165', '1992169', '1992171', '2002419', '2002420', '2049380', '2049381', '2100028',
                 '2100029', '2107520', '2107522', '2179744', '2179745', '2179749', '2205454', '2206090', '2206092',
                 '2206096', '2206099', '2376838', '2377130', '2377134', '2377231', '2380231', '2380232', '2380236',
-                '2380254', '2380256', '2380259', '2380260', '2563969', '2563971', '2563973', '2563976', '2563977'))
-        ;
-     select * into #multiple_stroke from (
+                '2380254', '2380256', '2380259', '2380260', '2563969', '2563971', '2563973', '2563976', '2563977')) as pic;
+select *
+into #multiple_stroke
+from (
          select patid, IIF(encounter_count > 1, 1, 0) as multiple_stroke
-         from (select patid,
-                      count(encounterid)                                                       as encounter_count,
-                      max(encounter.admit_date),
-                      min(encounter.admit_date),
+         from (select a.patid,
+                      count(a.encounterid)                                as encounter_count,
+                      max(admit_date)                                     as max_admit_date,
+                      min(admit_date)                                     as min_admit_date,
                       --CHECK this may be a problem... I'm trying to find the time between then first and last inpatient diagnosis
-                      round((max(encounter.admit_date) - min(encounter.admit_date)) )  as gap
-               from cdm_60_etl.encounter a
-                        join cdm_60_etl.diagnosis Como on a.encounterid = Como.encounterid
+                      abs(datediff(dd, max(admit_date), min(admit_date))) as gap
+               from cdm.dbo.encounter a
+                        join cdm.dbo.diagnosis Como on a.encounterid = Como.encounterid
 
-               where patid in (Select patid from #pat_list)
+               where a.patid in (Select patid from #pat_list)
                  and (
-                       Como.dx like '433%' -- STROKE
+                       dx like '433%' -- STROKE
 
-                       OR Como.dx like '434%' -- STROKE
+                       OR dx like '434%' -- STROKE
 
-                       OR Como.dx = '997.02' -- STROKE
+                       OR dx = '997.02' -- STROKE
 
-                       OR Como.dx like 'I63%' -- STROKE
+                       OR dx like 'I63%' -- STROKE
 
 
                    )
-                 and encounter.enc_Type in ('EI', 'IP')
+                 and enc_Type in ('EI', 'IP')
                  -- and DRG in ('061', '062', '063', '064', '065', '066')
-               group by patid
-               having count(encounterid) > 1) b
+               group by a.patid
+               having count(a.encounterid) > 1) b
 
          where gap
-                   > 30);
-    select * into #multiple_MI from (
+                   > 30) as pms;
+select *
+into #multiple_MI
+from (
          select patid, gap, IIF(encounter_count > 1, 1, 0) as multiple_MI
          from (select patid,
-                      count(encounterid)                                           as encounter_count,
-                      max(diagnosis.admit_date),
-                      min(diagnosis.admit_date),
-                      round(max(diagnosis.admit_date) - min(diagnosis.admit_date)) as gap
-               from cdm_60_etl.diagnosis
---join cdm_60_etl.diagnosis  Como using (patid, encounterid)
+                      count(encounterid)                                as encounter_count,
+                      max(admit_date)                                     as max_admit_date,
+                      min(admit_date)                                     as min_admit_date,
+                      abs(datediff(dd, max(admit_date), min(admit_date))) as gap
+               from cdm.dbo.diagnosis
+--join cdm.dbo.diagnosis  Como using (patid, encounterid)
 
                where patid in (Select patid from #pat_list)
-                 and diagnosis.enc_Type in ('EI', 'IP')
+                 and enc_Type in ('EI', 'IP')
                  and (((dx like '410%' -- MI
 
                    OR dx like 'I21%')-- MI)
@@ -491,31 +520,35 @@ select * into #pat_list from (select patid, cohort, TG_DATE
 
 
          where gap
-                   > 30)
-        ;
-     select * into #multiple_PCI from (
+                   > 30) as pgmM;
+select *
+into #multiple_PCI
+from (
          select patid, PCI_gap, IIF(encounter_count > 1, 1, 0) as multiple_PCI
-         from (select patid,
-                      count(encounterid)                as encounter_count,
+         from (select a.patid,
+                      count(a.encounterid)                                as encounter_count,
 
                       -- 'PCI'                             as Comorbidity_name,
                       -- 1 as PCI--,
-                      -- ,   max(admit_date),
-                      min(admit_date),
-                      max(admit_date) - min(admit_date) as PCI_gap
+                      -- ,   max(admit_date) as max_admit_date,
+                      min(admit_date)                                     as min_admit_date,
+                      abs(datediff(dd, max(admit_date), min(admit_date))) as PCI_gap
                from #pat_list a
-                        left join cdm_60_etl.procedures b on a.patid = b.patid
+                        left join cdm.dbo.procedures b on a.patid = b.patid
                where PX in
                      ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
-               group by patid) d
-         where PCI_gap > 30);
-select * into #CKD from(select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
-             from #labs_all)
-        ;
+               group by a.patid) d
+         where PCI_gap > 30) as pPgmP;
+select *
+into #CKD
+from (select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
+      from #labs_all) as pC;
 
-     select * into #combined from (
+select *
+into #combined
+from (
          select distinct patid,
 
                          -- stroke_gap,
@@ -539,25 +572,33 @@ select * into #CKD from(select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
                          hscrp_over_3,
                          nhdl_over_130,
                          microvascular_disease,
-                         IIF(Statin = 1, 'Statin', 'No Statin')                                                      as Statin,
-                         IIF((PCI + MI + stroke) > 1, 1, 0)                                                          as more_than_1_of_PCI_MI_stroke,
-                         IIF((PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1, 1, 0)           as more_than_1_of_PCI_MI_stroke_allowing_multiples,
-                         IIF(((CAD + PAD + insulin + TIA) > 1), 1, 0)                                                as more_than_1_of_CAD_insulin_PAD_TIA,
-                         IIF(((microvascular_disease + insulin + diabetes_10y) > 1), 1, 0)                           as more_than_1_diabetes_insulin_microvascular,
+                         IIF(Statin = 1, 'Statin', 'No Statin')                                    as Statin,
+                         IIF((PCI + MI + stroke) > 1, 1, 0)                                        as more_than_1_of_PCI_MI_stroke,
+                         IIF((PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1, 1,
+                             0)                                                                    as more_than_1_of_PCI_MI_stroke_allowing_multiples,
+                         IIF(((CAD + PAD + insulin + TIA) > 1), 1, 0)                              as more_than_1_of_CAD_insulin_PAD_TIA,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) > 1), 1, 0)         as more_than_1_diabetes_insulin_microvascular,
 
-                         IIF((microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1), 1, 0)                   as any_diabetes_10y_insulin_microvascular,
+                         IIF((microvascular_disease = 1 or insulin = 1 or diabetes_10y = 1), 1, 0) as any_diabetes_10y_insulin_microvascular,
 
-                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1), 1, 0)      as any_diabetes_10y_insulin_microvascular_age_over_65,
-                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1), 1, 0)   as any_diabetes_10y_insulin_microvascular_smoker,
-                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1), 1, 0)    as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
-                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1), 1, 0)      as any_diabetes_10y_insulin_microvascular_retinopathy,
-                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1), 1, 0)     as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and age_over_65 = 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_age_over_65,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and current_smoker = 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_smoker,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and nhdl_over_130 = 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_nhdl_over_130,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and retinopathy = 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_retinopathy,
+                         IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and hscrp_over_3 = 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
                          IIF(((microvascular_disease + insulin + diabetes_10y) >= 1 and
-                              hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1), 1, 0) as any_diabetes_10y_insulin_microvascular_plus_any,
+                              hscrp_over_3 + retinopathy + nhdl_over_130 + current_smoker + age_over_65 >= 1), 1,
+                             0)                                                                    as any_diabetes_10y_insulin_microvascular_plus_any,
 
                          IIF((microvascular_disease + insulin + diabetes_10y + hscrp_over_3 + retinopathy +
                               nhdl_over_130 +
-                              current_smoker + age_over_65 + PCI + MI + stroke = 0), 1, 0)                           as no_CV_or_risk_factors
+                              current_smoker + age_over_65 + PCI + MI + stroke = 0), 1,
+                             0)                                                                    as no_CV_or_risk_factors
 
 
          from (select distinct a.patid,
@@ -585,7 +626,8 @@ select * into #CKD from(select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
                        ,
                                IIF(current_smoker = 1, 1, 0)        as current_smoker,
                                IIF(age_over_65 = 1, 1, 0)           as age_over_65
-               from #stroke a  full outer join #MI b on a.patid = b.patid
+               from #stroke a
+                        full outer join #MI b on a.patid = b.patid
                         full outer join #PCI c on a.patid = c.patid
                         full outer join #statins d on a.patid = d.patid
                         full outer join #insulin e on a.patid = e.patid
@@ -593,14 +635,14 @@ select * into #CKD from(select patid, IIF(egfr_2021 < 60, 1, 0) as CKD
                         full outer join #TIA g on a.patid = g.patid
                         full outer join #PAD h on a.patid = h.patid
                         full outer join #diabetes_10y i on a.patid = i.patid
-                        full outer join #retinopathy j on a.patid =j.patid
+                        full outer join #retinopathy j on a.patid = j.patid
                         full outer join #multiple_stroke k on a.patid = k.patid
                         full outer join #multiple_MI l on a.patid = l.patid
                         full outer join #multiple_PCI m on a.patid = m.patid
-                        full outer join #smoking n on a.patid =n.patid
+                        full outer join #smoking n on a.patid = n.patid
                         full outer join #age_65 o on a.patid = o.patid
                         full outer join #labs p on a.patid = p.patid
-              ) f);
+              ) f) as f2;
 
 
 select a.cohort,
@@ -636,7 +678,7 @@ select a.cohort,
        sum(any_diabetes_10y_insulin_microvascular_hscrp_over_3)  as any_diabetes_10y_insulin_microvascular_hscrp_over_3,
        sum(any_diabetes_10y_insulin_microvascular_plus_any)      as N_any_diabetes_10y_insulin_microvascular_plus_any,
        sum(no_CV_or_risk_factors)                                as N_no_CV_or_risk_factors,
-       count(distinct a.patid)                                     as total_count_patients
+       count(distinct a.patid)                                   as total_count_patients
 
 from #pat_list a
          left join #combined b on a.patid = b.patid
