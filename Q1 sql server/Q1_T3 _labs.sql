@@ -74,7 +74,7 @@ from (select distinct a.patid,
      ) c;
 select *
 into #lipid_panel_date
-from (select a.patid, a.result_date, a.index_date  
+from (select a.patid, a.result_date, a.index_date
       from #HDL_all a
                inner join #total_chol_all b on a.patid = b.patid and a.result_date = b.result_date) c;
 
@@ -98,7 +98,7 @@ from (
                       row_number() OVER (
                           PARTITION BY a.patid
                           ORDER BY datediff(dd, a.result_date, a.index_date) ASC
-                          )                                    row_num   
+                          )                                        row_num
                from #lipid_panel_date a
               ) c
          where row_num in (2)) d;
@@ -115,13 +115,13 @@ from (
                 IIF(time_from_index between 1 and 180, 1, 0) as within_180_days
          from (select a.patid,
 --                      a.cohort,
-                       a.result_date,
-                       a.index_date,
-                      datediff(dd,  a.result_date,  a.index_date) as time_from_index,
+                      a.result_date,
+                      a.index_date,
+                      datediff(dd, a.result_date, a.index_date) as time_from_index,
                       row_number() OVER (
-                          PARTITION BY  a.patid
-                          ORDER BY abs(datediff(dd,  a.result_date,  a.index_date)) ASC
-                          )                                    row_num
+                          PARTITION BY a.patid
+                          ORDER BY abs(datediff(dd, a.result_date, a.index_date)) ASC
+                          )                                        row_num
                from #lipid_panel_date a
               ) c
          where row_num > 1
@@ -460,7 +460,7 @@ from (select *
            ----group by cohort
       union
       select count(patid) OVER (PARTITION BY cohort) as               count_patients,
-             count(apob) OVER (PARTITION BY cohort) as                count_non_null,
+             count(apob) OVER (PARTITION BY cohort)  as               count_non_null,
              -- median(apob)                                    median,
              round(avg(apob) OVER (PARTITION BY cohort), 2)           mean,
              round(stdev(apob) OVER (PARTITION BY cohort), 2)         std,
@@ -584,14 +584,14 @@ from (select *
                  GROUP (ORDER BY egfr_2021 asc) OVER (PARTITION BY cohort), 2) "Median",
              'egfr_2021',
              cohort
-      from #all_labs  
-) as "dc*ab";
+      from #all_labs
+     ) as "dc*ab";
 --group by cohort) d;
 
 --CHECK
 select *
 into #table3b
-from (select count(patid) as count_patients,
+from (select count(patid)            as                                                 count_patients,
              COUNT(CASE WHEN lpa_mol >= 125 THEN 1 END)                                 count1,
              'N_lpa_over_125_nmol'   as                                                 count_label,
              round(100 * COUNT(CASE WHEN lpa_mass >= 125 THEN 1 END) / count(patid), 2) pct1,
@@ -601,7 +601,7 @@ from (select count(patid) as count_patients,
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)        as                                                    count_patients,
              COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END)                                count1,
              'N_lpa_over_50mg'   as                                                    count_label,
              round(100 * COUNT(CASE WHEN lpa_mass >= 50 THEN 1 END) / count(patid), 2) pct1,
@@ -611,7 +611,7 @@ from (select count(patid) as count_patients,
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)     as                                                 count_patients,
              COUNT(CASE WHEN a1c >= 7 THEN 1 END)                                count1,
              'N_a1c_over_7'   as                                                 count_label,
              round(100 * COUNT(CASE WHEN a1c >= 7 THEN 1 END) / count(patid), 2) pct1,
@@ -621,416 +621,401 @@ from (select count(patid) as count_patients,
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                        as count_patients,
              COUNT(CASE WHEN a1c >= 8 THEN 1 END)                                as count2,
-             'N_a1c_over_8' as                                                 count_label,
-
-             round(100 * COUNT(CASE WHEN a1c >= 8 THEN 1 END) / count(patid), 2) as pct2
-              ,
-             'pct_a1c_over_8',
+             'N_a1c_over_8'                                                      as count_label,
+             round(100 * COUNT(CASE WHEN a1c >= 8 THEN 1 END) / count(patid), 2) as pct2,
+             'pct_a1c_over_8'                                                    as pct_label,
              'A1C'                                                                  measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-
-
-             COUNT(CASE WHEN (FIB_4 >= 1.30 and AGE < 65) THEN 1 END),
-             'N_fib4_over_1_30_age_under_65',
-
-             round(100 * COUNT(CASE WHEN FIB_4 >= 1.30 THEN 1 END) / count(patid), 2) pct_fib4_over_1_30,
-             'pct_fib4_over_1_30_under_65',
-             'FIB4'                                                                   measure1,
+      select count(patid)                                                                            as count_patients,
+             COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE > 65) THEN 1 END)                                 as count2,
+             'N_fib4_over_2_age_over_65'                                                             as count_label,
+             round(100 * COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE >= 65) THEN 1 END) / count(patid), 2) as pct_fib4_over_2,
+             'pct_fib4_over_2_age_over_65'                                                           as pct_label,
+             'FIB4'                                                                                  as measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE >= 65) THEN 1 END),
-             'N_fib4_over_2_age_over_65',
-             round(100 * COUNT(CASE WHEN (FIB_4 >= 2.0 and AGE >= 65) THEN 1 END) / count(patid),
-                   2) pct_fib4_over_2,
-             'pct_fib4_over_age_over_65',
-             'FIB4'   measure1,
+      select count(patid)                                                             as count_patients,
+             COUNT(CASE WHEN (FIB_4 >= 1.30 and AGE < 65) THEN 1 END)                 as count2,
+             'N_fib4_over_1_30_age_under_65'                                          as count_label,
+             round(100 * COUNT(CASE WHEN FIB_4 >= 1.30 THEN 1 END) / count(patid), 2) as pct_fib4_over_1_30,
+             'pct_fib4_over_1_30_under_65'                                            as pct_label,
+             'FIB4'                                                                   as measure1,
              cohort
       from #all_labs
+
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN FIB_4 >= 2.67 THEN 1 END),
-             'N_fib4_over_2_67',
+      select count(patid)                                                             as count_patients,
+             COUNT(CASE WHEN FIB_4 >= 2.67 THEN 1 END)                                as count2,
+             'N_fib4_over_2_67'                                                       as count_label,
 
-             round(100 * COUNT(CASE WHEN FIB_4 >= 2.67 THEN 1 END) / count(patid), 2) as pct_fib4_over_2_67
-              ,
-             'pct_fib4_over_2_67',
+             round(100 * COUNT(CASE WHEN FIB_4 >= 2.67 THEN 1 END) / count(patid), 2) as pct_fib4_over_2_67,
+             'pct_fib4_over_2_67'                                                     as pct_label,
              'FIB4'                                                                      measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)       as                                               count_patients,
              COUNT(CASE WHEN BMI < 20 THEN 1 END)                                count1,
-             'N BMI under 20',
+             'N BMI under 20'   as                                               count_label,
              round(100 * COUNT(CASE WHEN BMI < 20 THEN 1 END) / count(patid), 2) pct1,
-             'pct BMI under 20',
+             'pct BMI under 20' as                                               pct_label,
              'BMI'                                                               measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN BMI >= 40 THEN 1 END),
-             'N BMI over 40',
-
-             round(100 * COUNT(CASE WHEN BMI >= 40 THEN 1 END) / count(patid), 2) as pct2
-              ,
-             'pct BMI over 40',
+      select count(patid)                                                         as count_patients,
+             COUNT(CASE WHEN BMI >= 40 THEN 1 END)                                as count2,
+             'N BMI over 40'                                                      as count_label,
+             round(100 * COUNT(CASE WHEN BMI >= 40 THEN 1 END) / count(patid), 2) as pct2,
+             'pct BMI over 40'                                                    as pct_label,
              'BMI'                                                                   measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN BMI between 20 and 25 THEN 1 END),
-             'N BMI 20 to 25',
+      select count(patid)                                      as                             count_patients,
+             COUNT(CASE WHEN BMI between 20 and 25 THEN 1 END) as                             count,
+             'N BMI 20 to 25'                                  as                             count_label,
              round(100 * COUNT(CASE WHEN BMI between 20 and 25 THEN 1 END) / count(patid), 2) pct3,
-             'pct BMI 20 to 25',
-             'BMI'                                                                            measure1,
+             'pct BMI 20 to 25'                                as                             pct_label,
+             'BMI'                                             as                             measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN BMI between 35 and 40 THEN 1 END),
-             'N BMI 35 to 40',
+      select count(patid)                                                                     as count_patients,
+             COUNT(CASE WHEN BMI between 35 and 40 THEN 1 END)                                as count2,
+             'N BMI 35 to 40'                                                                 as count_label,
 
-             round(100 * COUNT(CASE WHEN BMI between 35 and 40 THEN 1 END) / count(patid), 2) as pct4
-              ,
-             'pct BMI 35 to 40',
+             round(100 * COUNT(CASE WHEN BMI between 35 and 40 THEN 1 END) / count(patid), 2) as pct4,
+             'pct BMI 35 to 40'                                                               as pct_label,
              'BMI'                                                                               measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE WHEN BMI between 25 and 30 THEN 1 END),
-             'N BMI 25 to 30',
+      select count(patid)                                      as                             count_patients,
+             COUNT(CASE WHEN BMI between 25 and 30 THEN 1 END) as                             count2,
+             'N BMI 25 to 30'                                  as                             count_label,
              round(100 * COUNT(CASE WHEN BMI between 25 and 30 THEN 1 END) / count(patid), 2) pct5,
-             'pct BMI 25 to 30',
+             'pct BMI 25 to 30'                                as                             pct_label,
              'BMI'                                                                            measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                     as count_patients,
              COUNT(CASE WHEN BMI between 30 and 35 THEN 1 END)                                   count1,
-             'N BMI 30 to 35',
+             'N BMI 30 to 35'                                                                 as count_label,
 
              round(100 * COUNT(CASE WHEN BMI between 30 and 35 THEN 1 END) / count(patid), 2) as pct6
               ,
-             'pct BMI 30 to 35',
+             'pct BMI 30 to 35'                                                               as pct_label,
              'BMI'                                                                               measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)       as                                                     count_patients,
              COUNT(CASE when egfr_2021 > 90 THEN 1 END)                                count1,
-             'N eGFR over 90',
+             'N eGFR over 90'   as                                                     count_label,
              round(100 * COUNT(CASE when egfr_2021 > 90 THEN 1 END) / count(patid), 2) pct1,
-             'pct eGFR over 90',
+             'pct eGFR over 90' as                                                     pct_label,
              'eGFR'                                                                    measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when egfr_2021 < 15 THEN 1 END),
-             'N eGFR under 15',
+      select count(patid)                                                              as count_patients,
+             COUNT(CASE when egfr_2021 < 15 THEN 1 END)                                as count2,
+             'N eGFR under 15'                                                         as count_label,
 
              round(100 * COUNT(CASE when egfr_2021 < 15 THEN 1 END) / count(patid), 2) as pct2
               ,
-             'pct eGFR under 15',
+             'pct eGFR under 15'                                                       as pct_label,
              'eGFR'                                                                       measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when egfr_2021 between 60 and 90 THEN 1 END),
-             'N eGFR 60 to 90',
+      select count(patid)                                            as                             count_patients,
+             COUNT(CASE when egfr_2021 between 60 and 90 THEN 1 END) as                             count2,
+             'N eGFR 60 to 90'                                       as                             count_label,
              round(100 * COUNT(CASE when egfr_2021 between 60 and 90 THEN 1 END) / count(patid), 2) pct3,
-             'pct eGFR 60 to 90',
+             'pct eGFR 60 to 90'                                     as                             pct_label,
              'eGFR'                                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
 
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when egfr_2021 between 45 and 60 THEN 1 END),
-             'N eGFR 45 to 60',
+      select count(patid)                                            as                             count_patients,
+             COUNT(CASE when egfr_2021 between 45 and 60 THEN 1 END) as                             count2,
+             'N eGFR 45 to 60'                                       as                             count_label,
              round(100 * COUNT(CASE when egfr_2021 between 45 and 60 THEN 1 END) / count(patid), 2) pct5,
-             'pct eGFR 45 to 60',
+             'pct eGFR 45 to 60'                                     as                             pct_label,
              'eGFR'                                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                           as count_patients,
              COUNT(CASE when egfr_2021 between 30 and 45 THEN 1 END)                                   count1,
-             'N eGFR 30 to 45',
+             'N eGFR 30 to 45'                                                                      as pct_label,
 
              round(100 * COUNT(CASE when egfr_2021 between 30 and 45 THEN 1 END) / count(patid), 2) as pct6
               ,
-             'pct eGFR 30 to 45',
+             'pct eGFR 30 to 45'                                                                    as pct_label,
              'eGFR'                                                                                    measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when egfr_2021 between 15 and 30 THEN 1 END),
-             'N eGFR 15 to 30',
+      select count(patid)                                                                           as count_patients,
+             COUNT(CASE when egfr_2021 between 15 and 30 THEN 1 END)                                as count2,
+             'N eGFR 15 to 30'                                                                      as count_label,
 
              round(100 * COUNT(CASE when egfr_2021 between 15 and 30 THEN 1 END) / count(patid), 2) as pct4
               ,
-             'pct eGFR 15 to 30',
+             'pct eGFR 15 to 30'                                                                    as pct_label,
              'eGFR'                                                                                    measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)       as                                                count_patients,
              COUNT(CASE when LDL > 160 THEN 1 END)                                count1,
-             'N LDL over 160',
+             'N LDL over 160'   as                                                count_label,
              round(100 * COUNT(CASE when LDL > 160 THEN 1 END) / count(patid), 2) pct1,
-             'pct LDL over 160',
+             'pct LDL over 160' as                                                pct_label,
              'LDL'                                                                measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when LDL < 70 THEN 1 END),
-             'N LDL under 70',
+      select count(patid)                                                        as count_patients,
+             COUNT(CASE when LDL < 70 THEN 1 END)                                as count2,
+             'N LDL under 70'                                                    as count_label,
 
              round(100 * COUNT(CASE when LDL < 70 THEN 1 END) / count(patid), 2) as pct2
               ,
-             'pct LDL under 70',
+             'pct LDL under 70'                                                  as pct_label,
              'LDL'                                                                  measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when LDL between 130 and 160 THEN 1 END),
-             'N LDL 130 to 160',
+      select count(patid)                                        as                             count_patients,
+             COUNT(CASE when LDL between 130 and 160 THEN 1 END) as                             count2,
+             'N LDL 130 to 160'                                  as                             count_label,
              round(100 * COUNT(CASE when LDL between 130 and 160 THEN 1 END) / count(patid), 2) pct3,
-             'pct LDL 130 to 160',
+             'pct LDL 130 to 160'                                as                             pct_label,
              'LDL'                                                                              measure1,
              cohort
       from #all_labs
       group by cohort
 
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when LDL between 100 and 130 THEN 1 END),
-             'N LDL 100 to 130',
+      select count(patid)                                        as                             count_patients,
+             COUNT(CASE when LDL between 100 and 130 THEN 1 END) as                             count2,
+             'N LDL 100 to 130'                                  as                             count_label,
              round(100 * COUNT(CASE when LDL between 100 and 130 THEN 1 END) / count(patid), 2) pct5,
-             'pct LDL 100 to 130',
+             'pct LDL 100 to 130'                                as                             pct_label,
              'LDL'                                                                              measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                      as count_patients,
              COUNT(CASE when LDL between 70 and 100 THEN 1 END)                                   count1,
-             'N LDL 70 to 100',
+             'N LDL 70 to 100'                                                                 as count_label,
 
              round(100 * COUNT(CASE when LDL between 70 and 100 THEN 1 END) / count(patid), 2) as pct6
               ,
-             'pct LDL 70 to 100',
+             'pct LDL 70 to 100'                                                               as pct_label,
              'LDL'                                                                                measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)       as                                                count_patients,
              COUNT(CASE when TG > 2000 THEN 1 END)                                count1,
-             'N TG over 2000',
+             'N TG over 2000'   as                                                count_label,
              round(100 * COUNT(CASE when TG > 2000 THEN 1 END) / count(patid), 2) pct1,
-             'pct TG over 2000',
+             'pct TG over 2000' as                                                pct_label,
              'TG'                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when TG < 500 THEN 1 END),
-             'N TG under 500',
+      select count(patid)                                                        as count_patients,
+             COUNT(CASE when TG < 500 THEN 1 END)                                as count2,
+             'N TG under 500'                                                    as count_label,
 
              round(100 * COUNT(CASE when TG < 500 THEN 1 END) / count(patid), 2) as pct2
               ,
-             'pct TG under 500',
+             'pct TG under 500'                                                  as pct_label,
              'TG'                                                                   measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when TG between 1000 and 2000 THEN 1 END),
-             'N TG 1000 to 2000',
+      select count(patid)                                         as                             count_patients,
+             COUNT(CASE when TG between 1000 and 2000 THEN 1 END) as                             count2,
+             'N TG 1000 to 2000'                                  as                             count_label,
              round(100 * COUNT(CASE when TG between 1000 and 2000 THEN 1 END) / count(patid), 2) pct3,
-             'pct TG 1000 to 2000',
+             'pct TG 1000 to 2000'                                as                             pct_label,
              'TG'                                                                                measure1,
              cohort
       from #all_labs
       group by cohort
 
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when TG between 880 and 1000 THEN 1 END),
-             'N TG 880 to 1000',
+      select count(patid)                                        as                             count_patients,
+             COUNT(CASE when TG between 880 and 1000 THEN 1 END) as                             count2,
+             'N TG 880 to 1000'                                  as                             count_label,
              round(100 * COUNT(CASE when TG between 880 and 1000 THEN 1 END) / count(patid), 2) pct5,
-             'pct TG 880 to 1000',
+             'pct TG 880 to 1000'                                as                             pct_label,
              'TG'                                                                               measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                      as count_patients,
              COUNT(CASE when TG between 500 and 880 THEN 1 END)                                   count1,
-             'N TG 500 to 880 ',
-
-             round(100 * COUNT(CASE when TG between 500 and 880 THEN 1 END) / count(patid), 2) as pct6
-              ,
-             'pct TG 500 to 880 ',
+             'N TG 500 to 880'                                                                 as count_label,
+             round(100 * COUNT(CASE when TG between 500 and 880 THEN 1 END) / count(patid), 2) as pct6,
+             'pct TG 500 to 880'                                                               as pct_label,
              'TG'                                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                      as count_patients,
              COUNT(CASE when TG between 150 and 500 THEN 1 END)                                   count1,
-             'N TG 150 to 500',
-
-             round(100 * COUNT(CASE when TG between 150 and 500 THEN 1 END) / count(patid), 2) as pct6
-              ,
-             'pct TG 150 to 500',
+             'N TG 150 to 500'                                                                 as count_label,
+             round(100 * COUNT(CASE when TG between 150 and 500 THEN 1 END) / count(patid), 2) as pct6,
+             'pct TG 150 to 500'                                                               as pct_label,
              'TG'                                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)        as                                                count_patients,
              COUNT(CASE when nHDL > 190 THEN 1 END)                                count1,
-             'N nHDL over 190',
+             'N nHDL over 190'   as                                                count_label,
              round(100 * COUNT(CASE when nHDL > 190 THEN 1 END) / count(patid), 2) pct1,
-             'pct nHDL over 190',
+             'pct nHDL over 190' as                                                pct_label,
              'nHDL'                                                                measure1,
              cohort
       from #all_labs
 
       group by cohort
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when nHDL between 160 and 190 THEN 1 END),
-             'N nHDL 160 to 190',
+      select count(patid)                                         as                             count_patients,
+             COUNT(CASE when nHDL between 160 and 190 THEN 1 END) as                             count2,
+             'N nHDL 160 to 190'                                  as                             count_label,
              round(100 * COUNT(CASE when nHDL between 160 and 190 THEN 1 END) / count(patid), 2) pct3,
-             'pct nHDL 160 to 190',
+             'pct nHDL 160 to 190'                                as                             pct_label,
              'nHDL'                                                                              measure1,
              cohort
       from #all_labs
       group by cohort
 
       union
-      select count(patid) as count_patients,
-             COUNT(CASE when nHDL between 130 and 160 THEN 1 END),
-             'N nHDL 130 to 160',
+      select count(patid)                                         as                             count_patients,
+             COUNT(CASE when nHDL between 130 and 160 THEN 1 END) as                             count2,
+             'N nHDL 130 to 160'                                  as                             count_label,
              round(100 * COUNT(CASE when nHDL between 130 and 160 THEN 1 END) / count(patid), 2) pct5,
-             'pct nHDL 130 to 160',
+             'pct nHDL 130 to 160'                                as                             count_label,
              'nHDL'                                                                              measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)                                                                        as count_patients,
              COUNT(CASE when nHDL between 100 and 130 THEN 1 END)                                   count1,
-             'N nHDL 100 to 130',
-
-             round(100 * COUNT(CASE when nHDL between 100 and 130 THEN 1 END) / count(patid), 2) as pct6
-              ,
-             'pct nHDL 100 to 130',
+             'N nHDL 100 to 130'                                                                 as count_label,
+             round(100 * COUNT(CASE when nHDL between 100 and 130 THEN 1 END) / count(patid), 2) as pct6,
+             'pct nHDL 100 to 130'                                                               as pct_label,
              'nHDL'                                                                                 measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)        as                                                count_patients,
              COUNT(CASE when apob > 130 THEN 1 END)                                count1,
-             'N apob over 130',
+             'N apob over 130'   as                                                count_label,
              round(100 * COUNT(CASE when apob > 130 THEN 1 END) / count(patid), 2) pct1,
-             'pct apob over 130',
+             'pct apob over 130' as                                                pct_label,
              'apob'                                                                measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(patid) as count_patients,
+      select count(patid)       as                                                count_patients,
              COUNT(CASE when vldl > 30 THEN 1 END)                                count1,
-             'N vldl over 30',
+             'N vldl over 30'   as                                                count_label,
              round(100 * COUNT(CASE when vldl > 30 THEN 1 END) / count(patid), 2) pct1,
-             'pct vldl over 30',
+             'pct vldl over 30' as                                                pct_label,
              'vldl'                                                               measure1,
              cohort
       from #all_labs
       group by cohort
       union
-      select count(a.patid) as count_patients,
-             COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END)                                count1,
-             'N repeat NHDL within 60 days',
+      select count(a.patid)                   as                                                  count_patients,
+             COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END)                                  count1,
+             'N repeat NHDL within 60 days'   as                                                  count_label,
              round(100 * COUNT(CASE when nhdl_within_60_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
-             'pct repeat NHDL within 60 days',
-             'repeat NHDL within 60 days'                                                       measure1,
+             'pct repeat NHDL within 60 days' as                                                  pct_label,
+             'repeat NHDL within 60 days'                                                         measure1,
              cohort
       from #next_nhdl b
-	  join #pat_list a on a.patid = b.patid
+               join #pat_list a on a.patid = b.patid
       group by cohort
       union
-      select count(a.patid) as count_patients,
-             COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END)                                count1,
-             'N repeat NHDL within 180 days',
+      select count(a.patid)                    as                                                  count_patients,
+             COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END)                                  count1,
+             'N repeat NHDL within 180 days'   as                                                  count_label,
              round(100 * COUNT(CASE when nhdl_within_180_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
-             'pct repeat NHDL within 180 days',
-             'repeat NHDL within 180 days'                                                       measure1,
+             'pct repeat NHDL within 180 days' as                                                  pct_label,
+             'repeat NHDL within 180 days'                                                         measure1,
              cohort
       from #next_nhdl b
-	  join #pat_list a on a.patid = b.patid
+               join #pat_list a on a.patid = b.patid
       group by cohort
       union
-      select count(a.patid) as count_patients,
+      select count(a.patid)                   as                                                count_patients,
              COUNT(CASE when less_than_90_days = 1 THEN 1 END)                                  count1,
-             'N lipid panel within 90 days',
+             'N lipid panel within 90 days'   as                                                count_label,
              round(100 * COUNT(CASE when less_than_90_days = 1 THEN 1 END) / count(a.patid), 2) pct1,
-             'pct lipid panel within 90 days',
+             'pct lipid panel within 90 days' as                                                pct_label,
              'lipid panel within 90 days'                                                       measure1,
              a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-           group by cohort
+      group by cohort
       union
-      select count(a.patid) as count_patients,
+      select count(a.patid)                     as                                                count_patients,
              COUNT(CASE when less_than_15_months = 1 THEN 1 END)                                  count1,
-             'N lipid panel within 15 months',
+             'N lipid panel within 15 months'   as                                                count_label,
              round(100 * COUNT(CASE when less_than_15_months = 1 THEN 1 END) / count(a.patid), 2) pct1,
-             'pct lipid panel within 15 months',
+             'pct lipid panel within 15 months' as                                                pct_label,
              'lipid panel within 15 months'                                                       measure1,
              a.cohort
       from #pat_list a
                left join #lipid_panel_next_closest b on a.patid = b.patid
-         group by cohort
+      group by cohort
 
 
          /*order by 7, 6, 5*/) c;
