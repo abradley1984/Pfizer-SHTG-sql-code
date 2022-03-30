@@ -527,8 +527,7 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
                  from all_labs
                  group by cohort)
 
-       select *
-from table3a; ,
+     ,
 
 
      table3b as (
@@ -971,4 +970,6 @@ from table3a; ,
 
 
                  order by 7, 6, 5))
+--select * from table3a;
+select * from table3b;
 
