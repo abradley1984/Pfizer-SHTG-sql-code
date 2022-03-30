@@ -530,7 +530,7 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
      ,
 
 
-     table3b as (
+     table3b as
          (select count(patid),
                         COUNT(CASE WHEN lpa_mol >= 125 THEN 1 END)                                count1,
                         'N_lpa_over_125_nmol'   as                                                 count_label,
@@ -969,7 +969,7 @@ joined1 as (select * from SHTG_Q2_STEP3_d5
                  group by cohort
 
 
-                 order by 7, 6, 5))
+                 order by 7, 6, 5)
 --select * from table3a;
 select * from table3b;
 
