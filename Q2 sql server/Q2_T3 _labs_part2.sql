@@ -1,57 +1,59 @@
 
---Running time: 8 mins *2
+/*This query has two parts - table 3a and table 3b, gotten by uncommenting the second line at the end.
+
+Running time: 8 mins *2
+*/
 
 with
-joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
-    where cohort is not null),
+
     pat_list as
          (
-             select LDL_Date as index_date, joined1.*
-            from joined1
+             select LDL_Date as index_date, *
+            from SHTG_Q2_STEP3
 
              where cohort is not null
              -- fetch first 1000 rows only
          ),
-     all_labs as (select Q2_labs_all_Testa.*, cohort from Q2_labs_all_Testa left join joined1 on joined1.patid =Q2_labs_all_Testa.patid),-- generated in Q1_labs_part1
+     all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join joined1 on joined1.patid =Q2_labs_all.patid),-- generated in Q1_labs_part1
 
  HDL_all as (select distinct patid,
 
-                                 --  lab_result_cm.result_num  total_chol_result_num,
-                                 -- lab_result_cm.result_unit result_unit,
-                                 trunc(lab_result_cm.result_date) result_date
+                                 --  result_num  total_chol_result_num,
+                                 -- result_unit result_unit,
+                                 round(result_date) result_date
 
 
-                 FROM pat_list
-                          left join cdm_60_etl.lab_result_cm using (patid)
-                 WHERE lab_result_cm.result_date BETWEEN '2019-04-01' AND '2021-09-30'
-                   AND lab_result_cm.lab_loinc in ('2085-9')
-                   and lab_result_cm.result_num is not null
+                 from #pat_list a
+                          left join cdm_60_etl.lab_result_cm b on a.patid=b.patid
+                 WHERE result_date BETWEEN '2019-04-01' AND '2021-09-30'
+                   AND lab_loinc in ('2085-9')
+                   and result_num is not null
 
-         -- and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         -- and result_num >= 0
+         -- AND not result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         --AND result_num < 1000
 
      ),
 
      total_chol_all as (select distinct patid,
                                         cohort,
 
-                                        --  lab_result_cm.result_num  total_chol_result_num,
-                                        -- lab_result_cm.result_unit result_unit,
-                                        trunc(lab_result_cm.result_date) result_date,
+                                        --  result_num  total_chol_result_num,
+                                        -- result_unit result_unit,
+                                        trunc(result_date) result_date,
                                         index_date
 
 
-                        FROM pat_list
-                                 left join cdm_60_etl.lab_result_cm using (patid)
+                        from #pat_list a
+                                 left join cdm_60_etl.lab_result_cm b on a.patid=b.patid
 
-                        WHERE lab_result_cm.result_date BETWEEN '2019-04-01' AND '2021-09-30'
-                          AND lab_result_cm.lab_loinc in ('2093-3')
-                          and lab_result_cm.result_num is not null
+                        WHERE result_date BETWEEN '2019-04-01' AND '2021-09-30'
+                          AND lab_loinc in ('2093-3')
+                          and result_num is not null
 
-         -- and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         -- and result_num >= 0
+         -- AND not result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         --AND result_num < 1000
 
      ),
      lipid_panel_date as (select *
@@ -113,9 +115,9 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                    group by patid, cohort, index_date),
      last_TG_above_500 as (select *
                            from (select patid,
-                                        lab_result_cm.result_num         TG_result_num,
-                                        lab_result_cm.result_unit        result_unit,
-                                        lab_result_cm.result_date,
+                                        result_num         TG_result_num,
+                                        result_unit        result_unit,
+                                        result_date,
                                         index_date,
                                         abs(result_date - index_date) as TG_time_from_index,
                                         row_number() OVER (
@@ -123,17 +125,17 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                                             ORDER BY abs(result_date - index_date) ASC
                                             )                            row_num
 
-                                 FROM pat_list
-                                          left join cdm_60_etl.lab_result_cm using (patid)
-                                 WHERE                                                                       --lab_result_cm.result_date '2019-04-01' AND '2021-09-30'
-                                     lab_result_cm.lab_loinc in ('2571-8', '12951-0')
-                                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
-                                   and lab_result_cm.result_num is not null
-                                   and lab_result_cm.result_num >= 500
+                                 from #pat_list a
+                                          left join cdm_60_etl.lab_result_cm b on a.patid=b.patid
+                                 WHERE                                                                       --result_date '2019-04-01' AND '2021-09-30'
+                                     lab_loinc in ('2571-8', '12951-0')
+                                   AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
+                                   and result_num is not null
+                                   and result_num >= 500
                                    and (result_date - index_date) <= (-1)--TG occurs before index_date
                                 )
-                                --and patid in (select patid from pat_list)
-                                --AND lab_result_cm.result_num < 1000
+                                --and patid in (select patid from #pat_list a)
+                                --AND result_num < 1000
                            where row_num = 1
      ),
      diabetic_control as (
@@ -169,7 +171,7 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                         'time to next nHDL (days)',
                         cohort
 
-                 from pat_list
+                 from #pat_list a
                           left join next_nhdl using (patid, cohort)
                  group by cohort
                  union
@@ -184,8 +186,8 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                         'time to last TG > 500 (days)',
                         cohort
 
-                 from pat_list
-                          left join last_TG_above_500 using (patid)
+                 from #pat_list a
+                          left join last_TG_above_500 b on a.patid=b.patid
                  group by cohort
                  union
                  select count(patid)                                          count_patients,
@@ -936,7 +938,7 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                         'pct lipid panel within 90 days',
                         'lipid panel within 90 days'                                                     measure1,
                         cohort
-                 from pat_list left join lipid_panel_next_closest using (patid, cohort)
+                 from #pat_list a left join lipid_panel_next_closest  b on a.patid=b.patid
                  group by cohort
                  union
                  select count(patid),
@@ -946,7 +948,7 @@ joined1 as (select * from SHTG_Q2_STEP1_d5 join  SHTG_Q2_STEP3_d1 using(patid)
                         'pct lipid panel within 15 months',
                         'lipid panel within 15 months'                                                     measure1,
                         cohort
-                 from pat_list left join lipid_panel_next_closest using (patid, cohort)
+                 from #pat_list a left join lipid_panel_next_closest  b on a.patid=b.patid
                  group by cohort
 
 

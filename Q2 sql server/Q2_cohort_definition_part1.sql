@@ -6,24 +6,24 @@
 --with
 select *
 into #TG_all
-from (select lab_result_cm.patid,
+from (select patid,
              row_number() OVER (
-                 PARTITION BY lab_result_cm.patid
-                 ORDER BY lab_result_cm.result_date ASC
+                 PARTITION BY patid
+                 ORDER BY result_date ASC
                  )                     row_num,
 
-             lab_result_cm.result_num  TG_result_num,
-             lab_result_cm.result_unit result_unit,
-             lab_result_cm.result_date,
-             LAB_RESULT_CM.RAW_RESULT
+             result_num  TG_result_num,
+             result_unit result_unit,
+             result_date,
+             RAW_RESULT
 
-      FROM cdm_60_etl.lab_result_cm
+      FROM cdm_60_etl.lab_result_cm lab
        WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-            AND lab_result_cm.lab_loinc in ('2571-8', '12951-0')
-        AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-        and lab_result_cm.result_num is not null
-        and lab_result_cm.result_num >= 0
-         --AND lab_result_cm.result_num < 1000
+            AND lab_loinc in ('2571-8', '12951-0')
+        AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+        and result_num is not null
+        and result_num >= 0
+         --AND result_num < 1000
 
      ) c;
 select *
@@ -33,23 +33,23 @@ from (select *
       where row_num = 1) c;
 select *
 into #LDL_all
-from (select lab_result_cm.patid,
+from (select patid,
              row_number() OVER (
-                 PARTITION BY lab_result_cm.patid
-                 ORDER BY lab_result_cm.result_date asc
+                 PARTITION BY patid
+                 ORDER BY result_date asc
                  )                     row_num,
-             lab_result_cm.result_num  LDL_result_num,
-             lab_result_cm.result_unit result_unit,
-             lab_result_cm.result_date
+            result_num  LDL_result_num,
+            result_unit result_unit,
+            result_date
 
-      FROM cdm_60_etl.lab_result_cm
+      FROM cdm_60_etl.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-        AND lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
-        --and lab_result_cm.patid in #pat_list
-        and lab_result_cm.result_num is not null
-        and lab_result_cm.result_num >= 0
-         -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+        AND lab_loinc in ('13457-7', '18262-6', '2089-1')
+        --andpatid in #pat_list
+        and result_num is not null
+        and result_num >= 0
+         -- AND not result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
+         --and result_num < 1000
 
      ) c;
 select *
@@ -61,31 +61,29 @@ from (select *
 select *
 into #max_LDL
 from (select patid,
-             case
-                 when (max(LDL_result_num) over (partition by patid)) >= 190 then 1
-                 else 0 end as max_ldl_above_190
+             IIF((max(LDL_result_num) over (partition by patid)) >= 190, 1, 0) as max_ldl_above_190
       from #LDL_all
      ) as p;
 select *
 into #total_chol_all
-from (select lab_result_cm.patid,
+from (select patid,
              row_number() OVER (
-                 PARTITION BY lab_result_cm.patid
-                 ORDER BY lab_result_cm.result_date ASC
+                 PARTITION BY patid
+                 ORDER BY result_date ASC
                  )                     row_num,
-             lab_result_cm.result_num  total_chol_result_num,
-             lab_result_cm.result_unit result_unit,
-             lab_result_cm.result_date result_date
+            result_num  total_chol_result_num,
+            result_unit result_unit,
+            result_date result_date
 
-      FROM cdm_60_etl.lab_result_cm
+      FROM cdm_60_etl.lab_result_cm lab
 
         WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
-        AND lab_result_cm.lab_loinc in ('2093-3')
+        AND lab_loinc in ('2093-3')
 
-        -- and lab_result_cm.result_num is not null
-        -- and lab_result_cm.result_num >= 0
-        AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+        -- and result_num is not null
+        -- and result_num >= 0
+        AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+         --AND result_num < 1000
 
      ) c;
 select *
@@ -95,21 +93,21 @@ from (select *
       where row_num = 1) c;
 select *
 into #HDL_all
-from (select lab_result_cm.patid,
+from (select patid,
              row_number() OVER (
-                 PARTITION BY lab_result_cm.patid
-                 ORDER BY lab_result_cm.result_date ASC
+                 PARTITION BY patid
+                 ORDER BY result_date ASC
                  )                     row_num,
-             lab_result_cm.result_num  HDL_result_num,
-             lab_result_cm.result_unit result_unit,
-             lab_result_cm.result_date
+             result_num  HDL_result_num,
+             result_unit result_unit,
+             result_date
 
-      FROM cdm_60_etl.lab_result_cm
+      FROM cdm_60_etl.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
-       AND lab_result_cm.lab_loinc in ('2085-9')
-        --  and lab_result_cm.result_num is not null
-        and lab_result_cm.result_num >= 0
-        AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
+       AND lab_loinc in ('2085-9')
+        --  and result_num is not null
+        and result_num >= 0
+        AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 
      ) c;
@@ -406,13 +404,13 @@ from (select patid,
 --sql server age: floor(datediff(day, demographic.birth_date, '2020-08-31') / 365.25) as age
 
 select distinct #joined.*,
-                 round(datediff(dd,  first_admit_date,LDL_date)) as pre_index_days,
+                datediff(dd, first_admit_date,LDL_date) as pre_index_days,
 
-             round(datediff(dd,LDL_date, last_admit_date ) )        as post_index_days,
-                round(datediff(dd,LDL_date, birth_date )/ 365.25, 2) as age
+            datediff(dd,LDL_date, last_admit_date )        as post_index_days,
+               datediff(dd,LDL_date, birth_date )/ 365.25 as age
 into SHTG_Q2_STEP1
 from #joined
 Where round(datediff(dd,LDL_date, birth_date )/ 365.25, 2) > 18 --over 18
-  And round(datediff(dd,  first_admit_date,LDL_date) ) > 180 --at least 6 months pre-index.
+  And datediff(dd,  first_admit_date,LDL_date) > 180 --at least 6 months pre-index.
 ;
 

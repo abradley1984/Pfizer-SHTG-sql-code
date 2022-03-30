@@ -1,7 +1,7 @@
 --SHTG_Pfizer Q2
 -- Add in data needed for cohorts (Various lab and dx criteria based on AHA guidelines), and get cohort groupings.
 -- Run time:
---create table SHTG_Q2_STEP3_d2 as
+--create table SHTG_Q2_STEP3 as
 --WITH
      select * into #PAT_LIST from
      (SELECT * FROM SHTG_Q2_STEP1
