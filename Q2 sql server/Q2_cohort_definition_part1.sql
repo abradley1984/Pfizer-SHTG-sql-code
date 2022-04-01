@@ -148,7 +148,7 @@ from (
          from #LDL LDL
                   left join #NHDL NHDL on LDL.patid = NHDL.patid
                   left join #TG TG on LDL.patid = TG.patid
-                  left join #max_LDL LDL on LDL.patid = LDL.patid) as LNTL;
+                  left join #max_LDL max_LDL on LDL.patid = max_ldl.patid) as LNTL;
 select *
 into #pat_list
 from (select patid, LDL_date from #lab_list) as pLd;
