@@ -857,7 +857,7 @@
                                   )) as pdre;
      select * into #lab_enhancers from (select patid,
                                                IIF(
-                                                       (egfr_2021 < 60 or hscrp >= 2 or lpa_mass > 50 or lpa_mass > 125 or apob > 130),
+                                                       (egfr_2021 < 60 or hscrp >= 2 or lpa_mass > 50 or lpa_mol > 125 or apob > 130),
                                                        1, 0) as lab_enhancers
                        from #labs_all) as ple;
 
