@@ -1,6 +1,6 @@
 /* Generates demographics table (T1) for all cohorts.
    Save to Csv file
-   Same for Q1 and Q2, just editing initial pat_list
+  Similar for Q1 and Q2, just editing initial pat_list, and adding back in age_category table
    Running time: ~2 minutes
 
    --Edits for sql server: changing percentile and median syntax
