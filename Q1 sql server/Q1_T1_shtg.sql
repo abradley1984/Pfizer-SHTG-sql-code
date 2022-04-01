@@ -204,11 +204,11 @@ where  p.provider_specialty_primary in
 
 --Both cardiology and endocrinology
 --CHECK - I'm getting an issue here, but I don't know what it means. I want a list of patients that have both a cardiology and endo provider
-select e.patid as patid, 'both_endo_cardio' as both_endo_cardio
+select b.patid as patid, 'both_endo_cardio' as both_endo_cardio
 into   #cardio_plus_endo
-from ((select a.patid/*, provider_specialty as provider_specialty_a*/ from #providers a where a.provider_specialty = 'endo') b
-    inner join (select c.patid /*, provider_specialty as provider_specialty_b*/ from #providers c where c.provider_specialty = 'cardiology') d
- on b.patid =d.patid ) e;
+from (select a.patid/*, provider_specialty as provider_specialty_a*/ from #providers a where a.provider_specialty = 'endo') b
+    inner join (select c.patid patid /*, provider_specialty as provider_specialty_b*/ from #providers c where c.provider_specialty = 'cardiology') d
+ on b.patid =d.patid  ;
 
   select * into #Table1_pre from
     (
@@ -290,7 +290,7 @@ from #pat_list a
     left join #smoking_category  b on a.patid = b.patid
 group by a.cohort, smoking_category
 union
-select '9' as order1, 'pre-index_days', 'Mean', round(avg(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'Mean', avg(PRE_INDEX_DAYS) as N, cohort
 from #pat_list
 group by cohort
 /*union
@@ -298,7 +298,7 @@ select '9' as order1, 'pre-index_days', 'Median', round(median(PRE_INDEX_DAYS)) 
 from #pat_list
 group by cohort*/
 union
-select '9' as order1, 'pre-index_days', 'STD', round(stdev(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'STD', stdev(PRE_INDEX_DAYS) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -364,15 +364,10 @@ select order1,
     label2,
     N,
     N_cohort_total,
-    case
-    when (a.label2 in ('pct_75', 'pct_25')
-    or a.label2 like ('Mean%')
-    or a.label2 like ('Median%')
-    or a.label2 like ('STD%'))
-    then 0
-    else
-    round(100 * N / N_cohort_total, 2)
-    end
+       IIF((a.label2 in ('pct_75', 'pct_25')
+           or a.label2 like ('Mean%')
+           or a.label2 like ('Median%')
+           or a.label2 like ('STD%')), 0, round(100 * N / N_cohort_total, 2))
     as percentage1
 into  #percentages
 from #Table1_pre a
