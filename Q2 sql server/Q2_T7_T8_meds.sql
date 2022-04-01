@@ -1394,7 +1394,7 @@ select cohort,
        --sum(less_than_3_months_therapy) as less_than_3_months_therapy
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
 
-from shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2
 group by cohort;
 
 --table 8
@@ -1577,4 +1577,3 @@ group by ldl_under_70_nhdl_above_100
 having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
-

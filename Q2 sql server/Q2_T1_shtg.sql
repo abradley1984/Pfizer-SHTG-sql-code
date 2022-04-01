@@ -19,8 +19,8 @@ GROUP (ORDER BY age asc) OVER (PARTITION BY cohort)
 
 select *
 into #pat_list
-from
-                                    foo.dbo.SHTG_Q2_STEP3 ;
+from foo.dbo.SHTG_Q2_STEP3 ;
+
 select *
 into #smoking
 from (

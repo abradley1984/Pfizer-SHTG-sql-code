@@ -9,7 +9,7 @@ USE CDM;
 --ALTER USER "username" WITH DEFAULT_SCHEMA = PCORI_CDM_SCHEMA;
 GO
 
-elect *
+select *
 into #pat_list
 from (
          select LDL_date as index_date, foo.dbo.SHTG_Q2_STEP3.*

@@ -21,7 +21,7 @@ select * into #pat_list from
 
 
 
-select * into #nash from (select distinct patid, 1 as NASH from #pat_list a
+select * into #nash from (select distinct a.patid, 1 as NASH from #pat_list a
  INNER JOIN cdm.dbo.diagnosis como on a.patid=como.patid
      Where dx in ('K75.81', '571.8', 'K76.0') ) as pN;
 
