@@ -572,7 +572,7 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
                            group by patid, cohort),
      ASCVD as (select patid,
                       cohort,
-                      max(index_date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
+                      max(datediff(dd, admit_date, index_date) / 365.25 as time_since_first_ascvd_diagnosis,
                       'ASCVD'                            as Comorbidity_name
                FROM pat_list a
                         INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
@@ -881,7 +881,7 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
              from ascvd
 
          ),
-     table2 as (select order1, 'Comorbidity', Comorbidity_name, round(N, 2) as N_mean_etc, cohort
+     table2 as (select order1, 'Comorbidity' as comorbidity, Comorbidity_name, round(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
               /*  order by cohort*/),
       totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
