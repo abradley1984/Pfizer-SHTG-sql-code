@@ -24,17 +24,17 @@ from
 select *
 into #smoking
 from (
-    select patid,
+    select a.patid,
     row_number() OVER (
     PARTITION BY patid
-    ORDER BY vital.measure_date desc
+    ORDER BY measure_date desc
     ) row_num,
-    vital.smoking as smoking,
+    smoking as smoking,
     cohort
     FROM #pat_list a
     left join cdm.dbo.vital  b on a.patid = b.patid
-    WHERE vital.smoking IS NOT NULL
-    AND not vital.smoking in ('NI', 'OT', 'UN')) c
+    WHERE smoking IS NOT NULL
+    AND not smoking in ('NI', 'OT', 'UN')) c
 where row_num = 1;
 select a.patid,
        a.cohort,
@@ -147,29 +147,29 @@ select patid,
 into #insurance_type
 from #insurance;
 
-select patid,
-    provider_specialty_primary,
-    cohort,
+select a.patid,
+    p.provider_specialty_primary,
+    a.cohort,
     case
-    when provider_specialty_primary in
+    when  p.provider_specialty_primary in
     ('208D00000X', '163WG0000X', '207Q00000X', '207QA0000X', '207QA0505X', '207R00000X',
     '207RA0000X',
     '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X', '364SF0001X') then 'primary_care'
-    when provider_specialty_primary in
+    when  p.provider_specialty_primary in
     ('207RC0000X', '207RA0001X', '207RC0001X', '207RI0011X', '2080P0202X') then 'cardiology'
-    when provider_specialty_primary in
+    when  p.provider_specialty_primary in
     ('163WE0003X', '207P00000X', '207PE0004X', '207PP0204X', '207PS0010X', '207PT0002X',
     '2080P0204X', '261QE0002X', '364SE0003X') then 'emergency medicine'
-    when provider_specialty_primary in ('207RG0100X') then 'GI'
-    when provider_specialty_primary in ('207RE0101X', '2080P0205X') then 'endo'
+    when  p.provider_specialty_primary in ('207RG0100X') then 'GI'
+    when  p.provider_specialty_primary in ('207RE0101X', '2080P0205X') then 'endo'
     else 'other'
     end as provider_specialty
 into #providers
 from #pat_list a
     left join cdm.dbo.encounter  e on a.patid = e.patid
-    left join cdm.dbo.provider
-on encounter.providerid = provider.providerid
-where provider_specialty_primary in
+    left join cdm.dbo.provider p
+on e.providerid = p.providerid
+where  p.provider_specialty_primary in
     ('208D00000X'
     , '163WG0000X'
     , '207Q00000X'
@@ -199,17 +199,17 @@ where provider_specialty_primary in
     , '261QP2300X'
     , '363LP2300X'
     , '364SF0001X')
-  And encounter.admit_date BETWEEN '2020-09-30'
+  And e.admit_date BETWEEN '2020-09-30'
   AND '2021-09-30'
     ;
 
 --Both cardiology and endocrinology
 --CHECK - I'm getting an issue here, but I don't know what it means. I want a list of patients that have both a cardiology and endo provider
-select e.patid as patid, 'both_endo_cardio' as both_endo_cardio, e.cohort
+select b.patid as patid, 'both_endo_cardio' as both_endo_cardio
 into   #cardio_plus_endo
-from ((select */*, provider_specialty as provider_specialty_a*/ from #providers a where a.provider_specialty = 'endo') b
-    inner join (select * /*, provider_specialty as provider_specialty_b*/ from #providers c where c.provider_specialty = 'cardiology') d
- on b.patid =d.patid ) e;
+from (select a.patid/*, provider_specialty as provider_specialty_a*/ from #providers a where a.provider_specialty = 'endo') b
+    inner join (select c.patid patid /*, provider_specialty as provider_specialty_b*/ from #providers c where c.provider_specialty = 'cardiology') d
+ on b.patid =d.patid  ;
 
   select * into #Table1_pre from
     (
@@ -291,7 +291,7 @@ from #pat_list a
     left join #smoking_category  b on a.patid = b.patid
 group by a.cohort, smoking_category
 union
-select '9' as order1, 'pre-index_days', 'Mean', round(avg(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'Mean', avg(PRE_INDEX_DAYS) as N, cohort
 from #pat_list
 group by cohort
 /*union
@@ -299,7 +299,7 @@ select '9' as order1, 'pre-index_days', 'Median', round(median(PRE_INDEX_DAYS)) 
 from #pat_list
 group by cohort*/
 union
-select '9' as order1, 'pre-index_days', 'STD', round(stdev(PRE_INDEX_DAYS)) as N, cohort
+select '9' as order1, 'pre-index_days', 'STD', stdev(PRE_INDEX_DAYS) as N, cohort
 from #pat_list
 group by cohort
 union
@@ -365,15 +365,10 @@ select order1,
     label2,
     N,
     N_cohort_total,
-    case
-    when (a.label2 in ('pct_75', 'pct_25')
-    or a.label2 like ('Mean%')
-    or a.label2 like ('Median%')
-    or a.label2 like ('STD%'))
-    then 0
-    else
-    round(100 * N / N_cohort_total, 2)
-    end
+       IIF((a.label2 in ('pct_75', 'pct_25')
+           or a.label2 like ('Mean%')
+           or a.label2 like ('Median%')
+           or a.label2 like ('STD%')), 0, round(100 * N / N_cohort_total, 2))
     as percentage1
 into  #percentages
 from #Table1_pre a
