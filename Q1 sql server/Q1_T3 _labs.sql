@@ -1,3 +1,5 @@
+
+   
 /*This query has two parts - table 3a and table 3b that should be written to csv files.
 Running time: 8 mins *2
   Issues to check for sql server version are marked with --CHECK comments

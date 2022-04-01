@@ -3,17 +3,13 @@ This code defines the overall cohort for the first section of the SHTG query (Q1
    -had a TG value in the one year study period (30-Sep-2020 to 30-Sep-2021)
    -had a TG>500, or had an LDL within the study period if their TG was <500,
    - had an NHDL within 30 days of their first TG.
-
-
    The output table is written to disk as:
  	shtg_Q1_cohort_definition_with_exclusions
         This lists all patients that meet inclusion and exclusion criteria, with their sub-cohort,  index lab values and age.
         One row per patient.
         This is used as the cohort definition for the rest of the tables
-
 The code also outputs a general count table(T0), that will need to be saved to a csv file (Q1_table0.csv)
    
-
    Running time:
    running time at Pitt was <25 minutes.
    */
@@ -193,7 +189,7 @@ into    #age_gender_race_ethnicity
          FROM #pat_list pats
                   INNER JOIN
  -- @cdm.@cdmschema.demographic demo
- demographic demo
+ cdm.dbo.demographic demo
  ON demo.patid = pats.patid
 
      ;
@@ -210,7 +206,7 @@ into    #age_gender_race_ethnicity
                                from #pat_list p
                                         left join
 --@cdm.@cdmschema.encounter encounter
-encounter
+cdm.dbo.encounter
 on p.patid = encounter.patid) dummy
                          where row_num = 1
      ;
@@ -226,7 +222,7 @@ into  #last_encounter
                                from #pat_list p
                                         left join
 --@cdm.@cdmschema.encounter encounter
-encounter
+cdm.dbo.encounter
 on p.patid = encounter.patid) dummy
                         where row_num = 1
      ;
@@ -269,23 +265,24 @@ into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
     --CHECK Database name written to disk for site
 foo.dbo.shtg_Q1_cohort_definition2
 from #with_exclusions
-where age>18 and pre_index_days>180;
+where age > 18 and pre_index_days > 180;
 
 --Q1_Table0.csv (basic counts -  save to csv)
 
-(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from demographic
+(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm.dbo.demographic
 union
 select count(distinct patid) ,'Have lab data',2 from #with_exclusions
     union
 select count(distinct patid) ,'Have lab data and over 18',3 from #with_exclusions
-where age>=18
+where age >= 18
 union
 select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
-where age>=18 and pre_index_days>=180);
+where age >= 18 and pre_index_days >= 180);
 
 select * into #labs from (select * from foo.dbo.shtg_Q1_cohort_definition2
 ) as [sQ1cd2*];
-   select * into  #lab_labels from (select labs.*,
+
+   select * into  #lab_labels from (select #labs.*,
                            case
                                when TG_result_num < 150
                                    then 'TG_under_150'
@@ -362,13 +359,13 @@ select * into #labs from (select * from foo.dbo.shtg_Q1_cohort_definition2
                                    then 'Age_40_55'
                                when Age BETWEEN 55 and 65
                                    then 'Age_55_65'
- when Age BETWEEN 65 and 75
+                               when Age BETWEEN 65 and 75
                                    then 'Age_65_75'
                                when Age > 75
                                    then 'Age_over_75'
                                else 'other'
                                end as Age_category
-                    from #labs  labs) as l;
+                    from #labs) as l;
      select * into #with_cohorts from (select case
                                  when TG_category = 'TG_over_2000' then 'cohort_1K'
 
@@ -408,11 +405,6 @@ select * into foo.dbo.shtg_Q1_cohort_with_exclusions
 from #with_cohorts
 
 ;
-
-
-
-
-
 
 
 

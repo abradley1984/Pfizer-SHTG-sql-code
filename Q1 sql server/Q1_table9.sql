@@ -467,10 +467,10 @@ from (
          select patid, IIF(encounter_count > 1, 1, 0) as multiple_stroke
          from (select a.patid,
                       count(a.encounterid)                                as encounter_count,
-                      max(admit_date)                                     as max_admit_date,
-                      min(admit_date)                                     as min_admit_date,
+                      max(a.admit_date)                                     as max_admit_date,
+                      min(a.admit_date)                                     as min_admit_date,
                       --CHECK this may be a problem... I'm trying to find the time between then first and last inpatient diagnosis
-                      abs(datediff(dd, max(admit_date), min(admit_date))) as gap
+                      abs(datediff(dd, max(a.admit_date), min(a.admit_date))) as gap
                from cdm.dbo.encounter a
                         join cdm.dbo.diagnosis Como on a.encounterid = Como.encounterid
 
@@ -486,7 +486,7 @@ from (
 
 
                    )
-                 and enc_Type in ('EI', 'IP')
+                 and a.enc_Type in ('EI', 'IP')
                  -- and DRG in ('061', '062', '063', '064', '065', '066')
                group by a.patid
                having count(a.encounterid) > 1) b
@@ -526,7 +526,7 @@ into #multiple_PCI
 from (
          select patid, PCI_gap, IIF(encounter_count > 1, 1, 0) as multiple_PCI
          from (select a.patid,
-                      count(a.encounterid)                                as encounter_count,
+                      count(b.encounterid)                                as encounter_count,
 
                       -- 'PCI'                             as Comorbidity_name,
                       -- 1 as PCI--,
@@ -686,4 +686,3 @@ group by a.cohort, Statin
 
 order by a.cohort
 
-/*

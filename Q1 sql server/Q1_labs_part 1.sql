@@ -14,11 +14,12 @@ Run time: ~40 mins
 --
 -- drop table Q1_labs_all;*/
 
+--select top 100 * from foo.dbo.shtg_Q1_cohort_with_exclusions
 
 select *
 into #pat_list
 from (
-         select TG_Date as index_date, foo.dbo.shtg_Q1_cohort_with_exclusions.*
+         select TG_Date as index_date, foo.dbo.shtg_Q1_cohort_with_exclusions.*  
          from foo.dbo.shtg_Q1_cohort_with_exclusions
 
          where cohort is not null
@@ -28,135 +29,135 @@ from (
 --vldl
 select *
 into #vldl
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  vldl,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  vldl,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       FROM #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('46986-6', '13458-5', '2091-7')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('46986-6', '13458-5', '2091-7')
+        and lab_result_cm.result_num is not null) as ab;
 
 
 --apo_b
 
 select *
 into #apo_b
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  apob,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  apob,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('1884-6', '1871-3', '1881-2')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('1884-6', '1871-3', '1881-2')
+        and lab_result_cm.result_num is not null) as ab;
 
 
 --  lpa - mol and mass handled separately
 
 select *
 into #lpa_mass
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  lpa_mass,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  lpa_mass,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND (lab_loinc in
+        AND (lab_result_cm.lab_loinc in
              ('10835-7') and not result_unit = 'nmol/L')
 
 
-        and result_num is not null) as ab;
+        and lab_result_cm.result_num is not null) as ab;
 
 select *
 into #lpa_mol
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  lpa_mol,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  lpa_mol,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND (lab_loinc in
+        AND (lab_result_cm.lab_loinc in
              ('43583-4')
-          or (lab_loinc in
+          or (lab_result_cm.lab_loinc in
               ('10835-7') and result_unit = 'nmol/L')
-                 and result_num is not null)) as ab;
+                 and lab_result_cm.result_num is not null)) as ab;
 
 
 --apo_a1
 
 select *
 into #apo_a1
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  apo_a1,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  apo_a1,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('1869-7', '1874-7', '55724-9')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('1869-7', '1874-7', '55724-9')
+        and lab_result_cm.result_num is not null) as ab;
 
 
 --nlr
 select *
 into #nlr
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  nlr,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  nlr,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in
+        AND lab_result_cm.lab_loinc in
             ('770-8', '23761-0', '26511-6')
-        and result_num is not null
+        and lab_result_cm.result_num is not null
         and (result_unit in ('OT', '%') or result_unit is null)) as ab;
 
 
@@ -164,26 +165,26 @@ from (select patid,
 
 select *
 into #hscrp
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  hscrp,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  hscrp,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('30522-7', '35648-5')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('30522-7', '35648-5')
+        and lab_result_cm.result_num is not null) as ab;
 
 select *
 into #diabetes
-from (select distinct (patid), 1 as Diabetes
+from (select distinct (pats.patid), 1 as Diabetes
       from #pat_list  pats
                            JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
       WHERE (dx like 'E13%'
@@ -201,201 +202,201 @@ from (select distinct (patid), 1 as Diabetes
 
 select *
 into #a1c
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  a1c,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  a1c,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
-        and result_num is not null
-        and patid in (select patid from #diabetes)) as ab;
+        AND lab_result_cm.lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
+        and lab_result_cm.result_num is not null
+        and a.patid in (select patid from #diabetes)) as ab;
 --only giving A1c for diabetic patients
 
 --albumin
 
 select *
 into #albumin
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  albumin,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  albumin,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('1751-7', '61151-7', '2862-1', '61152-5')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('1751-7', '61151-7', '2862-1', '61152-5')
+        and lab_result_cm.result_num is not null) as ab;
 
 --alp
 
 select *
 into #alp
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  alp,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  alp,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in
+        AND lab_result_cm.lab_loinc in
             ('6768-6')
-        and result_num is not null) as ab;
+        and lab_result_cm.result_num is not null) as ab;
 
 --alt
 
 select *
 into #alt
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  alt,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  alt,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('1742-6', '1743-4', '1744-2')
-        and result_num is not null
-        and result_num > 0) as ab;
+        AND lab_result_cm.lab_loinc in ('1742-6', '1743-4', '1744-2')
+        and lab_result_cm.result_num is not null
+        and lab_result_cm.result_num > 0) as ab;
 
 --ast
 
 select *
 into #ast
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  ast,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  ast,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('1920-8', '30239-8')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('1920-8', '30239-8')
+        and lab_result_cm.result_num is not null) as ab;
 
 --ggt
 
 select *
 into #ggt
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  ggt,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  ggt,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('2324-2')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('2324-2')
+        and lab_result_cm.result_num is not null) as ab;
 
 
 --platelets
 
 select *
 into #platelets
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  platelets,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  platelets,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
-        and result_num is not null
-        and result_num > 0) as ab;
+        AND lab_result_cm.lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
+        and lab_result_cm.result_num is not null
+        and lab_result_cm.result_num > 0) as ab;
 
 --TG
 
 select *
 into #tg
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  tg_result_num,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  tg_result_num,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('2571-8')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('2571-8')
+        and lab_result_cm.result_num is not null) as ab;
 
 --uacr
 
 select *
 into #uacr
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
-                 ORDER BY result_date asc
+                 PARTITION BY a.patid
+                 ORDER BY lab_result_cm.result_date asc
                  )                     row_num,
-             result_num  uacr,
-             result_unit result_unit,
-             result_date result_date
+             lab_result_cm.result_num  uacr,
+             lab_result_cm.result_unit result_unit,
+             lab_result_cm.result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm  b on a.patid = b.patid
-      WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+               left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+      WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-        AND lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
-        and result_num is not null) as ab;
+        AND lab_result_cm.lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
+        and lab_result_cm.result_num is not null) as ab;
 select *
 into #weight
-from (select patid,
+from (select vital.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY vital.patid
                  ORDER BY measure_date DESC
                  ) row_num,
              wt    weight,
@@ -404,12 +405,12 @@ from (select patid,
       from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and wt is not null
-        and patid in (select patid from #pat_list)) as v;
+        and vital.patid in (select patid from #pat_list)) as v;
 select *
 into #height
-from (select patid,
+from (select vital.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY vital.patid
                  ORDER BY measure_date DESC
                  ) row_num,
              ht    height,
@@ -418,19 +419,19 @@ from (select patid,
       from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and ht is not null
-        and patid in (select patid from #pat_list)) as v;
+        and vital.patid in (select patid from #pat_list)) as v;
 
 select *
 into #creatinine
 from (select *
-      from (select patid,
+      from (select a.patid,
                    row_number() OVER (
-                       PARTITION BY patid
-                       ORDER BY result_date asc
+                       PARTITION BY a.patid
+                       ORDER BY lab_result_cm.result_date asc
                        )                      row_num,
-                   result_num   creat_result_num,
-                   result_unit  result_unit,
-                   result_date  result_date,
+                   lab_result_cm.result_num   creat_result_num,
+                   lab_result_cm.result_unit  result_unit,
+                   lab_result_cm.result_date  result_date,
                    cohort,
                    sex,
                    age,
@@ -438,11 +439,11 @@ from (select *
                    round(result_num / 0.7, 2) creat_result_num_female
 
             from #pat_list a
-                     left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-            WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
+                     left join cdm.dbo.lab_result_cm on a.patid = lab_result_cm.patid
+            WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
-              AND lab_loinc in ('2160-0', '38483-4')
-              and result_num is not null
+              AND lab_result_cm.lab_loinc in ('2160-0', '38483-4')
+              and lab_result_cm.result_num is not null
               AND RESULT_NUM < 500
               AND RESULT_NUM > 0
            ) as "p*"
@@ -464,16 +465,16 @@ from (select patid,
                  when (SEX = 'M' and creat_result_num_male < 1) then 142 *
                                                                      (power(creat_result_num_male, -0.302))
                      *
-                                                                     (power(0.9938, (age)))
+                                                                     (power(0.9938, round(age, 0)))
                  when sex = 'F' and creat_result_num_female < 1 then 142 * 1.012 *
                                                                      (power(creat_result_num_female, -0.241)) *
-                                                                     (1) * power(0.9938, (age))
+                                                                     (1) * power(0.9938, round(age, 0))
                  when (sex = 'M' and creat_result_num_male >= 1) then 142 *
                                                                       (power(creat_result_num_male, -1.2)) *
-                                                                      round(power(0.9938, (age)), 2)
+                                                                      round(power(0.9938, round(age, 0)), 2)
                  when sex = 'F' and creat_result_num_female >= 1 then 142 * 1.012 *
                                                                       (power(creat_result_num_female, -1.2)) *
-                                                                      power(0.9938, (age))
+                                                                      power(0.9938, round(age, 0))
                  else NULL end
                  as egfr_2021
       from #creatinine--_TEST2
@@ -540,5 +541,6 @@ from (
 --writing labs table
 --create table Q1_labs_all as
 select *
-into Q1_labs_all
+into foo.dbo.Q1_labs_all
 From #all_labs2;
+
