@@ -105,7 +105,7 @@ when Age BETWEEN 65 and 75
                           then 'Age_over_75'
                       else 'other'
                       end as Age_category
-           from pat_list);
+           from pat_list) as pAc;
 
 select a.*, e.payer_type_primary
 into #insurance
