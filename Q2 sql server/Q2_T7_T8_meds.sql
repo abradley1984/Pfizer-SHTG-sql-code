@@ -1373,7 +1373,7 @@ from (
 
 -- This is a table that will be used in later queries
 select *
-into foo.dbo.shtg_meds_Q1
+into foo.dbo.shtg_meds_Q2
 from #all_meds_with_labs;
 
 --table 7
@@ -1394,7 +1394,7 @@ select cohort,
        --sum(less_than_3_months_therapy) as less_than_3_months_therapy
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
 
-from shtg_meds_Q1
+from shtg_meds_Q2
 group by cohort;
 
 --table 8
@@ -1419,7 +1419,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by ldl_above_70
 having ldl_above_70 = 1
 union
@@ -1445,7 +1445,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by ldl_above_100
 having ldl_above_100 = 1
 union
@@ -1470,7 +1470,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by nhdl_above_100
 having nhdl_above_100 = 1
 union
@@ -1494,7 +1494,7 @@ select sum(Statin)                                              Statin,
 
        'nhdl_above_130'
 --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by nhdl_above_130
 having nhdl_above_130 = 1
 union
@@ -1520,7 +1520,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by TG_above_150
 having TG_above_150 = 1
 union
@@ -1545,7 +1545,7 @@ select sum(Statin)                                              Statin,
        'ldl_under_70_nhdl_above_100_TG_above_150'
 
 
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by ldl_under_70_nhdl_above_100_TG_above_150
 having ldl_under_70_nhdl_above_100_TG_above_150 = 1
 union
@@ -1572,7 +1572,7 @@ select sum(Statin)                                              Statin,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from shtg_meds_Q1
+from foo.dbo.shtg_meds_Q2
 group by ldl_under_70_nhdl_above_100
 having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
