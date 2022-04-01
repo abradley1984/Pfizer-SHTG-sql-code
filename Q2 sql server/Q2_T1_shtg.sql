@@ -90,7 +90,7 @@ select patid,
 
 into #sex_category
 from #pat_list ;
-select * into  #age_Category from (select patid, case
+select * into  #age_Category from (select patid, cohort, case
                       when Age < 18
                           then 'Age_under_18'
                       when Age BETWEEN 18 and 40
