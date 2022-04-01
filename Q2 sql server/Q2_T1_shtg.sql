@@ -90,7 +90,7 @@ select patid,
 
 into #sex_category
 from #pat_list ;
-/* age_Category as (select patid, case
+select * into  #age_Category from (select patid, case
                       when Age < 18
                           then 'Age_under_18'
                       when Age BETWEEN 18 and 40
@@ -103,9 +103,9 @@ when Age BETWEEN 65 and 75
                           then 'Age_65_75'
                       when Age > 75
                           then 'Age_over_75'
-                      else 'uhoh'
+                      else 'other'
                       end as Age_category
-           from pat_list),*/
+           from pat_list);
 
 select a.*, e.payer_type_primary
 into #insurance
@@ -218,7 +218,7 @@ from #pat_list
 group by cohort
 union
 select '2' as order1, 'Age', Age_category, count(distinct patid) as N, cohort
-from #pat_list
+from #age_category
 group by cohort, Age_category
 union
 select '2' as order1, 'age', 'Mean age', round(avg(age), 2) as N, cohort
