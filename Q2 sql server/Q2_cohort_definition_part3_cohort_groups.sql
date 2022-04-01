@@ -721,7 +721,7 @@ from (select a.patid                                as patid,
              IIF(hypercholesterolemia = 1, 1, 0)    as hypercholesterolemia,
              IIF(PCI = 1, 1, 0)                     as PCI,
 
-             coalesce(diabetes, 0)                  as diabetes,
+             IIF(Diabetes = 1, 1, 0)                  as diabetes,
              IIF(hypertension = 1, 1, 0)            as hypertension,
              IIF(CKD = 1, 1, 0)                     as CKD,
 
@@ -841,7 +841,7 @@ from (select a.patid,
              IIF(Age >= 65, 1, 0)                         as age_over_65,
 
              coalesce(ASCVD, MI, stroke, PAD, TIA_IHD, 0) as ASCVD,
-             coalesce(diabetes, 0)                        as diabetes,
+             IIF(Diabetes = 1, 1, 0)                        as diabetes,
              coalesce(max_ldl_above_190, 0)               as max_ldl_above_190
 
       from #pat_list a
@@ -849,6 +849,7 @@ from (select a.patid,
                left join #stroke st on a.patid = st.patid
                left join #PAD pad on a.patid = pad.patid
                left join #TIA_IHD ihd on a.patid = ihd.patid
+               left join #diabetes dm on a.patid = dm.patid
      ) as amspi;
 
 
@@ -903,7 +904,7 @@ from (select a.patid,
       from #TG_most_recent_high_175 a
                left join #TG_all TG_all on a.patid = TG_all.patid
       where not row_num = 1
-        and first_result_date - TG_all.result_date > 90 --over 3 months since first
+        and datediff(dd, TG_all.result_date, first_result_date) > 90 --over 3 months since first
      ) as aTa;
 
 
@@ -1007,18 +1008,5 @@ from (
                   left join #add_categories add_categories on a.patid = add_categories.patid) as aveac;
 
 
-select a.*,
-                b.TG_CATEGORY,
-                b.LDL_category2,
-                b.nhdl_category2,
-                b.v_high_risk,
-                b.enhanced_risk,
-             
-               b.diabetes,
-       cohort
-into foo.dbo.shtg_Q2_STEP3
-from #PAT_LIST a
-         join #cohorts b on a.patid = b.patid
-where cohort is not null;
-
+select a.*,                b.TG_CATEGORY,                b.LDL_category2,                b.nhdl_category2,                b.v_high_risk,                b.enhanced_risk,                b.diabetes,       cohortinto foo.dbo.shtg_Q2_STEP3from #PAT_LIST a         join #cohorts b on a.patid = b.patidwhere cohort is not null;
 
