@@ -6,7 +6,8 @@ Running time: 8 mins *2
 with pat_list as
         (select * from SHTG_Q2_STEP3_d5
     where cohort is not null),
-     all_labs as (select * from Q2_labs_all),-- generated in Q2_labs_part1
+      all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join joined1 on joined1.patid =Q2_labs_all.patid),-- generated in Q2_labs_part1
+ HDL_all as (select distinct patid,
 
      HDL_all as (select distinct patid,
 
