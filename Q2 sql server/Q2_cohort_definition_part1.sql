@@ -1,7 +1,19 @@
 /* SHTG Query 2 part 1 - first part of cohort definition, gathering a list of patient with LDL values in the study period, their ages and ASCVD history.
 
  */
-
+/*
+IF OBJECT_ID(#risk_enhancers) IS NOT NULL
+    DROP TABLE #risk_enhancers;
+IF OBJECT_ID(#v_high_risk_combined) IS NOT NULL
+    DROP TABLE #v_high_risk_combined;
+IF OBJECT_ID(#CKD) IS NOT NULL
+    DROP TABLE #CKD;
+IF OBJECT_ID(#hypertension) IS NOT NULL
+    DROP TABLE #hypertension;
+IF OBJECT_ID(#hypercholesterolemia) IS NOT NULL
+    DROP TABLE #hypercholesterolemia;
+IF OBJECT_ID(#congestive_HF) IS NOT NULL
+    DROP TABLE #congestive_HF;*/
 --create table SHTG_Q2_STEP1_d5 as
 --with
 select *
