@@ -22,7 +22,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
          SELECT patid,
 
-                dx,
+                dx  ,
 
                 MIN(admit_date) min_date,
 
@@ -258,10 +258,10 @@ WHEN dx in ('440.20',
                   INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
 
 
-         WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-09-30'
+         WHERE /*admit_date BETWEEN '2020-08-31' AND '2021-09-30'
 */
 
-             (como.dx IN (
+             (dx IN (
                           'I10',
                          -- 'E66.9', obesity
                           --'E66.01',
@@ -284,98 +284,98 @@ WHEN dx in ('440.20',
                  )
 
 -- DX FROM TABLE 9
-OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
-                 OR Como.dx like 'E08%' -- diabetes
+OR dx like 'K74.6%' -- 'CIRRHOSIS'
+                 OR dx like 'E08%' -- diabetes
 
-                -- OR Como.dx like 'E09%' -- diabetes
+                -- OR dx like 'E09%' -- diabetes
 
-                 OR Como.dx like 'E10%' -- diabetes
+                 OR dx like 'E10%' -- diabetes
 
-                 OR Como.dx like 'E11%' -- diabetes
+                 OR dx like 'E11%' -- diabetes
 
-                 OR Como.dx like 'E13%' -- diabetes
+                 OR dx like 'E13%' -- diabetes
 
-                 OR Como.dx like '249%' -- diabetes
+                 OR dx like '249%' -- diabetes
 
-                 OR Como.dx like '250%' -- diabetes
+                 OR dx like '250%' -- diabetes
 
                  -- OVERLAP BETWEEN RETINOPATHY & DIABETES
 /*
-                 OR Como.dx like 'H31%' -- RETINOPATHY
+                 OR dx like 'H31%' -- RETINOPATHY
 
-                 OR Como.dx like 'H35%' -- RETINOPATHY
+                 OR dx like 'H35%' -- RETINOPATHY
 
-                 OR Como.dx like 'I12%' -- MULTIVESSEL CAD
+                 OR dx like 'I12%' -- MULTIVESSEL CAD
 
-                 OR Como.dx like 'Z95%' -- MULTIVESSEL CAD
+                 OR dx like 'Z95%' -- MULTIVESSEL CAD
 
-                 OR Como.dx = 'Z98.61' -- PCI*/
-                 OR Como.dx like 'G93.4%' -- Encephalopathy, other
+                 OR dx = 'Z98.61' -- PCI*/
+                 OR dx like 'G93.4%' -- Encephalopathy, other
 
 
                  -- NEXT WAS "GUESSING EXCLUDING" TAB, ALL ARE H35 & OVERLAPS WITH RETINOPATHY
 
 
-                /* OR Como.dx like '581%' -- NEPHROTIC SYN
+                /* OR dx like '581%' -- NEPHROTIC SYN
 
-                 OR Como.dx like 'NO4%' -- NEPHROTIC SYN
+                 OR dx like 'NO4%' -- NEPHROTIC SYN
 
-                 OR Como.dx = 'Z87.441' -- NEPHROTIC SYN
+                 OR dx = 'Z87.441' -- NEPHROTIC SYN
 
-                 OR Como.dx = '042' -- HIV
+                 OR dx = '042' -- HIV
 
-                 OR Como.dx = 'B20' -- HIV
+                 OR dx = 'B20' -- HIV
 
-                 OR Como.dx = 'B97.35' -- HIV
+                 OR dx = 'B97.35' -- HIV
 
-                 OR Como.dx = 'Z21' -- HIV
+                 OR dx = 'Z21' -- HIV
 
 
-                 OR Como.dx like '433%' -- STROKE
+                 OR dx like '433%' -- STROKE
 
-                 OR Como.dx like '434%' -- STROKE
+                 OR dx like '434%' -- STROKE
 
-                 OR Como.dx = '997.02' -- STROKE
+                 OR dx = '997.02' -- STROKE
 
-                 OR Como.dx like 'I63%' -- STROKE
+                 OR dx like 'I63%' -- STROKE
 
-                 OR Como.dx like 'I97.8%' -- STROKE
+                 OR dx like 'I97.8%' -- STROKE
 
-                 OR Como.dx like '278%' -- OBESITY
+                 OR dx like '278%' -- OBESITY
 
-                 OR Como.dx like 'E66%' -- OBESITY
+                 OR dx like 'E66%' -- OBESITY
 
-                 OR Como.dx like '410%' -- MI
+                 OR dx like '410%' -- MI
 
-                 OR Como.dx = '411.0' -- MI
+                 OR dx = '411.0' -- MI
 
-                 OR Como.dx = '411.81' -- MI
+                 OR dx = '411.81' -- MI
 
-                 OR Como.dx = '412' -- MI
+                 OR dx = '412' -- MI
 
-                 OR Como.dx like 'I21%' -- MI
+                 OR dx like 'I21%' -- MI
 
-                 OR Como.dx like 'I22%' -- MI
+                 OR dx like 'I22%' -- MI
 
-                 OR Como.dx like '123%' -- MI
+                 OR dx like '123%' -- MI
 */
 --
 --                  -- ?? IN SPREADSHEET FOR I24 AND I25
 --
---                  OR Como.dx = 'I24.0' -- MI
+--                  OR dx = 'I24.0' -- MI
 --
---                  OR Como.dx = 'I25.2' -- MI
+--                  OR dx = 'I25.2' -- MI
 --
 --
---                  OR Como.dx like '996%' -- ORGAN TRN
+--                  OR dx like '996%' -- ORGAN TRN
 --
---                  OR Como.dx like 'Z48.2%' -- ORGAN TRN
+--                  OR dx like 'Z48.2%' -- ORGAN TRN
                   or dx like 'K72%' -- 'liver_failure'
 
 
 -- DX FROM TABLE 2
 
-                 OR Como.dx in
+                 OR dx in
                     ('403.01', '404.02', '403.91', '404.03', '404.12', '585.3', '585.4', '585.5', '585.6', '285.21',
                      '710',
                      '403.1', '403.9', '403.11',
@@ -391,7 +391,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                      '428.21', '428.42', '428.32', '428.22', '428.31', '428.33', '428.41', 'V42.0', '428.23', '428.43',
                      'V58.67') -- CKD
 
-                 OR Como.dx in
+                 OR dx in
                     ('I12.0', 'I13.11', 'I13.2', 'N18.30', 'N18.4', 'N18.5', 'N18.6', 'M32.14', 'I12.9', 'I13.10',
                      'I13.0',
                      'E10.22', 'E11.22', 'E13.22',
@@ -406,80 +406,80 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                      'I50.814', 'I50.89', 'I50.83', 'N18.31', 'N18.3', 'Z79.4') --CKD
 
 
-                 OR Como.dx like 'G45%' -- TIA
-                 OR Como.dx like '435%' -- TIA
+                 OR dx like 'G45%' -- TIA
+                 OR dx like '435%' -- TIA
 
-                 OR Como.dx like 'I20%' -- IHD
+                 OR dx like 'I20%' -- IHD
 
-                 OR Como.dx like 'I21%' -- IHD
+                 OR dx like 'I21%' -- IHD
 
-                 OR Como.dx like 'I22%' -- IHD
+                 OR dx like 'I22%' -- IHD
 
-                 OR Como.dx like 'I23%' -- IHD
+                 OR dx like 'I23%' -- IHD
 
-                 OR Como.dx like 'I24%' -- IHD
+                 OR dx like 'I24%' -- IHD
 
-                 OR Como.dx like 'I25%' -- IHD
+                 OR dx like 'I25%' -- IHD
 
-                 OR Como.dx like 'I50%' -- HEART FAILURE
-                 OR Como.dx like '428%' -- HEART FAILURE
+                 OR dx like 'I50%' -- HEART FAILURE
+                 OR dx like '428%' -- HEART FAILURE
 
-                 OR Como.dx = 'I10' -- HYPERTENSIVE
+                 OR dx = 'I10' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I11.0' -- HYPERTENSIVE
+                 OR dx = 'I11.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I11.9' -- HYPERTENSIVE
+                 OR dx = 'I11.9' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I12.0' -- HYPERTENSIVE
+                 OR dx = 'I12.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I12.9' -- HYPERTENSIVE
+                 OR dx = 'I12.9' -- HYPERTENSIVE
 
-                 OR Como.dx like 'I13%' -- HYPERTENSIVE
+                 OR dx like 'I13%' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.0' -- HYPERTENSIVE
+                 OR dx = 'I15.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.1' -- HYPERTENSIVE
+                 OR dx = 'I15.1' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.2' -- HYPERTENSIVE
+                 OR dx = 'I15.2' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.8' -- HYPERTENSIVE
+                 OR dx = 'I15.8' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.9' -- HYPERTENSIVE
+                 OR dx = 'I15.9' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.0' -- HYPERTENSIVE
+                 OR dx = 'I16.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.1' -- HYPERTENSIVE
+                 OR dx = 'I16.1' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.9' -- HYPERTENSIVE
+                 OR dx = 'I16.9' -- HYPERTENSIVE
 
-                 OR Como.dx = '401' -- HYPERTENSIVE
-                 OR Como.dx = '402' -- HYPERTENSIVE
-                 OR Como.dx = '403' -- HYPERTENSIVE
-                 OR Como.dx = '404' -- HYPERTENSIVE
-                 OR Como.dx = '405' -- HYPERTENSIVE
+                 OR dx = '401' -- HYPERTENSIVE
+                 OR dx = '402' -- HYPERTENSIVE
+                 OR dx = '403' -- HYPERTENSIVE
+                 OR dx = '404' -- HYPERTENSIVE
+                 OR dx = '405' -- HYPERTENSIVE
 
-                -- OR Como.dx like
+                -- OR dx like
                  --   ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
-                 OR Como.dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
-                 OR Como.dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
-                 OR Como.dx = 'E78.1' -- LIPIDEMIA, hypertriglyceridemia
-                 OR Como.dx = 'E78.2' -- LIPIDEMIA, mixed hyperlipedimia
-                 OR Como.dx = 'E78.3' -- LIPIDEMIA, hyperchylomicronemia
-                 OR Como.dx = 'E78.41' -- LIPIDEMIA, elevated lipoprotien(a)
-                 OR Como.dx = '272.1' -- LIPIDEMIA, hypertriglyceridemia
+                 OR dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
+                 OR dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
+                 OR dx = 'E78.1' -- LIPIDEMIA, hypertriglyceridemia
+                 OR dx = 'E78.2' -- LIPIDEMIA, mixed hyperlipedimia
+                 OR dx = 'E78.3' -- LIPIDEMIA, hyperchylomicronemia
+                 OR dx = 'E78.41' -- LIPIDEMIA, elevated lipoprotien(a)
+                 OR dx = '272.1' -- LIPIDEMIA, hypertriglyceridemia
 
 
-                 OR Como.dx in
+                 OR dx in
                     ('K85.0', 'K85.00', 'K85.01', 'K85.02', 'K85.1', 'K85.10', 'K85.11', 'K85.12', 'K85.8', 'K85.80',
                      'K85.81',
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
+                 OR dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
                                 'K86.9') -- CHRONIC PANCREATITIS
 
 
-                 OR Como.dx in ('440.20',
+                 OR dx in ('440.20',
                                 '440.21',
                                 '440.22',
                                 '440.23',
@@ -520,31 +520,31 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                 'I70.91',
                                 'I70.92')-- PAD
 
-                 OR Como.dx = 'R17' -- JAUNDICE
-                 OR Como.dx = '782.4' -- JAUNDICE
+                 OR dx = 'R17' -- JAUNDICE
+                 OR dx = '782.4' -- JAUNDICE
 
-                 OR Como.dx = 'R18.8' -- ASCITES
-                 OR Como.dx = '789.5' -- ASCITES
+                 OR dx = 'R18.8' -- ASCITES
+                 OR dx = '789.5' -- ASCITES
 
-                 OR Como.dx in ('I85.11', 'I85.01', '465.0', '456.20') -- ESOPHAGEAL VARICES HEMORRHAGIC
+                 OR dx in ('I85.11', 'I85.01', '465.0', '456.20') -- ESOPHAGEAL VARICES HEMORRHAGIC
 
-                 OR Como.dx = 'G93.4' -- ENCEPHALOPATHY, UNSPEC
-                 OR Como.dx = '348.30' -- ENCEPHALOPATHY, UNSPEC
+                 OR dx = 'G93.4' -- ENCEPHALOPATHY, UNSPEC
+                 OR dx = '348.30' -- ENCEPHALOPATHY, UNSPEC
 
-                 OR Como.dx = 'K76.7' -- HEPATORENAL SYND
-                 OR Como.dx = '572.4' -- HEPATORENAL SYND
+                 OR dx = 'K76.7' -- HEPATORENAL SYND
+                 OR dx = '572.4' -- HEPATORENAL SYND
 
-                 OR Como.dx = 'K65.2' -- SPONTANEOUS BACTERIAL PERITONITIS
-                 OR Como.dx = '567.23' -- SPONTANEOUS BACTERIAL PERITONITIS
+                 OR dx = 'K65.2' -- SPONTANEOUS BACTERIAL PERITONITIS
+                 OR dx = '567.23' -- SPONTANEOUS BACTERIAL PERITONITIS
 
-                 OR Como.dx in ('K75.81', '571.8', 'K76.0') -- NAFLD OR NASH
+                 OR dx in ('K75.81', '571.8', 'K76.0') -- NAFLD OR NASH
 
 
                  )
 
          GROUP BY patid,
                   cohort,
-                  como.dx
+                  dx
 
 
 
@@ -566,8 +566,8 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                     INNER JOIN cdm.dbo.diagnosis  b on a.patid = b.patid
 
 
-                           WHERE /*como.admit_date BETWEEN '2020-08-31' AND '2021-08-31'
-                              and*/ Como.dx like
+                           WHERE /*admit_date BETWEEN '2020-08-31' AND '2021-08-31'
+                              and*/ dx like
                                     ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                            group by patid, cohort),
      ASCVD as (select patid,
@@ -894,16 +894,11 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                      N_mean_etc,
 
                             N_cohort_total,
-                            case
-                                when (Comorbidity_name like '%75%'
-                                or Comorbidity_name like '%25%'
-                                    or Comorbidity_name like ('%Mean%')
-                                    or Comorbidity_name like ('%Median%')
-                                    or Comorbidity_name like ('%std%'))
-                                    then 0
-                                else
-                                    round(100 * N_mean_etc/ N_cohort_total, 2)
-                                end
+                              IIF((Comorbidity_name like '%75%'
+                                  or Comorbidity_name like '%25%'
+                                  or Comorbidity_name like ('%Mean%')
+                                  or Comorbidity_name like ('%Median%')
+                                  or Comorbidity_name like ('%std%')), 0, round(100 * N_mean_etc / N_cohort_total, 2))
                                 as percentage1
                      from table2 a
                               left join totals b on a.cohort= b.cohort
