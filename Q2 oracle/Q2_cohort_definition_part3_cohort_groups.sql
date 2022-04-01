@@ -2,6 +2,8 @@
 -- Add in data needed for cohorts (Various lab and dx criteria based on AHA guidelines), and get cohort groupings.
 -- Run time: ~ 13 minutes
 --drop table SHTG_Q2_STEP3_d5
+
+
 create table SHTG_Q2_STEP3_d5 as
 WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
      where age>=18 and pre_index_days>=180),
