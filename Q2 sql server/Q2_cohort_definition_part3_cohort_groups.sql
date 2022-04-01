@@ -1007,7 +1007,15 @@ from (
                   left join #add_categories add_categories on a.patid = add_categories.patid) as aveac;
 
 
-select *
+select a.*,
+                b.TG_CATEGORY,
+                b.LDL_category2,
+                b.nhdl_category2,
+                b.v_high_risk,
+                b.enhanced_risk,
+             
+               b.diabetes,
+       cohort
 into foo.dbo.shtg_Q2_STEP3
 from #PAT_LIST a
          join #cohorts b on a.patid = b.patid
