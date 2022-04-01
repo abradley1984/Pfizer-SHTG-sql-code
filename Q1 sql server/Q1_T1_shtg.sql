@@ -19,13 +19,14 @@ GROUP (ORDER BY age asc) OVER (PARTITION BY cohort)
 
 select *
 into #pat_list
-from foo.dbo.shtg_Q1_cohort_with_exclusions;
+from
+                                    foo.dbo.SHTG_Q2_STEP3 ;
 select *
 into #smoking
 from (
     select a.patid,
     row_number() OVER (
-    PARTITION BY patid
+      PARTITION BY a.patid
     ORDER BY measure_date desc
     ) row_num,
     smoking as smoking,
@@ -106,7 +107,7 @@ when Age BETWEEN 65 and 75
                       end as Age_category
            from pat_list),*/
 
-select *
+select a.*, e.payer_type_primary
 into #insurance
 from #pat_list a
     left join cdm.dbo.encounter e  on a.patid = e.patid
