@@ -17,12 +17,11 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                   from foo.dbo.shtg_Q1_cohort_with_exclusions),
 
 
-
      comorbid_conditions AS ( --All diagnoses for each patient
 
          SELECT patid,
 
-                dx  ,
+                dx,
 
                 MIN(admit_date) min_date,
 
@@ -38,7 +37,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
                     WHEN dx like 'E10%' THEN 'diabetes'
 
-                   -- WHEN dx like 'E09%' THEN 'diabetes'
+                    -- WHEN dx like 'E09%' THEN 'diabetes'
 
                     WHEN dx like 'E08%' THEN 'diabetes'
 
@@ -47,39 +46,39 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                     WHEN dx like '250%' THEN 'diabetes'
 
 
-                  --  WHEN dx like 'H31%' THEN 'retinopathy'
+                    --  WHEN dx like 'H31%' THEN 'retinopathy'
 
-                  --  WHEN dx like 'H35%' THEN 'retinopathy'
-
-
-                 --   WHEN dx like 'I12%' THEN 'multivessel cad'
-
-                  --  WHEN dx like 'Z95%' THEN 'multivessel cad'
+                    --  WHEN dx like 'H35%' THEN 'retinopathy'
 
 
-                  --  WHEN dx like 'Z98.61%' THEN 'PCI'
+                    --   WHEN dx like 'I12%' THEN 'multivessel cad'
+
+                    --  WHEN dx like 'Z95%' THEN 'multivessel cad'
 
 
-                   -- WHEN dx like '581%' THEN 'NEPHROTIC SYN'
+                    --  WHEN dx like 'Z98.61%' THEN 'PCI'
 
-                   -- WHEN dx like 'N04%' THEN 'NEPHROTIC SYN'
+
+                    -- WHEN dx like '581%' THEN 'NEPHROTIC SYN'
+
+                    -- WHEN dx like 'N04%' THEN 'NEPHROTIC SYN'
 
                     --WHEN dx like 'Z87.441%' THEN 'NEPHROTIC SYN'
 
 
-                --    WHEN dx IN ('O42', 'B20', 'B98.35', 'Z21') THEN 'HIV'
+                    --    WHEN dx IN ('O42', 'B20', 'B98.35', 'Z21') THEN 'HIV'
 
 
-               /* --    WHEN dx like '433%' THEN 'STROKE'
+                    /* --    WHEN dx like '433%' THEN 'STROKE'
 
-                --    WHEN dx like '434%' THEN 'STROKE'
+                     --    WHEN dx like '434%' THEN 'STROKE'
 
-                    WHEN dx like '997.02%' THEN 'STROKE'
+                         WHEN dx like '997.02%' THEN 'STROKE'
 
-                    WHEN dx like 'I63%' THEN 'STROKE'
+                         WHEN dx like 'I63%' THEN 'STROKE'
 
-                    WHEN dx like 'I97.8%' THEN 'STROKE'
-*/
+                         WHEN dx like 'I97.8%' THEN 'STROKE'
+     */
 /*
                     WHEN dx like 'E66%' THEN 'obesity'
 
@@ -131,9 +130,9 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                     WHEN dx IN ('I10', 'I11.0', 'I11.9', 'I12.0', 'I15.0', 'I15.1', 'I15.2', 'I15.8', 'I15.9', 'I16.0',
                                 'I16.1', 'I16.9', '401', '402', '403', '404', '405') THEN 'hypertension'
 
-                 -- WHEN dx LIKE 'I129%' THEN 'hypertension' error
+                    -- WHEN dx LIKE 'I129%' THEN 'hypertension' error
 
-                   -- WHEN dx LIKE 'I30%' THEN 'hypertension' error
+                    -- WHEN dx LIKE 'I30%' THEN 'hypertension' error
 
 
                     WHEN dx = '272' THEN 'Disorders of lipoprotein metabolism and other'
@@ -161,7 +160,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
                     WHEN dx LIKE 'I25%' THEN 'IHD'
 
-WHEN dx in ('440.20',
+                    WHEN dx in ('440.20',
                                 '440.21',
                                 '440.22',
                                 '440.23',
@@ -170,7 +169,7 @@ WHEN dx in ('440.20',
                                 '440.30',
                                 '440.31',
                                 '440.32',
-                               -- '440.4', -- removed no icd9
+                        -- '440.4', -- removed no icd9
                                 'I70.0',
                                 'I70.1',
                                 'I70.201',
@@ -178,12 +177,12 @@ WHEN dx in ('440.20',
                                 'I70.203',
                                 'I70.208',
                                 'I70.209',
-                              -- 'I70.21', -- removed
-                               -- 'I70.22', -- removed
+                        -- 'I70.21', -- removed
+                        -- 'I70.22', -- removed
                                 'I70.232',
-                               -- 'I70.24', -- removed
+                        -- 'I70.24', -- removed
                                 'I70.25',
-                               -- 'I70.26', -- removed
+                        -- 'I70.26', -- removed
                                 'I70.261',
                                 'I70.262',
                                 'I70.263',
@@ -194,14 +193,13 @@ WHEN dx in ('440.20',
                                 'I70.293',
                                 'I70.298',
                                 'I70.299',
-                               -- 'I70.3', -- removed
-                              -- 'I70.4', -- removed
+                        -- 'I70.3', -- removed
+                        -- 'I70.4', -- removed
                                 'I70.5',
                                 'I70.8',
                                 'I70.90',
                                 'I70.91',
                                 'I70.92') THEN 'PAD'
-
 
 
                     WHEN dx LIKE 'I50%' THEN 'HEART FAILURE'
@@ -212,7 +210,7 @@ WHEN dx in ('440.20',
                                 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') THEN 'ACUTE PANCREATITIS'
 
 
-                    WHEN dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89', 'K86.9')
+                    WHEN dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89', 'K86.9')
                         THEN 'CHRONIC PANCREATITIS'
 
 
@@ -249,9 +247,6 @@ WHEN dx in ('440.20',
                     AS          Comorbidity_name
 
 
-
-
-
          FROM pat_list a
 
 
@@ -262,32 +257,32 @@ WHEN dx in ('440.20',
 */
 
              (dx IN (
-                          'I10',
-                         -- 'E66.9', obesity
-                          --'E66.01',
-                          --'E66.09',
-                         -- 'K21.9',gerd
-                        --  'K21.0',
-                        --  'K76.6',
-                        --  'F41.9',
-                          'R17',
-                          'R18.8',
-                          'I85.01',
-                          --'I85.10',
-                          --'I85.00',
-                          'I85.11',
-                          'K76.7',
-                          'K65.2'
-                       --   'K65.0',
-                       --   'K65.9'
+                     'I10',
+                 -- 'E66.9', obesity
+                 --'E66.01',
+                 --'E66.09',
+                 -- 'K21.9',gerd
+                 --  'K21.0',
+                 --  'K76.6',
+                 --  'F41.9',
+                     'R17',
+                     'R18.8',
+                     'I85.01',
+                 --'I85.10',
+                 --'I85.00',
+                     'I85.11',
+                     'K76.7',
+                     'K65.2'
+                 --   'K65.0',
+                 --   'K65.9'
 
                  )
 
 -- DX FROM TABLE 9
-OR dx like 'K74.6%' -- 'CIRRHOSIS'
+                 OR dx like 'K74.6%' -- 'CIRRHOSIS'
                  OR dx like 'E08%' -- diabetes
 
-                -- OR dx like 'E09%' -- diabetes
+                 -- OR dx like 'E09%' -- diabetes
 
                  OR dx like 'E10%' -- diabetes
 
@@ -316,49 +311,49 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
                  -- NEXT WAS "GUESSING EXCLUDING" TAB, ALL ARE H35 & OVERLAPS WITH RETINOPATHY
 
 
-                /* OR dx like '581%' -- NEPHROTIC SYN
+                 /* OR dx like '581%' -- NEPHROTIC SYN
 
-                 OR dx like 'NO4%' -- NEPHROTIC SYN
+                  OR dx like 'NO4%' -- NEPHROTIC SYN
 
-                 OR dx = 'Z87.441' -- NEPHROTIC SYN
+                  OR dx = 'Z87.441' -- NEPHROTIC SYN
 
-                 OR dx = '042' -- HIV
+                  OR dx = '042' -- HIV
 
-                 OR dx = 'B20' -- HIV
+                  OR dx = 'B20' -- HIV
 
-                 OR dx = 'B97.35' -- HIV
+                  OR dx = 'B97.35' -- HIV
 
-                 OR dx = 'Z21' -- HIV
+                  OR dx = 'Z21' -- HIV
 
 
-                 OR dx like '433%' -- STROKE
+                  OR dx like '433%' -- STROKE
 
-                 OR dx like '434%' -- STROKE
+                  OR dx like '434%' -- STROKE
 
-                 OR dx = '997.02' -- STROKE
+                  OR dx = '997.02' -- STROKE
 
-                 OR dx like 'I63%' -- STROKE
+                  OR dx like 'I63%' -- STROKE
 
-                 OR dx like 'I97.8%' -- STROKE
+                  OR dx like 'I97.8%' -- STROKE
 
-                 OR dx like '278%' -- OBESITY
+                  OR dx like '278%' -- OBESITY
 
-                 OR dx like 'E66%' -- OBESITY
+                  OR dx like 'E66%' -- OBESITY
 
-                 OR dx like '410%' -- MI
+                  OR dx like '410%' -- MI
 
-                 OR dx = '411.0' -- MI
+                  OR dx = '411.0' -- MI
 
-                 OR dx = '411.81' -- MI
+                  OR dx = '411.81' -- MI
 
-                 OR dx = '412' -- MI
+                  OR dx = '412' -- MI
 
-                 OR dx like 'I21%' -- MI
+                  OR dx like 'I21%' -- MI
 
-                 OR dx like 'I22%' -- MI
+                  OR dx like 'I22%' -- MI
 
-                 OR dx like '123%' -- MI
-*/
+                  OR dx like '123%' -- MI
+ */
 --
 --                  -- ?? IN SPREADSHEET FOR I24 AND I25
 --
@@ -370,7 +365,7 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
 --                  OR dx like '996%' -- ORGAN TRN
 --
 --                  OR dx like 'Z48.2%' -- ORGAN TRN
-                  or dx like 'K72%' -- 'liver_failure'
+                 or dx like 'K72%' -- 'liver_failure'
 
 
 -- DX FROM TABLE 2
@@ -458,7 +453,7 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
                  OR dx = '404' -- HYPERTENSIVE
                  OR dx = '405' -- HYPERTENSIVE
 
-                -- OR dx like
+                 -- OR dx like
                  --   ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                  OR dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                  OR dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
@@ -475,50 +470,50 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
-                                'K86.9') -- CHRONIC PANCREATITIS
+                 OR dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
+                           'K86.9') -- CHRONIC PANCREATITIS
 
 
                  OR dx in ('440.20',
-                                '440.21',
-                                '440.22',
-                                '440.23',
-                                '440.24',
-                                '440.29',
-                                '440.30',
-                                '440.31',
-                                '440.32',
-                               -- '440.4',
-                                'I70.0',
-                                'I70.1',
-                                'I70.201',
-                                'I70.202',
-                                'I70.203',
-                                'I70.208',
-                                'I70.209',
-                                'I70.21',
-                                'I70.22',
-                                'I70.232',
-                                'I70.24',
-                                'I70.25',
-                                'I70.26',
-                                'I70.261',
-                                'I70.262',
-                                'I70.263',
-                                'I70.268',
-                                'I70.269',
-                                'I70.291',
-                                'I70.292',
-                                'I70.293',
-                                'I70.298',
-                                'I70.299',
-                                'I70.3',
-                                'I70.4',
-                                'I70.5',
-                                'I70.8',
-                                'I70.90',
-                                'I70.91',
-                                'I70.92')-- PAD
+                           '440.21',
+                           '440.22',
+                           '440.23',
+                           '440.24',
+                           '440.29',
+                           '440.30',
+                           '440.31',
+                           '440.32',
+                     -- '440.4',
+                           'I70.0',
+                           'I70.1',
+                           'I70.201',
+                           'I70.202',
+                           'I70.203',
+                           'I70.208',
+                           'I70.209',
+                           'I70.21',
+                           'I70.22',
+                           'I70.232',
+                           'I70.24',
+                           'I70.25',
+                           'I70.26',
+                           'I70.261',
+                           'I70.262',
+                           'I70.263',
+                           'I70.268',
+                           'I70.269',
+                           'I70.291',
+                           'I70.292',
+                           'I70.293',
+                           'I70.298',
+                           'I70.299',
+                           'I70.3',
+                           'I70.4',
+                           'I70.5',
+                           'I70.8',
+                           'I70.90',
+                           'I70.91',
+                           'I70.92')-- PAD
 
                  OR dx = 'R17' -- JAUNDICE
                  OR dx = '782.4' -- JAUNDICE
@@ -545,12 +540,8 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
          GROUP BY patid,
                   cohort,
                   dx
-
-
-
-
      ),
-   Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
+     Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list a
                                  left join cdm.dbo.procedures b on a.patid = b.patid
                         where PX =
@@ -558,12 +549,12 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
      comorbidity_group as (select patid,
                                   cohort,
 
-                                  max( datediff(dd,  index_date, admit_date)) / 365.25              as tx_since_first_lip,
-                                  'Disorders of lipoprotein metabolism and other' as Comorbidity_name
+                                  max(datediff(dd, index_date, admit_date)) / 365.25 as tx_since_first_lip,
+                                  'Disorders of lipoprotein metabolism and other'    as Comorbidity_name
                            FROM pat_list a
 
 
-                                    INNER JOIN cdm.dbo.diagnosis  b on a.patid = b.patid
+                                    INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
 
 
                            WHERE /*admit_date BETWEEN '2020-08-31' AND '2021-08-31'
@@ -573,177 +564,177 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
      ASCVD as (select patid,
                       cohort,
                       max(datediff(dd, admit_date, index_date) / 365.25 as time_since_first_ascvd_diagnosis,
-                      'ASCVD'                            as Comorbidity_name
-               FROM pat_list a
-                        INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
-               WHERE dx in ('413.9',
-                            'I20.9',
-                            'I23.7',
-                            'I25.111',
-                            'I25.118',
-                            'I25.119',
-                            'I25.701',
-                            'I25.708',
-                            'I25.709',
-                            'I25.738',
-                            'I25.751',
-                            'I25.791',
-                            '411.1',
-                            '411.81',
-                            '411.89',
-                            '413.0',
-                            '413.1',
-                            'I20.0',
-                            'I20.1',
-                            'I20.8',
-                            'I24.0',
-                            'I24.8',
-                            'I24.9',
-                            'I25.110',
-                            'I25.700',
-                            'I25.710',
-                            'I25.720',
-                            'I25.730',
-                            'I25.750',
-                            'I25.760',
-                            'I25.790',
-                            '414.8',
-                            '414.9',
-                            'I25.5',
-                            'I25.6',
-                            'I25.89',
-                            'I25.9',
-                            '410.11',
-                            '410.2',
-                            '410.3',
-                            '410.4',
-                            '410.50',
-                            '410.51',
-                            '410.60',
-                            '410.61',
-                            '410.62',
-                            '410.70',
-                            '410.71',
-                            '410.72',
-                            '410.81',
-                            '410.90',
-                            '410.91',
-                            '410.92',
-                            '411.0',
-                            '412',
-                            'I21.01',
-                            'I21.02',
-                            'I21.09',
-                            'I21.11',
-                            'I21.19',
-                            'I21.21',
-                            'I21.29',
-                            'I21.3',
-                            'I21.4',
-                            'I21.9',
-                            'I21.A1',
-                            'I21.A9',
-                            'I22.0',
-                            'I22.1',
-                            'I22.2',
-                            'I22.8',
-                            'I22.9',
-                            'I23.0',
-                            'I23.3',
-                            'I23.6',
-                            'I23.8',
-                            'I24.1',
-                            'I25.2',
-                            '440.20',
-                            '440.21',
-                            '440.22',
-                            '440.23',
-                            '440.24',
-                            '440.29',
-                            '440.30',
-                            '440.31',
-                            '440.32',
-                            '440.4',
-                            'I70.0',
-                            'I70.1',
-                            'I70.201',
-                            'I70.202',
-                            'I70.203',
-                            'I70.208',
-                            'I70.209',
-                            'I70.21',
-                            'I70.22',
-                            'I70.232',
-                            'I70.24',
-                            'I70.25',
-                            'I70.26',
-                            'I70.261',
-                            'I70.262',
-                            'I70.263',
-                            'I70.268',
-                            'I70.269',
-                            'I70.291',
-                            'I70.292',
-                            'I70.293',
-                            'I70.298',
-                            'I70.299',
-                            'I70.3',
-                            'I70.4',
-                            'I70.5',
-                            'I70.8',
-                            'I70.90',
-                            'I70.91',
-                            'I70.92',
-                            '346.62',
-                            '346.63',
-                            '433.01',
-                            '433.11',
-                            '433.21',
-                            '433.31',
-                            '433.81',
-                            '433.91',
-                            '434.01',
-                            '434.11',
-                            '434.91',
-                            'V12.54',
-                            'G43.601',
-                            'G43.609',
-                            'G43.611',
-                            'G43.619',
-                            'I63.00',
-                            'I63.011',
-                            'I63.012',
-                            'I63.019',
-                            'I63.02',
-                            'I63.031',
-                            'I63.032',
-                            'I63.09',
-                            'I63.10',
-                            'I63.112',
-                            'I63.12',
-                            'I63.19',
-                            'I63.311',
-                            'I63.312',
-                            'I63.319',
-                            'I63.321',
-                            'I63.323',
-                            'I63.333',
-                            'I63.343',
-                            'I63.412',
-                            'I63.413',
-                            'I63.429',
-                            'I63.431',
-                            'I63.511',
-                            'I63.519',
-                            'I63.531',
-                            'I63.539',
-                            'I63.59',
-                            'Z86.73')
-               group by patid,
-                        cohort
-     ),
+                          'ASCVD' as Comorbidity_name
+                          FROM pat_list a
+                          INNER JOIN cdm.dbo.diagnosis b on a.patid = b.patid
+                          WHERE dx in ('413.9',
+                                       'I20.9',
+                                       'I23.7',
+                                       'I25.111',
+                                       'I25.118',
+                                       'I25.119',
+                                       'I25.701',
+                                       'I25.708',
+                                       'I25.709',
+                                       'I25.738',
+                                       'I25.751',
+                                       'I25.791',
+                                       '411.1',
+                                       '411.81',
+                                       '411.89',
+                                       '413.0',
+                                       '413.1',
+                                       'I20.0',
+                                       'I20.1',
+                                       'I20.8',
+                                       'I24.0',
+                                       'I24.8',
+                                       'I24.9',
+                                       'I25.110',
+                                       'I25.700',
+                                       'I25.710',
+                                       'I25.720',
+                                       'I25.730',
+                                       'I25.750',
+                                       'I25.760',
+                                       'I25.790',
+                                       '414.8',
+                                       '414.9',
+                                       'I25.5',
+                                       'I25.6',
+                                       'I25.89',
+                                       'I25.9',
+                                       '410.11',
+                                       '410.2',
+                                       '410.3',
+                                       '410.4',
+                                       '410.50',
+                                       '410.51',
+                                       '410.60',
+                                       '410.61',
+                                       '410.62',
+                                       '410.70',
+                                       '410.71',
+                                       '410.72',
+                                       '410.81',
+                                       '410.90',
+                                       '410.91',
+                                       '410.92',
+                                       '411.0',
+                                       '412',
+                                       'I21.01',
+                                       'I21.02',
+                                       'I21.09',
+                                       'I21.11',
+                                       'I21.19',
+                                       'I21.21',
+                                       'I21.29',
+                                       'I21.3',
+                                       'I21.4',
+                                       'I21.9',
+                                       'I21.A1',
+                                       'I21.A9',
+                                       'I22.0',
+                                       'I22.1',
+                                       'I22.2',
+                                       'I22.8',
+                                       'I22.9',
+                                       'I23.0',
+                                       'I23.3',
+                                       'I23.6',
+                                       'I23.8',
+                                       'I24.1',
+                                       'I25.2',
+                                       '440.20',
+                                       '440.21',
+                                       '440.22',
+                                       '440.23',
+                                       '440.24',
+                                       '440.29',
+                                       '440.30',
+                                       '440.31',
+                                       '440.32',
+                                       '440.4',
+                                       'I70.0',
+                                       'I70.1',
+                                       'I70.201',
+                                       'I70.202',
+                                       'I70.203',
+                                       'I70.208',
+                                       'I70.209',
+                                       'I70.21',
+                                       'I70.22',
+                                       'I70.232',
+                                       'I70.24',
+                                       'I70.25',
+                                       'I70.26',
+                                       'I70.261',
+                                       'I70.262',
+                                       'I70.263',
+                                       'I70.268',
+                                       'I70.269',
+                                       'I70.291',
+                                       'I70.292',
+                                       'I70.293',
+                                       'I70.298',
+                                       'I70.299',
+                                       'I70.3',
+                                       'I70.4',
+                                       'I70.5',
+                                       'I70.8',
+                                       'I70.90',
+                                       'I70.91',
+                                       'I70.92',
+                                       '346.62',
+                                       '346.63',
+                                       '433.01',
+                                       '433.11',
+                                       '433.21',
+                                       '433.31',
+                                       '433.81',
+                                       '433.91',
+                                       '434.01',
+                                       '434.11',
+                                       '434.91',
+                                       'V12.54',
+                                       'G43.601',
+                                       'G43.609',
+                                       'G43.611',
+                                       'G43.619',
+                                       'I63.00',
+                                       'I63.011',
+                                       'I63.012',
+                                       'I63.019',
+                                       'I63.02',
+                                       'I63.031',
+                                       'I63.032',
+                                       'I63.09',
+                                       'I63.10',
+                                       'I63.112',
+                                       'I63.12',
+                                       'I63.19',
+                                       'I63.311',
+                                       'I63.312',
+                                       'I63.319',
+                                       'I63.321',
+                                       'I63.323',
+                                       'I63.333',
+                                       'I63.343',
+                                       'I63.412',
+                                       'I63.413',
+                                       'I63.429',
+                                       'I63.431',
+                                       'I63.511',
+                                       'I63.519',
+                                       'I63.531',
+                                       'I63.539',
+                                       'I63.59',
+                                       'Z86.73')
+                          group by patid,
+                          cohort
+                          ),
 
-     comorbidity_count as
+                      comorbidity_count as
          (
              select '2'                   as order1,
                     count(distinct patid) as N,
@@ -881,12 +872,12 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
              from ascvd
 
          ),
-     table2 as (select order1, 'Comorbidity' as comorbidity, Comorbidity_name, round(N, 2) as N_mean_etc, cohort
+                      table2 as (select order1, 'Comorbidity' as comorbidity, Comorbidity_name, round(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
               /*  order by cohort*/),
-      totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
+                      totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
 
-     percentages as (select
+                      percentages as (select
                               a.Cohort,
                             order1,
                              Comorbidity_name,
