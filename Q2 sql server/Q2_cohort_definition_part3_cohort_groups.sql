@@ -25,20 +25,20 @@ IF OBJECT_ID(#multiple_stroke) IS NOT NULL
 IF OBJECT_ID(#MI) IS NOT NULL
     DROP TABLE #MI;
 
-    IF OBJECT_ID(#PAD) IS NOT NULL
-      DROP TABLE #PAD; 
-      
-      IF OBJECT_ID(#TG_persistent_high_175) IS NOT NULL
-        DROP TABLE #TG_persistent_high_175; 
-        
-        IF OBJECT_ID(#TG_all) IS NOT NULL
-          DROP TABLE #TG_all; 
-          
-          IF OBJECT_ID(#TG_second_most_recent_175) IS NOT NULL
-            DROP TABLE #TG_second_most_recent_175; 
-            
-            IF OBJECT_ID(#TG_most_recent_high_175) IS NOT NULL
-              DROP TABLE #TG_most_recent_high_175; 
+IF OBJECT_ID(#PAD) IS NOT NULL
+    DROP TABLE #PAD;
+
+IF OBJECT_ID(#TG_persistent_high_175) IS NOT NULL
+    DROP TABLE #TG_persistent_high_175;
+
+IF OBJECT_ID(#TG_all) IS NOT NULL
+    DROP TABLE #TG_all;
+
+IF OBJECT_ID(#TG_second_most_recent_175) IS NOT NULL
+    DROP TABLE #TG_second_most_recent_175;
+
+IF OBJECT_ID(#TG_most_recent_high_175) IS NOT NULL
+    DROP TABLE #TG_most_recent_high_175;
 
 IF OBJECT_ID(#PCI) IS NOT NULL
     DROP TABLE #PCI;
@@ -72,7 +72,40 @@ IF OBJECT_ID(#LDL_second_most_recent_100) IS NOT NULL
 IF OBJECT_ID(#LDL_second_most_recent_160) IS NOT NULL
     DROP TABLE #LDL_second_most_recent_160;
 
+IF OBJECT_ID(#cohorts) IS NOT NULL
+    DROP TABLE #cohorts;
 
+IF OBJECT_ID(#v_high_risk_category) IS NOT NULL
+    DROP TABLE #v_high_risk_category;
+
+IF OBJECT_ID(#v_high_risk_combined) IS NOT NULL
+    DROP TABLE #v_high_risk_combined;
+
+IF OBJECT_ID(#enhanced_category) IS NOT NULL
+    DROP TABLE #enhanced_category;
+
+
+IF OBJECT_ID(#enhanced) IS NOT NULL
+    DROP TABLE #enhanced;
+
+IF OBJECT_ID(#risk_enhancers) IS NOT NULL
+    DROP TABLE #risk_enhancers;
+
+
+IF OBJECT_ID(#v_high_risk_combined) IS NOT NULL
+    DROP TABLE #v_high_risk_combined;
+
+IF OBJECT_ID(#CKD) IS NOT NULL
+    DROP TABLE #CKD;
+
+IF OBJECT_ID(#hypertension) IS NOT NULL
+    DROP TABLE #hypertension;
+
+IF OBJECT_ID(#hypercholesterolemia) IS NOT NULL
+    DROP TABLE #hypercholesterolemia;
+
+IF OBJECT_ID(#congestive_HF) IS NOT NULL
+    DROP TABLE #congestive_HF;
 select *
 into #PAT_LIST
 from (SELECT *
