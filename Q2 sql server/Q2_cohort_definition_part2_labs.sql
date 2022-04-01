@@ -1,3 +1,4 @@
+
 /* This code extracts lab values for patients, some of which are needed for cohort definitions for Q2, others will be used to create Table 3.
 
 Run time: ~36 mins
@@ -29,18 +30,18 @@ from (
          select LDL_Date as index_date, foo.dbo.SHTG_Q2_STEP1.*
          from foo.dbo.SHTG_Q2_STEP1
 
-         -- where cohort is not null
+        -- where cohort is not null
          -- fetch first 1000 rows only
      ) as "ids";
 
 --vldl
 select *
 into #vldl
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  vldl,
              result_unit result_unit,
              result_date result_date
@@ -58,11 +59,11 @@ from (select patid,
 
 select *
 into #apo_b
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  apob,
              result_unit result_unit,
              result_date result_date
@@ -80,11 +81,11 @@ from (select patid,
 
 select *
 into #lpa_mass
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  lpa_mass,
              result_unit result_unit,
              result_date result_date
@@ -102,11 +103,11 @@ from (select patid,
 
 select *
 into #lpa_mol
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  lpa_mol,
              result_unit result_unit,
              result_date result_date
@@ -127,11 +128,11 @@ from (select patid,
 
 select *
 into #apo_a1
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  apo_a1,
              result_unit result_unit,
              result_date result_date
@@ -148,11 +149,11 @@ from (select patid,
 --nlr
 select *
 into #nlr
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  nlr,
              result_unit result_unit,
              result_date result_date
@@ -172,11 +173,11 @@ from (select patid,
 
 select *
 into #hscrp
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  hscrp,
              result_unit result_unit,
              result_date result_date
@@ -191,29 +192,29 @@ from (select patid,
 
 select *
 into #diabetes
-from (select distinct (patid), 1 as Diabetes
-      from #pat_list pats
-               JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+from (select distinct (pats.patid), 1 as Diabetes
+      from #pat_list  pats
+                           JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
       WHERE (dx like 'E13%'
-          or
-             dx like 'E11%'
-          or
-             dx like 'E10%'
-          or
-             dx like 'E09%'
-          or
-             dx like 'E08%')) as pD;
+         or
+          dx like 'E11%'
+         or
+          dx like 'E10%'
+         or
+          dx like 'E09%'
+         or
+          dx like 'E08%')) as pD;
 
 --a1c
 
 
 select *
 into #a1c
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  a1c,
              result_unit result_unit,
              result_date result_date
@@ -225,18 +226,18 @@ from (select patid,
 
         AND lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
         and result_num is not null
-        and patid in (select patid from #diabetes)) as ab;
+        and a.patid in (select patid from #diabetes)) as ab;
 --only giving A1c for diabetic patients
 
 --albumin
 
 select *
 into #albumin
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  albumin,
              result_unit result_unit,
              result_date result_date
@@ -253,11 +254,11 @@ from (select patid,
 
 select *
 into #alp
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  alp,
              result_unit result_unit,
              result_date result_date
@@ -275,11 +276,11 @@ from (select patid,
 
 select *
 into #alt
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  alt,
              result_unit result_unit,
              result_date result_date
@@ -297,11 +298,11 @@ from (select patid,
 
 select *
 into #ast
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  ast,
              result_unit result_unit,
              result_date result_date
@@ -318,11 +319,11 @@ from (select patid,
 
 select *
 into #ggt
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  ggt,
              result_unit result_unit,
              result_date result_date
@@ -340,11 +341,11 @@ from (select patid,
 
 select *
 into #platelets
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  platelets,
              result_unit result_unit,
              result_date result_date
@@ -362,11 +363,11 @@ from (select patid,
 
 select *
 into #tg
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  tg_result_num,
              result_unit result_unit,
              result_date result_date
@@ -383,18 +384,18 @@ from (select patid,
 
 select *
 into #uacr
-from (select patid,
+from (select a.patid,
              row_number() OVER (
-                 PARTITION BY patid
+                 PARTITION BY a.patid
                  ORDER BY result_date asc
-                 )       row_num,
+                 )                     row_num,
              result_num  uacr,
              result_unit result_unit,
              result_date result_date
 
 
       from #pat_list a
-               left join cdm.dbo.lab_result_cm b on a.patid = b.patid
+               left join cdm.dbo.lab_result_cm  b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
@@ -412,7 +413,7 @@ from (select patid,
       from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and wt is not null
-        and patid in (select patid from #pat_list)) as v;
+        and vital.patid in (select patid from #pat_list)) as v;
 select *
 into #height
 from (select patid,
@@ -426,19 +427,19 @@ from (select patid,
       from cdm.dbo.vital
       WHERE measure_date BETWEEN '2020-09-30' AND '2021-09-30'
         and ht is not null
-        and patid in (select patid from #pat_list)) as v;
+        and vital.patid in (select patid from #pat_list)) as v;
 
 select *
 into #creatinine
 from (select *
-      from (select patid,
+      from (select a.patid,
                    row_number() OVER (
-                       PARTITION BY patid
+                       PARTITION BY a.patid
                        ORDER BY result_date asc
                        )                      row_num,
-                   result_num                 creat_result_num,
-                   result_unit                result_unit,
-                   result_date                result_date,
+                   result_num   creat_result_num,
+                   result_unit  result_unit,
+                   result_date  result_date,
                    --cohort,
                    sex,
                    age,
@@ -481,7 +482,7 @@ from (select patid,
                                                                       round(power(0.9938, age), 2)
                  when sex = 'F' and creat_result_num_female >= 1 then 142 * 1.012 *
                                                                       (power(creat_result_num_female, -1.2)) *
-                                                                      power(0.9938, age)
+                                                                      power(0.9938,age)
                  else NULL end
                  as egfr_2021
       from #creatinine--_TEST2
@@ -522,7 +523,6 @@ from (
                 lpa_mass,
                 egfr_2021
                  ,
-                diabetes,
                 creat_result_num
 
          from #pat_list a
@@ -544,12 +544,11 @@ from (
                   full outer join (select * From #apo_a1 where row_num = 1) q on a.patid = q.patid
 
                   full outer join (select * From #lpa_mass where row_num = 1) r on a.patid = r.patid
-                  full outer join (select * From #lpa_mol where row_num = 1) s on a.patid = s.patid
-                  full outer join (select * From #diabetes) t on a.patid = t.patid) as abcdefpaaagamnopqrs;
+                  full outer join (select * From #lpa_mol where row_num = 1) s on a.patid = s.patid) as abcdefpaaagamnopqrs ;
+
 --writing labs table
 --create table Q1_labs_all as
 select *
 into foo.dbo.Q2_labs_all
 From #all_labs2;
-select *
-from foo.dbo.Q2_labs_all;
+select * from foo.dbo.Q2_labs_all;
