@@ -10,7 +10,7 @@ from (select patid,
              row_number() OVER (
                  PARTITION BY patid
                  ORDER BY result_date ASC
-                 )                     row_num,
+                 )       row_num,
 
              result_num  TG_result_num,
              result_unit result_unit,
@@ -18,8 +18,8 @@ from (select patid,
              RAW_RESULT
 
       FROM cdm.dbo.lab_result_cm lab
-       WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-            AND lab_loinc in ('2571-8', '12951-0')
+      WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
+        AND lab_loinc in ('2571-8', '12951-0')
         AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
         and result_num is not null
         and result_num >= 0
@@ -37,10 +37,10 @@ from (select patid,
              row_number() OVER (
                  PARTITION BY patid
                  ORDER BY result_date asc
-                 )                     row_num,
-            result_num  LDL_result_num,
-            result_unit result_unit,
-            result_date
+                 )       row_num,
+             result_num  LDL_result_num,
+             result_unit result_unit,
+             result_date
 
       FROM cdm.dbo.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
@@ -70,14 +70,14 @@ from (select patid,
              row_number() OVER (
                  PARTITION BY patid
                  ORDER BY result_date ASC
-                 )                     row_num,
-            result_num  total_chol_result_num,
-            result_unit result_unit,
-            result_date result_date
+                 )       row_num,
+             result_num  total_chol_result_num,
+             result_unit result_unit,
+             result_date result_date
 
       FROM cdm.dbo.lab_result_cm lab
 
-        WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
+      WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
         AND lab_loinc in ('2093-3')
 
         -- and result_num is not null
@@ -97,14 +97,14 @@ from (select patid,
              row_number() OVER (
                  PARTITION BY patid
                  ORDER BY result_date ASC
-                 )                     row_num,
+                 )       row_num,
              result_num  HDL_result_num,
              result_unit result_unit,
              result_date
 
       FROM cdm.dbo.lab_result_cm lab
       WHERE lab.result_date BETWEEN '2020-08-31' AND '2021-09-30'
-       AND lab_loinc in ('2085-9')
+        AND lab_loinc in ('2085-9')
         --  and result_num is not null
         and result_num >= 0
         AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
@@ -119,15 +119,16 @@ from (select *
 
 
 select *
-into #NHDL from (select total_chol.patid,
-                total_chol.TOTAL_CHOL_RESULT_NUM - HDL.HDL_RESULT_NUM as NHDL,
-                total_chol.TOTAL_CHOL_RESULT_NUM                         CHOL_RESULT_NUM,
-                HDL.HDL_RESULT_NUM                                    as HDL_RESULT_NUM,
-                total_chol.RESULT_date                                as TC_date,
-                HDL.RESULT_date                                       as hdl_date
-         from #total_chol total_chol
-                  inner join #HDL HDL
-                             on total_chol.patid = HDL.patid) as tcH;
+into #NHDL
+from (select total_chol.patid,
+             total_chol.TOTAL_CHOL_RESULT_NUM - HDL.HDL_RESULT_NUM as NHDL,
+             total_chol.TOTAL_CHOL_RESULT_NUM                         CHOL_RESULT_NUM,
+             HDL.HDL_RESULT_NUM                                    as HDL_RESULT_NUM,
+             total_chol.RESULT_date                                as TC_date,
+             HDL.RESULT_date                                       as hdl_date
+      from #total_chol total_chol
+               inner join #HDL HDL
+                          on total_chol.patid = HDL.patid) as tcH;
 select *
 into #lab_list
 from (
@@ -226,191 +227,46 @@ from (select patid,
              max(LDL_Date - admit_date) / 365.25 as tx_since_first_ascvd,
              1                                   as ASCVD
       FROM #pat_list pats
-               INNER JOIN cdm.dbo.diagnosis como on pats.patid= como.patid
-      WHERE dx in ('413.9'
-          , 'I20.9'
-          , 'I23.7'
-          , 'I25.111'
-          , 'I25.118'
-          , 'I25.119'
-          , 'I25.701'
-          , 'I25.708'
-          , 'I25.709'
-          , 'I25.738'
-          , 'I25.751'
-          , 'I25.791'
-          , '411.1'
-          , '411.81'
-          , '411.89'
-          , '413.0'
-          , '413.1'
-          , 'I20.0'
-          , 'I20.1'
-          , 'I20.8'
-          , 'I24.0'
-          , 'I24.8'
-          , 'I24.9'
-          , 'I25.110'
-          , 'I25.700'
-          , 'I25.710'
-          , 'I25.720'
-          , 'I25.730'
-          , 'I25.750'
-          , 'I25.760'
-          , 'I25.790'
-          , '414.8'
-          , '414.9'
-          , 'I25.5'
-          , 'I25.6'
-          , 'I25.89'
-          , 'I25.9'
-          , '410.11'
-          , '410.2'
-          , '410.3'
-          , '410.4'
-          , '410.50'
-          , '410.51'
-          , '410.60'
-          , '410.61'
-          , '410.62'
-          , '410.70'
-          , '410.71'
-          , '410.72'
-          , '410.81'
-          , '410.90'
-          , '410.91'
-          , '410.92'
-          , '411.0'
-          , '412'
-          , 'I21.01'
-          , 'I21.02'
-          , 'I21.09'
-          , 'I21.11'
-          , 'I21.19'
-          , 'I21.21'
-          , 'I21.29'
-          , 'I21.3'
-          , 'I21.4'
-          , 'I21.9'
-          , 'I21.A1'
-          , 'I21.A9'
-          , 'I22.0'
-          , 'I22.1'
-          , 'I22.2'
-          , 'I22.8'
-          , 'I22.9'
-          , 'I23.0'
-          , 'I23.3'
-          , 'I23.6'
-          , 'I23.8'
-          , 'I24.1'
-          , 'I25.2'
-          , '440.20'
-          , '440.21'
-          , '440.22'
-          , '440.23'
-          , '440.24'
-          , '440.29'
-          , '440.30'
-          , '440.31'
-          , '440.32'
-          , '440.4'
-          , 'I70.0'
-          , 'I70.1'
-          , 'I70.201'
-          , 'I70.202'
-          , 'I70.203'
-          , 'I70.208'
-          , 'I70.209'
-          , 'I70.21'
-          , 'I70.22'
-          , 'I70.232'
-          , 'I70.24'
-          , 'I70.25'
-          , 'I70.26'
-          , 'I70.261'
-          , 'I70.262'
-          , 'I70.263'
-          , 'I70.268'
-          , 'I70.269'
-          , 'I70.291'
-          , 'I70.292'
-          , 'I70.293'
-          , 'I70.298'
-          , 'I70.299'
-          , 'I70.3'
-          , 'I70.4'
-          , 'I70.5'
-          , 'I70.8'
-          , 'I70.90'
-          , 'I70.91'
-          , 'I70.92'
-          , '346.62'
-          , '346.63'
-          , '433.01'
-          , '433.11'
-          , '433.21'
-          , '433.31'
-          , '433.81'
-          , '433.91'
-          , '434.01'
-          , '434.11'
-          , '434.91'
-          , 'V12.54'
-          , 'G43.601'
-          , 'G43.609'
-          , 'G43.611'
-          , 'G43.619'
-          , 'I63.00'
-          , 'I63.011'
-          , 'I63.012'
-          , 'I63.019'
-          , 'I63.02'
-          , 'I63.031'
-          , 'I63.032'
-          , 'I63.09'
-          , 'I63.10'
-          , 'I63.112'
-          , 'I63.12'
-          , 'I63.19'
-          , 'I63.311'
-          , 'I63.312'
-          , 'I63.319'
-          , 'I63.321'
-          , 'I63.323'
-          , 'I63.333'
-          , 'I63.343'
-          , 'I63.412'
-          , 'I63.413'
-          , 'I63.429'
-          , 'I63.431'
-          , 'I63.511'
-          , 'I63.519'
-          , 'I63.531'
-          , 'I63.539'
-          , 'I63.59'
-          )
+               INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
+      WHERE dx in
+            ('413.9', 'I20.9', 'I23.7', 'I25.111', 'I25.118', 'I25.119', 'I25.701', 'I25.708', 'I25.709', 'I25.738',
+             'I25.751', 'I25.791', '411.1', '411.81', '411.89', '413.0', '413.1', 'I20.0', 'I20.1', 'I20.8', 'I24.0',
+             'I24.8', 'I24.9', 'I25.110', 'I25.700', 'I25.710', 'I25.720', 'I25.730', 'I25.750', 'I25.760', 'I25.790',
+             '414.8', '414.9', 'I25.5', 'I25.6', 'I25.89', 'I25.9', '410.11', '410.2', '410.3', '410.4', '410.50',
+             '410.51', '410.60', '410.61', '410.62', '410.70', '410.71', '410.72', '410.81', '410.90', '410.91',
+             '410.92', '411.0', '412', 'I21.01', 'I21.02', 'I21.09', 'I21.11', 'I21.19', 'I21.21', 'I21.29', 'I21.3',
+             'I21.4', 'I21.9', 'I21.A1', 'I21.A9', 'I22.0', 'I22.1', 'I22.2', 'I22.8', 'I22.9', 'I23.0', 'I23.3',
+             'I23.6', 'I23.8', 'I24.1', 'I25.2', '440.20', '440.21', '440.22', '440.23', '440.24', '440.29', '440.30',
+             '440.31', '440.32', '440.4', 'I70.0', 'I70.1', 'I70.201', 'I70.202', 'I70.203', 'I70.208', 'I70.209',
+             'I70.21', 'I70.22', 'I70.232', 'I70.24', 'I70.25', 'I70.26', 'I70.261', 'I70.262', 'I70.263', 'I70.268',
+             'I70.269', 'I70.291', 'I70.292', 'I70.293', 'I70.298', 'I70.299', 'I70.3', 'I70.4', 'I70.5', 'I70.8',
+             'I70.90', 'I70.91', 'I70.92', '346.62', '346.63', '433.01', '433.11', '433.21', '433.31', '433.81',
+             '433.91', '434.01', '434.11', '434.91', 'V12.54', 'G43.601', 'G43.609', 'G43.611', 'G43.619', 'I63.00',
+             'I63.011', 'I63.012', 'I63.019', 'I63.02', 'I63.031', 'I63.032', 'I63.09', 'I63.10', 'I63.112', 'I63.12',
+             'I63.19', 'I63.311', 'I63.312', 'I63.319', 'I63.321', 'I63.323', 'I63.333', 'I63.343', 'I63.412',
+             'I63.413', 'I63.429', 'I63.431', 'I63.511', 'I63.519', 'I63.531', 'I63.539', 'I63.59'
+                )
       group by patid
      ) as ptsfadA;
 
-         select *
-         into #joined
-         from #lab_list labs
-                  left join #first_encounter e on labs.patid = e.patid
-                  left join #last_encounter f on labs.patid = f.patid
-                  left join #age_gender_race_ethnicity dem on labs.patid = dem.patid
-                  LEFT JOIN #ASCVD ascvd on labs.patid = ascvd.patid
-     ;
+select *
+into #joined
+from #lab_list labs
+         left join #first_encounter e on labs.patid = e.patid
+         left join #last_encounter f on labs.patid = f.patid
+         left join #age_gender_race_ethnicity dem on labs.patid = dem.patid
+         LEFT JOIN #ASCVD ascvd on labs.patid = ascvd.patid
+         LEFT JOIN #diabetes dm on labs.patid = dm.patid;
 --sql server age: floor(datediff(day, demographic.birth_date, '2020-08-31') / 365.25) as age
 
 select distinct #joined.*,
-                datediff(dd, first_admit_date,LDL_date) as pre_index_days,
+                datediff(dd, first_admit_date, LDL_date)    as pre_index_days,
 
-            datediff(dd,LDL_date, last_admit_date )        as post_index_days,
-               datediff(dd,LDL_date, birth_date )/ 365.25 as age
+                datediff(dd, LDL_date, last_admit_date)     as post_index_days,
+                datediff(dd, LDL_date, birth_date) / 365.25 as age
 into foo.dbo.SHTG_Q2_STEP1
 from #joined
-Where round(datediff(dd,LDL_date, birth_date )/ 365.25, 2) > 18 --over 18
-  And datediff(dd,  first_admit_date,LDL_date) > 180 --at least 6 months pre-index.
+Where round(datediff(dd, LDL_date, birth_date) / 365.25, 2) > 18 --over 18
+  And datediff(dd, first_admit_date, LDL_date) > 180 --at least 6 months pre-index.
 ;
 

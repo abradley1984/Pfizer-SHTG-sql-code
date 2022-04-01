@@ -116,6 +116,8 @@ from (SELECT *
 select *
 into #labs_all
 from (select * from foo.dbo.Q2_labs_all) as [Q2la*];
+
+
 --Risk status
 --Recent ACS (12 months)
 select *
