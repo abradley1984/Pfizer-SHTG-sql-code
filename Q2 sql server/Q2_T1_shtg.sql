@@ -192,20 +192,21 @@ from (select a.patid/*, provider_specialty as provider_specialty_a*/
                      where c.provider_specialty = 'cardiology') d
                     on b.patid = d.patid;
 
+
 select *
 into #Table1_pre
 from (
-         select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
+         select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, [cohort]
          from #pat_list
          group by cohort
          union
-         select '2' as order1, 'Age' as label1, Age_category as label2, count(distinct patid) as N, cohort
-         from #Age_category
-         group by cohort, Age_category
+         select '2' as order1, 'Age' as label1, Age_category as label2, count(distinct patlist.PATID) as N, patlist.[cohort]
+         from #Age_category agecat left join #pat_list patlist ON agecat.PATID = patlist.PATID
+         group by patlist.[cohort], Age_category
          union
-         select '2' as order1, 'age' as label1, 'Mean age' as label2, round(avg(age), 2) as N, cohort
+         select '2' as order1, 'age' as label1, 'Mean age' as label2, round(avg(age), 2) as N, [cohort]
          from #pat_list
-         group by cohort
+         group by [cohort]
 /*union
 select '2' as order1, 'age', 'Median age', round(median(age), 2) as N, cohort
 from #pat_list
@@ -324,15 +325,15 @@ group by cohort*/
          group by cohort, provider_specialty
          union
 
-         select '7' as order1, 'Provider' as label1, both_endo_cardio as label2, count(distinct patid), cohort
-         from #cardio_plus_endo
-         group by cohort, both_endo_cardio
+         select '7' as order1, 'Provider' as label1, both_endo_cardio as label2, count(distinct patlist.patid), patlist.[cohort]
+         from #cardio_plus_endo cardio left join #pat_list patlist ON cardio.patid = patlist.PATID
+         group by patlist.[cohort], both_endo_cardio
          union
-         select '7' as order1, 'Provider' as label1, 'provider_info_available' as label2, count(distinct patid), cohort
+         select '7' as order1, 'Provider' as label1, 'provider_info_available' as label2, count(distinct patid), [cohort]
          from #providers
          group by cohort
          union
-         select '2' as order1, 'Age' as label1, 'has_age_info' as label2, count(distinct patid), cohort
+         select '2' as order1, 'Age' as label1, 'has_age_info' as label2, count(distinct patid), [cohort]
          from #pat_list
          where Age is not null
          group by cohort
