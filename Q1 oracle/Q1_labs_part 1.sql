@@ -8,11 +8,11 @@ Run time: ~35 mins
 --
 -- drop table Q1_labs_all;*/
 
-create table Q1_labs_all_t as
+create table Q1_labs_all as
 with pat_list as
          (
-             select TG_Date as index_date, SHTG_Q1_COHORTS_WITH_EXCLUSIONS.*
-             from SHTG_Q1_COHORTS_WITH_EXCLUSIONS
+             select TG_Date as index_date, shtg_Q1_cohorts_with_ex.*
+             from shtg_Q1_cohorts_with_ex
 
              where cohort is not null
              -- fetch first 1000 rows only
