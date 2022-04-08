@@ -1,4 +1,3 @@
-
 /* This code extracts lab values for patients, some of which are needed for cohort definitions for Q2, others will be used to create Table 3.
 
 Run time: ~36 mins
@@ -9,7 +8,7 @@ Run time: ~36 mins
 -- drop table Q2_labs_all;*/
 
 
-create table Q2_labs_all as
+--create table Q2_labs_all as
 with pat_list as
          (
              select LDL_Date as index_date, SHTG_Q2_STEP1_d5.*
@@ -34,7 +33,8 @@ with pat_list as
                        left join cdm_60_etl.lab_result_cm using (patid)
               WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                 AND lab_result_cm.lab_loinc in ('46986-6', '13458-5', '2091-7')
-                and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                and lab_result_cm.result_num is not null
+                and lab_result_cm.result_num > 0),
 
 
 --apo_b
@@ -53,55 +53,51 @@ with pat_list as
                         left join cdm_60_etl.lab_result_cm using (patid)
                WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                  AND lab_result_cm.lab_loinc in ('1884-6', '1871-3', '1881-2')
-                 and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                 and lab_result_cm.result_num is not null
+                 and lab_result_cm.result_num > 0),
 
 
 --lpa
 
      lpa_mass as (select patid,
-                    row_number() OVER (
-                        PARTITION BY patid
-                        ORDER BY lab_result_cm.result_date asc
-                        )                     row_num,
-                    lab_result_cm.result_num  lpa_mass,
-                    lab_result_cm.result_unit result_unit,
-                    lab_result_cm.result_date result_date
+                         row_number() OVER (
+                             PARTITION BY patid
+                             ORDER BY lab_result_cm.result_date asc
+                             )                     row_num,
+                         lab_result_cm.result_num  lpa_mass,
+                         lab_result_cm.result_unit result_unit,
+                         lab_result_cm.result_date result_date
 
 
-             FROM pat_list
-                      left join cdm_60_etl.lab_result_cm using (patid)
-             WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-               AND ((lab_result_cm.lab_loinc in
-
-    ('10835-7') and not result_unit = 'nmol/L'))
-
-
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
- lpa_mol as (select patid,
-                    row_number() OVER (
-                        PARTITION BY patid
-                        ORDER BY lab_result_cm.result_date asc
-                        )                     row_num,
-                    lab_result_cm.result_num  lpa_mol,
-                    lab_result_cm.result_unit result_unit,
-                    lab_result_cm.result_date result_date
+                  FROM pat_list
+                           left join cdm_60_etl.lab_result_cm using (patid)
+                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                    AND ((lab_result_cm.lab_loinc in
+                          ('10835-7') and not result_unit = 'nmol/L'))
 
 
-             FROM pat_list
-                      left join cdm_60_etl.lab_result_cm using (patid)
-             WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-               AND (lab_result_cm.lab_loinc in
+                    and lab_result_cm.result_num is not null
+                    and lab_result_cm.result_num > 0),
+     lpa_mol as (select patid,
+                        row_number() OVER (
+                            PARTITION BY patid
+                            ORDER BY lab_result_cm.result_date asc
+                            )                     row_num,
+                        lab_result_cm.result_num  lpa_mol,
+                        lab_result_cm.result_unit result_unit,
+                        lab_result_cm.result_date result_date
 
 
+                 FROM pat_list
+                          left join cdm_60_etl.lab_result_cm using (patid)
+                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                   AND (lab_result_cm.lab_loinc in
+                        ('43583-4')
+                     or (lab_result_cm.lab_loinc in
+                         ('10835-7') and result_unit = 'nmol/L'))
 
-                   ('43583-4')
-                       or   (lab_result_cm.lab_loinc in
-
-
-
-                   ('10835-7') and result_unit = 'nmol/L'))
-
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                   and lab_result_cm.result_num is not null
+                   and lab_result_cm.result_num > 0),
 
 
 --apo_a1
@@ -120,7 +116,8 @@ with pat_list as
                          left join cdm_60_etl.lab_result_cm using (patid)
                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   AND lab_result_cm.lab_loinc in ('1869-7', '1874-7', '55724-9')
-                  and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                  and lab_result_cm.result_num is not null
+                  and lab_result_cm.result_num > 0),
 
 
 --nlr
@@ -140,9 +137,10 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in
-                   ('770-8', '23761-0',  '26511-6')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0
-                   and (result_unit in ('OT', '%') or result_unit is null)),
+                   ('770-8', '23761-0', '26511-6')
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0
+               and (result_unit in ('OT', '%') or result_unit is null)),
 
 
 --hscrp
@@ -161,7 +159,8 @@ with pat_list as
                         left join cdm_60_etl.lab_result_cm using (patid)
                WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                  AND lab_result_cm.lab_loinc in ('30522-7', '35648-5')
-                 and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                 and lab_result_cm.result_num is not null
+                 and lab_result_cm.result_num > 0),
 
      diabetes as (select distinct (patid), 1 as Diabetes
                   FROM pat_list pats
@@ -189,9 +188,9 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0
                and patid in (select patid from diabetes)),--only giving A1c for diabetic patients,
-
 
 
 --albumin
@@ -210,7 +209,8 @@ with pat_list as
                           left join cdm_60_etl.lab_result_cm using (patid)
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('1751-7', '61151-7', '2862-1', '61152-5')
-                   and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                   and lab_result_cm.result_num is not null
+                   and lab_result_cm.result_num > 0),
 
 --alp
 
@@ -229,7 +229,8 @@ with pat_list as
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in
                    ('6768-6')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0),
 
 --alt
 
@@ -247,8 +248,9 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('1742-6', '1743-4', '1744-2')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0
-               and lab_result_cm.result_num > 0),
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0
+              ),
 
 --ast
 
@@ -266,7 +268,8 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('1920-8', '30239-8')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0),
 
 --ggt
 
@@ -284,7 +287,8 @@ with pat_list as
                       left join cdm_60_etl.lab_result_cm using (patid)
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('2324-2')
-               and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+               and lab_result_cm.result_num is not null
+               and lab_result_cm.result_num > 0),
 
 
 --platelets
@@ -303,8 +307,9 @@ with pat_list as
                             left join cdm_60_etl.lab_result_cm using (patid)
                    WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                      AND lab_result_cm.lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
-                     and lab_result_cm.result_num is not null and lab_result_cm.result_num >0
-                     and lab_result_cm.result_num > 0),
+                     and lab_result_cm.result_num is not null
+                     and lab_result_cm.result_num > 0
+                     ),
 
 --TG
 
@@ -322,7 +327,8 @@ with pat_list as
                      left join cdm_60_etl.lab_result_cm using (patid)
             WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
               AND lab_result_cm.lab_loinc in ('2571-8')
-              and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+              and lab_result_cm.result_num is not null
+              and lab_result_cm.result_num > 0),
 
 --uacr
 
@@ -340,7 +346,8 @@ with pat_list as
                        left join cdm_60_etl.lab_result_cm using (patid)
               WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                 AND lab_result_cm.lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
-                and lab_result_cm.result_num is not null and lab_result_cm.result_num >0),
+                and lab_result_cm.result_num is not null
+                and lab_result_cm.result_num > 0),
      weight as (select patid,
                        row_number() OVER (
                            PARTITION BY patid
@@ -352,6 +359,7 @@ with pat_list as
                 from cdm_60_etl.vital
                 WHERE measure_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   and wt is not null
+                  and wt > 0
                   and patid in (select patid from pat_list)),
      height as (select patid,
                        row_number() OVER (
@@ -364,6 +372,7 @@ with pat_list as
                 from cdm_60_etl.vital
                 WHERE measure_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   and ht is not null
+                  and ht > 0
                   and patid in (select patid from pat_list)),
 
      creatinine as (select *
@@ -375,7 +384,7 @@ with pat_list as
                                  lab_result_cm.result_num   creat_result_num,
                                  lab_result_cm.result_unit  result_unit,
                                  lab_result_cm.result_date  result_date,
-                               --  cohort,
+                                 --  cohort,
                                  sex,
                                  age,
                                  trunc(result_num / 0.9, 2) creat_result_num_male,
@@ -385,9 +394,10 @@ with pat_list as
                                    left join cdm_60_etl.lab_result_cm using (patid)
                           WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                             AND lab_result_cm.lab_loinc in ('2160-0', '38483-4')
-                            and lab_result_cm.result_num is not null and lab_result_cm.result_num >0
-                          --  AND RESULT_NUM < 500
-                            AND RESULT_NUM > 0
+                            and lab_result_cm.result_num is not null
+                            and lab_result_cm.result_num > 0
+                            --  AND RESULT_NUM < 500
+
                          )
                     where row_num = 1),
 
@@ -396,7 +406,7 @@ with pat_list as
 
      egfr as (select patid,
 
-                   --  cohort,
+                     --  cohort,
                      creat_result_num,
                      result_unit,
                      age as egfrage,
@@ -426,7 +436,7 @@ with pat_list as
                    from (
                             select patid,
 
-                                 --  pat_list.cohort,
+                                   --  pat_list.cohort,
                                    a1c,
                                    albumin,
                                    platelets,
@@ -453,10 +463,11 @@ with pat_list as
                                    lpa_mass,
                                    lpa_mol,
                                    egfr_2021
-                            , creat_result_num
+                                    ,
+                                   creat_result_num
 
                             from pat_list
-                                    LEFT join egfr using (patid)
+                                     LEFT join egfr using (patid)
                                      LEFT join (select * From a1c where row_num = 1) using (patid)
                                      LEFT join (select * From uacr where row_num = 1) using (patid)
                                      LEFT join(select * From hscrp where row_num = 1) using (patid)
@@ -473,8 +484,8 @@ with pat_list as
                                      LEFT join (select * From nlr where row_num = 1) using (patid)
                                      LEFT join (select * From apo_a1 where row_num = 1) using (patid)
                                      LEFT join (select * From lpa_mol where row_num = 1) using (patid)
-                                      LEFT join (select * From lpa_mass where row_num = 1) using (patid))
-         )/*,
+                                     LEFT join (select * From lpa_mass where row_num = 1) using (patid))
+     )/*,
 
      all_labs3 as (
          select patid,
@@ -508,4 +519,5 @@ with pat_list as
          from pat_list
                   left join all_labs2 using (patid))*/
 --writing labs table
-select * From all_labs2;
+select *
+From all_labs2;
