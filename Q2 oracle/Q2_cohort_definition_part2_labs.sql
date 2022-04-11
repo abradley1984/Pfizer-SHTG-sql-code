@@ -8,7 +8,7 @@ Run time: ~36 mins
 -- drop table Q2_labs_all;*/
 
 
---create table Q2_labs_all as
+create table Q2_labs_all as
 with pat_list as
          (
              select LDL_Date as index_date, SHTG_Q2_STEP1_d5.*
