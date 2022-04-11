@@ -333,8 +333,8 @@ order by patid*/
 
 select * from percentages
 order by cohort, order1;
-from Table1_pre
-order by cohort, order1
+/*from Table1_pre
+order by cohort, order1*/
 
 /* pivot (
 
