@@ -1,8 +1,10 @@
---To do -edit insurance categories to apply to other sites
---Check provider categories?
---combine race, smoking categories
+/* Generates demographics table for all cohorts.
+   Same for Q1 and Q2, just editing initial pat_list
+   Running time: ~2 minutes
+   This version is specific to Pitt due to insurance categories
+ */
 
---with pat_list as (select * from htg_step3_with_exclusions_d1),
+
 with pat_list as ( select * from
                                  SHTG_Q2_STEP3_d5),
      smoking AS (select *
@@ -21,11 +23,13 @@ with pat_list as ( select * from
                             AND not vital.smoking in ('NI', 'OT', 'UN'))
                  where row_num = 1),
      smoking_category as (select patid,
-                                 cohort,
+                                 pat_list.cohort,
                                  smoking,
                                  case
                                      when smoking in ('01', '02', '07', '08') then 'Current smoker'
                                      when smoking in ('NI', 'UN', '05', '06', 'OT') then 'NI/unknown/refuse to answer'
+                                     when smoking is Null then 'NI/unknown/refuse to answer'
+
                                      when smoking = '03' then 'Former smoker'
                                      when smoking = '04' then 'Never smoker'
 
@@ -33,7 +37,8 @@ with pat_list as ( select * from
                                      end as smoking_category
 
 
-                          from smoking),
+                          from pat_list
+                                   left join smoking using (patid)),
      race_category as (select patid,
                               cohort,
                               race,
@@ -41,6 +46,7 @@ with pat_list as ( select * from
                               case
                                   when race in ('01', '04', '06', 'OT') then 'Other'
                                   when race in ('NI', 'UN', '07') then 'NI/unknown/refuse to answer'
+                                  when race is Null then 'NI/unknown/refuse to answer'
                                   when race = '03' then 'Black/African American'
                                   when race = '05' then 'White'
                                   when race = '02' then 'Asian'
@@ -48,6 +54,7 @@ with pat_list as ( select * from
                                   end as race_category,
                               case
                                   when hispanic in ('R', 'NI', 'UN', 'OT') then 'NI/unknown/refuse to answer'
+                                  when hispanic is Null then 'NI/unknown/refuse to answer'
                                   when hispanic = 'Y' then 'hispanic'
                                   when hispanic = 'N' then 'non-hispanic'
                                   else 'check_categorization'
@@ -196,14 +203,17 @@ when Age BETWEEN 65 and 75
                 '207QA0505X', '207R00000X', '207RA0000X', '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X',
                 '364SF0001X')
            And encounter.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY'))
-
-/*select distinct patid, cohort, insurance_type, raw_payer_type_primary from insurance_type
-order by patid*/
         ,
+     --Both cariology and endocrinology
+     cardio_plus_endo as (select patid, 'both_endo_cardio' as both_endo_cardio, cohort
+                          from (select * from providers where provider_specialty = 'endo')
+                                   inner join (select * from providers where provider_specialty = 'cardiology')
+                                             using (patid, cohort)),
+
      Table1_pre as (select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
                     from pat_list
                     group by cohort
-                   union
+                    union
                     select '2' as order1, 'Age', Age_category, count(distinct patid) as N, cohort
                     from age_Category
                     group by cohort, Age_category
@@ -221,11 +231,11 @@ order by patid*/
                     group by cohort
                     union
 
-                    select '2' as order1,
+                    select '2' as                       order1,
                            'age',
                            'pct_25',
-                           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY age asc)
-                                  "pct_25",
+                           PERCENTILE_CONT(0.25) WITHIN
+                               GROUP (ORDER BY age asc) "pct_25",
                            cohort
                     from pat_list
                     group by cohort
@@ -233,7 +243,8 @@ order by patid*/
                     select '2' as order1,
                            'age',
                            'pct_75',
-                           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY age asc)
+                           PERCENTILE_CONT(0.75) WITHIN
+                               GROUP (ORDER BY age asc)
                                   "pct_75",
                            cohort
                     from pat_list
@@ -263,9 +274,10 @@ order by patid*/
 
                     group by cohort
                     union
-                    select '6' as order1, 'Smoking', smoking_category, count(distinct patid), cohort
-                    from smoking_category
-                    group by cohort, smoking_category
+                    select '6' as order1, 'Smoking', smoking_category, count(distinct patid), pat_list.cohort
+                    from pat_list
+                             left join smoking_category using (patid)
+                    group by pat_list.cohort, smoking_category
                     union
                     select '9' as order1, 'pre-index_days', 'Mean', trunc(avg(PRE_INDEX_DAYS)) as N, cohort
                     from pat_list
@@ -282,7 +294,8 @@ order by patid*/
                     select '9' as order1,
                            'pre-index_days',
                            'pct_25',
-                           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                           PERCENTILE_CONT(0.25) WITHIN
+                               GROUP (ORDER BY PRE_INDEX_DAYS asc)
                                   "pct_25",
                            cohort
                     from pat_list
@@ -291,7 +304,8 @@ order by patid*/
                     select '9' as order1,
                            'pre-index_days',
                            'pct_75',
-                           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY PRE_INDEX_DAYS asc)
+                           PERCENTILE_CONT(0.75) WITHIN
+                               GROUP (ORDER BY PRE_INDEX_DAYS asc)
                                   "pct_75",
                            cohort
                     from pat_list
@@ -302,6 +316,11 @@ order by patid*/
                     from providers
                     group by cohort, provider_specialty
                     union
+
+                    select '7' as order1, 'Provider', both_endo_cardio, count(distinct patid), cohort
+                    from cardio_plus_endo
+                    group by cohort, both_endo_cardio
+                    union
                     select '7' as order1, 'Provider', 'provider_info_available', count(distinct patid), cohort
                     from providers
                     group by cohort
@@ -310,9 +329,8 @@ order by patid*/
                     from pat_list
                     where Age is not null
                     group by cohort
-
      ),
-     totals as (select N as N_cohort_total, cohort  From Table1_pre where label1 = 'Total' ),
+     totals as (select N as N_cohort_total, cohort From Table1_pre where label1 = 'Total'),
 
      percentages as (select order1, Cohort, label1, label2, N, N_cohort_total,
                             case  when (Table1_pre.label2 in ('pct_75','pct_25')
