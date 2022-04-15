@@ -844,7 +844,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
              from comorbidity_group
              group by cohort
              union
-             select '9'                                                    as order1,
+             select '9'                                  as order1,
 
                     trunc(median(tx_since_first_lip), 2) as N,
                     cohort,
@@ -852,7 +852,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
              from comorbidity_group
              group by cohort
              union
-             select '9'                                                    as order1,
+             select '9'                                  as order1,
 
                     trunc(STDDEV(tx_since_first_lip), 2) as N,
                     cohort,
@@ -860,60 +860,60 @@ with pat_list as (select patid, cohort, LDL_date as index_date
              from comorbidity_group
              group by cohort
              union
-             select '9' as                order1,
+             select '9' as                                      order1,
 
                     PERCENTILE_CONT(0.25) WITHIN
-             GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
+                        GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
                     cohort,
                     'Time since first lipidemia diagnosis (25th pct)'
              from comorbidity_group
              group by cohort
              union
              select '9' as order1,
-                 PERCENTILE_CONT(0.75) WITHIN
-             GROUP (ORDER BY tx_since_first_lip asc)
-                 "pct_75",
-                 cohort,
-                 'Time since first lipidemia diagnosis (75th pct)'
+                    PERCENTILE_CONT(0.75) WITHIN
+                        GROUP (ORDER BY tx_since_first_lip asc)
+                           "pct_75",
+                    cohort,
+                    'Time since first lipidemia diagnosis (75th pct)'
              from comorbidity_group
              group by cohort
              union
-             select '10' as order1,
-                 trunc(avg(time_since_first_ascvd_diagnosis), 2) as N,
-                 cohort,
-                 'Time since first ascvd diagnosis (Mean)'
+             select '10'                                            as order1,
+                    trunc(avg(time_since_first_ascvd_diagnosis), 2) as N,
+                    cohort,
+                    'Time since first ascvd diagnosis (Mean)'
+             from ascvd
+             group by cohort
+             union
+             select '10'                                               as order1,
+                    trunc(median(time_since_first_ascvd_diagnosis), 2) as N,
+                    cohort,
+                    'Time since first ascvd diagnosis (Median)'
+             from ascvd
+             group by cohort
+             union
+             select '10'                                               as order1,
+                    trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N,
+                    cohort,
+                    'Time since first ascvd diagnosis (std)'
              from ascvd
              group by cohort
              union
              select '10' as order1,
-                 trunc(median(time_since_first_ascvd_diagnosis), 2) as N,
-                 cohort,
-                 'Time since first ascvd diagnosis (Median)'
+                    PERCENTILE_CONT(0.25) WITHIN
+                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                            "pct_25",
+                    cohort,
+                    'Time since first ascvd diagnosis (25th pct)'
              from ascvd
              group by cohort
              union
              select '10' as order1,
-                 trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N,
-                 cohort,
-                 'Time since first ascvd diagnosis (std)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                 PERCENTILE_CONT(0.25) WITHIN
-             GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-                 "pct_25",
-                 cohort,
-                 'Time since first ascvd diagnosis (25th pct)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                 PERCENTILE_CONT(0.75) WITHIN
-             GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-                 "pct_75",
-                 cohort,
-                 'Time since first ascvd diagnosis (75th pct)'
+                    PERCENTILE_CONT(0.75) WITHIN
+                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                            "pct_75",
+                    cohort,
+                    'Time since first ascvd diagnosis (75th pct)'
              from ascvd
              group by cohort
          ),
@@ -926,11 +926,37 @@ with pat_list as (select patid, cohort, LDL_date as index_date
 /*select count(distinct patid), dx from comorbid_conditions
 where Comorbidity_name='other'
 group by dx;*/
+        ,
+     totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
+
+     percentages as (select Cohort,
+                            order1,
+                            Comorbidity_name,
+
+                            N_mean_etc,
+
+                            N_cohort_total,
+                            case
+                                when (Comorbidity_name like '%75%'
+                                    or Comorbidity_name like '%25%'
+                                    or Comorbidity_name like ('%Mean%')
+                                    or Comorbidity_name like ('%Median%')
+                                    or Comorbidity_name like ('%std%'))
+                                    then 0
+                                else
+                                    trunc(100 * N_mean_etc / N_cohort_total, 2)
+                                end
+                                as percentage1
+                     from table2
+                              left join totals using (cohort)
+                     )
+
+
+
+
 select *
-from table2;
+
+from percentages;
 /*select count(patid), cohort, stroke.Comorbidity_name, MI.Comorbidity_name
-from stroke full outer join MI using(patid, cohort)
-group by cohort, stroke.Comorbidity_name, MI.Comorbidity_name
-order by cohort
-;*/
+order by cohort, order1;
 
