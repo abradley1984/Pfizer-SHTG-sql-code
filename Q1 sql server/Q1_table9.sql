@@ -572,7 +572,8 @@ from (
                          hscrp_over_3,
                          nhdl_over_130,
                          microvascular_disease,
-                         IIF(Statin = 1, 'Statin', 'No Statin')                                    as Statin,
+                         --Editing to try to fix large null counts
+                         IIF(isnull(Statin, 0) = 1, 'Statin', 'No Statin')                                    as Statin,
                          IIF((PCI + MI + stroke) > 1, 1, 0)                                        as more_than_1_of_PCI_MI_stroke,
                          IIF((PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1, 1,
                              0)                                                                    as more_than_1_of_PCI_MI_stroke_allowing_multiples,
