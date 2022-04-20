@@ -611,7 +611,7 @@ from (
                                IIF(retinopathy = 1, 1, 0)           as retinopathy,
 
                                -- stroke_gap,
-                               coalesce(Statin,0),
+                               coalesce(Statin,0) as Statin,
 
                                IIF(diabetes_10y = 1, 1, 0)          as diabetes_10y,
                                IIF(insulin = 1, 1, 0)               as insulin,
