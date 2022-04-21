@@ -558,7 +558,7 @@ OR dx like 'K74.6%' -- 'CIRRHOSIS'
      comorbidity_group as (select a.patid,
                                   cohort,
 
-                                  max( datediff(dd,  index_date, admit_date)) / 365.25              as tx_since_first_lip,
+                                  max( datediff(dd, admit_date, index_date)) / 365.25              as tx_since_first_lip,
                                   'Disorders of lipoprotein metabolism and other' as Comorbidity_name
                            FROM pat_list a
 
