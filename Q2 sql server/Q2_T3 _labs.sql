@@ -18,9 +18,10 @@ from (
          where cohort is not null
          -- fetch first 1000 rows only
      ) a;
-select *
-into #all_labs
-from (select * from foo.dbo.Q2_labs_all) a;-- generated in Q1_labs_part1
+
+ select *
+into #all_labs from (select Q1_labs_all.*, pat_list.cohort from Q1_labs_all left join pat_list on pat_list.patid =Q1_labs_all.patid) as [Q1la.*c];-- generated in Q2_labs_part1
+
 
 select *
 into #HDL_all
