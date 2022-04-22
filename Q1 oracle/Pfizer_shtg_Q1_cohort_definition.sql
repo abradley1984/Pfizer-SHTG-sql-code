@@ -279,7 +279,7 @@ where age>=18 and pre_index_days>=180),
                                    then 'TG_880_2000'
                                when TG_result_num > 2000
                                    then 'TG_over_2000'
-                               else 'uhoh'
+                               else 'other'
                                end as TG_category,
                            case
                                when LDL_result_num < 70
@@ -289,7 +289,7 @@ where age>=18 and pre_index_days>=180),
                                    then 'LDL_high'
                                when LDL_result_num < 0
                                    then 'LDL_below_0'
-                               else 'uhoh'
+                               else 'other'
                                end as LDL_category,
                            case
                                when nHDL < 100
@@ -299,7 +299,7 @@ where age>=18 and pre_index_days>=180),
                                    then 'nHDL_high'
                                when LDL_result_num < 0
                                    then 'nHDL_below_0'
-                               else 'uhoh'
+                               else 'other'
                                end as nHDL_category,
                            case
                                when LDL_result_num < 70
@@ -315,7 +315,7 @@ where age>=18 and pre_index_days>=180),
                                when LDL_result_num > 160
                                    then 'LDL_above 160'
 
-                               else 'uhoh'
+                               else 'other'
                                end as LDL_category2,
                            case
                                when NHDL < 70
@@ -333,7 +333,7 @@ where age>=18 and pre_index_days>=180),
                                when NHDL > 190
                                    then 'NHDL_above 190'
 
-                               else 'uhoh'
+                               else 'other'
                                end as NHDL_category2,
                            case
                                when Age < 18
@@ -348,7 +348,7 @@ where age>=18 and pre_index_days>=180),
                                    then 'Age_65_75'
                                when Age > 75
                                    then 'Age_over_75'
-                               else 'uhoh'
+                               else 'other'
                                end as Age_category
                     from labs),
      with_cohorts as (select case

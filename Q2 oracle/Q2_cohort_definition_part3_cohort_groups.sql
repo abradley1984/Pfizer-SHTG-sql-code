@@ -709,7 +709,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                                        then 'LDL_high'
                                    when LDL_result_num < 0
                                        then 'LDL_below_0'
-                                   else 'uhoh'
+                                   else 'other'
                                    end                                      as LDL_category,
                                case
                                    when TG_result_num < 150 then 'TG_under_150'
@@ -738,7 +738,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                                    when LDL_result_num > 160
                                        then 'LDL_above 160'
 
-                                   else 'uhoh'
+                                   else 'other'
                                    end                                      as LDL_category2,
                                case
                                    when NHDL < 70
@@ -756,7 +756,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                                    when NHDL > 190
                                        then 'NHDL_above 190'
 
-                                   else 'uhoh'
+                                   else 'other'
                                    end                                      as NHDL_category2,
 --
                                case
