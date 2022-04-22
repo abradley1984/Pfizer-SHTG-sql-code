@@ -148,10 +148,10 @@ from (select *
                    result_unit                                   result_unit,
                    result_date,
                    index_date,
-                   abs(datediff(dd, result_date, index_date)) as TG_time_from_index,
+                   abs(datediff(dd,  index_date,result_date)) as TG_time_from_index,
                    row_number() OVER (
                        PARTITION BY a.patid
-                       ORDER BY abs(datediff(dd, result_date, index_date)) ASC
+                       ORDER BY abs(datediff(dd,  index_date,result_date)) ASC
                        )                                         row_num
 
             from #pat_list a
@@ -161,7 +161,7 @@ from (select *
               AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
               and result_num is not null
               and result_num >= 500
-              and (datediff(dd, result_date, index_date)) <= (-1)--TG occurs before index_date
+              and (datediff(dd,  index_date,result_date)) <= (-1)--TG occurs before index_date
            ) c
            --and patid in (select a.patid from #pat_list)
            --AND result_num < 1000
