@@ -4,7 +4,6 @@
 
  */
 
-
 select *
 into #pat_list
 from (select patid, cohort, TG_DATE
@@ -573,7 +572,7 @@ from (
                          nhdl_over_130,
                          microvascular_disease,
                          --Editing to try to fix large null counts
-                         IIF(isnull(Statin, 0) = 1, 'Statin', 'No Statin')                                    as Statin,
+                         IIF(isnull(Statin, 0) = 1, 'Statin', 'No Statin')                                    as [Statin],
                          IIF((PCI + MI + stroke) > 1, 1, 0)                                        as more_than_1_of_PCI_MI_stroke,
                          IIF((PCI + MI + stroke + multiple_stroke + multiple_PCI + multiple_MI) > 1, 1,
                              0)                                                                    as more_than_1_of_PCI_MI_stroke_allowing_multiples,
@@ -611,7 +610,7 @@ from (
                                IIF(retinopathy = 1, 1, 0)           as retinopathy,
 
                                -- stroke_gap,
-                               coalesce(Statin,0) as Statin,
+                               coalesce(Statin,0)					as Statin,
 
                                IIF(diabetes_10y = 1, 1, 0)          as diabetes_10y,
                                IIF(insulin = 1, 1, 0)               as insulin,
@@ -627,7 +626,7 @@ from (
                        ,
                                IIF(current_smoker = 1, 1, 0)        as current_smoker,
                                IIF(age_over_65 = 1, 1, 0)           as age_over_65
-               from #stroke a
+               from #pat_list a
                         full outer join #MI b on a.patid = b.patid
                         full outer join #PCI c on a.patid = c.patid
                         full outer join #statins d on a.patid = d.patid
@@ -643,6 +642,7 @@ from (
                         full outer join #smoking n on a.patid = n.patid
                         full outer join #age_65 o on a.patid = o.patid
                         full outer join #labs p on a.patid = p.patid
+						full outer Join #stroke q on  a.PATID = q.PATID
               ) f) as f2;
 
 
