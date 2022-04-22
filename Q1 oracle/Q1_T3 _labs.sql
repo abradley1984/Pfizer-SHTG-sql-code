@@ -183,7 +183,7 @@ with pat_list as
                         trunc(STDDEV(TG_time_from_index), 2)                                           std,
                         trunc(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY TG_time_from_index asc), 2) "pct_25",
                         trunc(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY TG_time_from_index asc), 2) "pct_75",
-                        'time to last TG > 500 (days)',
+                        'time to last TG over 500 (days)',
                         cohort
 
                  from pat_list

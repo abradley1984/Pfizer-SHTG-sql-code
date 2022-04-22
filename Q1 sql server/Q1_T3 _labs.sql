@@ -96,10 +96,10 @@ from (
 --                      a.cohort,
                       a.result_date,
                       a.index_date,
-                      datediff(dd, a.result_date, a.index_date) as time_from_index,
+                      datediff(dd, a.index_date, a.result_date) as time_from_index,
                       row_number() OVER (
                           PARTITION BY a.patid
-                          ORDER BY datediff(dd, a.result_date, a.index_date) ASC
+                          ORDER BY datediff(dd, a.index_date, a.result_date) ASC
                           )                                        row_num
                from #lipid_panel_date a
               ) c
@@ -119,10 +119,10 @@ from (
 --                      a.cohort,
                       a.result_date,
                       a.index_date,
-                      datediff(dd, a.result_date, a.index_date) as time_from_index,
+                      datediff(dd, a.index_date, a.result_date) as time_from_index,
                       row_number() OVER (
                           PARTITION BY a.patid
-                          ORDER BY abs(datediff(dd, a.result_date, a.index_date)) ASC
+                          ORDER BY abs(datediff(dd, a.index_date, a.result_date)) ASC
                           )                                        row_num
                from #lipid_panel_date a
               ) c
@@ -224,7 +224,7 @@ from (select *
                    2)                                                                 "pct_75",
              PERCENTILE_CONT(0.5) WITHIN
                  GROUP (ORDER BY TG_time_from_index asc) OVER (PARTITION BY a.cohort) "Median",
-             'time to last TG  (days)',
+             'time to last TG over 500 (days)',
              cohort
 
       from #pat_list a
