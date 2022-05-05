@@ -200,6 +200,11 @@ when Age BETWEEN 65 and 75
 /*select distinct patid, cohort, insurance_type, raw_payer_type_primary from insurance_type
 order by patid*/
         ,
+      --Both cariology and endocrinology
+     cardio_plus_endo as (select patid, 'both_endo_cardio' as both_endo_cardio, cohort
+                          from (select * from providers where provider_specialty = 'endo')
+                                   inner join (select * from providers where provider_specialty = 'cardiology')
+                                             using (patid, cohort)),
      Table1_pre as (select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
                     from pat_list
                     group by cohort
@@ -301,6 +306,10 @@ order by patid*/
                     select '7' as order1, 'Provider', provider_specialty, count(distinct patid), cohort
                     from providers
                     group by cohort, provider_specialty
+                    union
+      select '7' as order1, 'Provider', both_endo_cardio, count(distinct patid), cohort
+                    from cardio_plus_endo
+                    group by cohort, both_endo_cardio
                     union
                     select '7' as order1, 'Provider', 'provider_info_available', count(distinct patid), cohort
                     from providers
