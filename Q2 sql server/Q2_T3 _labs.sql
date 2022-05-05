@@ -20,7 +20,7 @@ from (
      ) a;
 
  select *
-into #all_labs from (select foo.dbo.Q2_labs_all.*, pat_list.cohort from foo.dbo.Q2_labs_all left join pat_list on pat_list.patid =Q2_labs_all.patid) as [q2la.*c];-- generated in Q2_labs_part1
+into #all_labs from (select a.*, b.cohort from foo.dbo.Q2_labs_all a  left join #pat_list b on a.patid =b.patid) as [q2la.*c];-- generated in Q2_labs_part1
 
 
 select *
