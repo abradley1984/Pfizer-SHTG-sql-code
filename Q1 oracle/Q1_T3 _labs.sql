@@ -777,12 +777,12 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when TG < 500 THEN 1 END),
-                        'N TG under 500',
+                        COUNT(CASE when TG < 150 THEN 1 END),
+                        'N TG under 150',
 
-                        trunc(100 * COUNT(CASE when TG < 500 THEN 1 END) / count(patid), 2) as pct2
+                        trunc(100 * COUNT(CASE when TG < 150 THEN 1 END) / count(patid), 2) as pct2
                          ,
-                        'pct TG under 500',
+                        'pct TG under 150',
                         'TG'                                                                   measure1,
                         cohort
                  from all_labs

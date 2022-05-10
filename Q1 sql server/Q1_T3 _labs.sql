@@ -861,12 +861,12 @@ from (select count(patid)            as                                         
       group by cohort
       union
       select count(patid)                                                        as count_patients,
-             COUNT(CASE when TG < 500 THEN 1 END)                                as count2,
-             'N TG under 500'                                                    as count_label,
+             COUNT(CASE when TG < 150 THEN 1 END)                                as count2,
+             'N TG under 150'                                                    as count_label,
 
-             round(100 * COUNT(CASE when TG < 500 THEN 1 END) / count(patid), 2) as pct2
+             round(100 * COUNT(CASE when TG < 150 THEN 1 END) / count(patid), 2) as pct2
               ,
-             'pct TG under 500'                                                  as pct_label,
+             'pct TG under 150'                                                  as pct_label,
              'TG'                                                                   measure1,
              cohort
       from #all_labs
