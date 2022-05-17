@@ -24,7 +24,7 @@ from (
      ) a;
 select *
 into #all_labs
-from (select * from foo.dbo.Q1_labs_all) a;-- generated in Q1_labs_part1
+from (select * from foo.dbo.Q1_labs_all_v2) a;-- generated in Q1_labs_part1
 
 select *
 into #HDL_all
