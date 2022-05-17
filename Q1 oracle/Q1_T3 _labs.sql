@@ -10,7 +10,7 @@ with pat_list as
              where cohort is not null
              -- fetch first 1000 rows only
          ),
-     all_labs as (select * from Q1_labs_all),-- generated in Q1_labs_part1
+     all_labs as (select * from Q1_labs_all_v2),-- generated in Q1_labs_part1
 
      HDL_all as (select distinct patid,
 

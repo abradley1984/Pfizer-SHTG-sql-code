@@ -8,7 +8,7 @@ Run time: ~36 mins
 -- drop table Q2_labs_all;*/
 
 
-create table Q2_labs_all as
+create table Q2_labs_all_v2 as
 with pat_list as
          (
              select LDL_Date as index_date, SHTG_Q2_STEP1_d5.*
@@ -372,7 +372,8 @@ with pat_list as
                 from cdm_60_etl.vital
                 WHERE measure_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   and ht is not null
-                  and ht > 0
+
+                    and ht>24 and ht<120
                   and patid in (select patid from pat_list)),
 
      creatinine as (select *
