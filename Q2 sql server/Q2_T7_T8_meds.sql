@@ -1,4 +1,3 @@
-   
 /*For Q2 T7 and T8
   Two tables will be output at the end, T7 and T8.
 
@@ -9,19 +8,14 @@
  */
 
 
-
-
-
 --
-select *
-into #pat_list
+select * into #pat_list
 from
     (
-    select * from  foo.dbo.SHTG_Q2_STEP3
+    select * from foo.dbo.SHTG_Q2_STEP3
     ) dummy;
 --statins
-select *
-into #statins
+select * into #statins
 from (
     select distinct a.patid, cohort, 1 as Statin
     from #pat_list a
@@ -38,8 +32,7 @@ from (
 
 -- high_intensity_statins
 
-select *
-into #high_intensity_statin
+select * into #high_intensity_statin
 from (
     select distinct a.patid,
     cohort,
@@ -154,8 +147,7 @@ from (
 
 
 -- ezetimibe
-select *
-into #ezetimibe
+select * into #ezetimibe
 from (
     select distinct a.patid, cohort, 1 as Ezetimibe
     from #pat_list a
@@ -166,8 +158,7 @@ from (
     group by a.patid, cohort) c;
 
 --bile_acid_sequestrant
-select *
-into  #bile_acid_sequestrant
+select * into  #bile_acid_sequestrant
 from (
     select distinct a.patid, cohort, 1 as bile_acid_sequestrant
     from #pat_list a
@@ -179,8 +170,7 @@ from (
 
 
 --fibrate
-select *
-into #fibrate
+select * into #fibrate
 from (
     select distinct a.patid, cohort, 1 as fibrate
     from #pat_list a
@@ -192,8 +182,7 @@ from (
 
 
 --icosapent_ethyl
-select *
-into #icosapent_ethyl
+select * into #icosapent_ethyl
 from (
     select distinct a.patid, cohort, 1 as icosapent_ethyl
     from #pat_list a
@@ -205,8 +194,7 @@ from (
 
 
 --niacin
-select *
-into #niacin
+select * into #niacin
 from (
     select distinct a.patid, cohort, 1 as niacin
     from #pat_list a
@@ -218,8 +206,7 @@ from (
 
 
 --omega_3
-select *
-into #omega_3
+select * into #omega_3
 from (
     select distinct a.patid, cohort, 1 as omega_3
     from #pat_list a
@@ -231,8 +218,7 @@ from (
 
 
 --pcsk9
-select *
-into #pcsk9
+select * into #pcsk9
 from (
     select distinct a.patid, cohort, 1 as pcsk9
     from #pat_list a
@@ -242,8 +228,7 @@ from (
     ('1659152', '1659183', '1659157', '1801322', '1665684', '1665896', '1659156', '1659177', '1665904', '1659161', '1659179', '1659182', '1665906', '1801319', '1665895', '1659165', '1665900', '1659167')
     group by a.patid, cohort) c;
 
-select *
-into #first_therapy_date
+select * into #first_therapy_date
 from (
     select a.patid, cohort, min (rx_order_Date) as first_therapy_date
     from #pat_list a
@@ -770,8 +755,7 @@ from (
     )
     group by a.patid, cohort) c;
 
-select *
-into #last_therapy_date
+select * into #last_therapy_date
 from (
     select a.patid, cohort, max (rx_order_Date) as last_therapy_date_in_sp
     from #pat_list a
@@ -1301,8 +1285,7 @@ from (
     )
     group by a.patid, cohort) c;
 
-select *
-into #all_meds
+select * into #all_meds
 from (
     select distinct a.patid,
     a.cohort,
@@ -1339,8 +1322,7 @@ from (
     full outer join #last_therapy_date l on a.patid=l.patid
     ) m
 ;
-select *
-into #all_meds_with_labs
+select * into #all_meds_with_labs
 from (
     select distinct patid,
     cohort,
@@ -1350,6 +1332,11 @@ from (
     when (coalesce (statin, Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl,
     niacin, omega_3, 0)) = 0
     then 1 end as no_lipid_lowering,
+   sum(case when High_Intensity_Statin = 1 and Ezetimibe = 1 then 1 end)            as high_intensity_statin_ezetimibe,
+
+      sum(case when Statin = 1 and other_lipid_lowering_ex_omega = 1 then 1 end) as statin_plus_other_lipid_l_Ex_omega
+       ,
+        sum(no_lipid_lowering_ex_omega)                                            as no_lipid_lowering_ex_omega,
     Statin,
     High_Intensity_Statin,
     Ezetimibe,
@@ -1372,8 +1359,7 @@ from (
     FROM #all_meds) n;
 
 -- This is a table that will be used in later queries
-select *
-into foo.dbo.shtg_meds_Q2
+select * into foo.dbo.shtg_meds_Q2_v2
 from #all_meds_with_labs;
 
 --table 7
@@ -1390,24 +1376,30 @@ select cohort,
        sum(icosapent_ethyl)                                                 icosapent_ethyl,
        sum(case when Statin = 1 and Ezetimibe = 1 then 1 end)            as statin_ezetimibe,
        sum(case when Statin = 1 and other_lipid_lowering = 1 then 1 end) as statin_plus_other_lipid_l,
-       sum(no_lipid_lowering)                                            as no_lipid_lowering--,--, ldl_above_70
-       --sum(less_than_3_months_therapy) as less_than_3_months_therapy
-       --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
 
-from foo.dbo.shtg_meds_Q2
+       sum(case when Statin = 1 and other_lipid_lowering = 1 then 1 end) as statin_plus_other_lipid_l,
+
+       sum(case when Statin = 1 and other_lipid_lowering_Except_omega3 = 1 then 1 end) as statin_plus_other_lipid_l_Ex_omega
+        ,
+       sum(no_lipid_lowering_ex_omega) as                                                     no_lipid_lowering_ex_omega,
+       sum(no_lipid_lowering) as                                                              no_lipid_lowering
+from foo.dbo.shtg_meds_Q2_v2
 group by cohort;
+/*
 
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1426,13 +1418,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1452,13 +1446,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1477,13 +1473,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1501,13 +1499,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1527,13 +1527,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1553,13 +1555,15 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
+    */
+/* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+     *//*
+sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
@@ -1577,3 +1581,4 @@ group by ldl_under_70_nhdl_above_100
 having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
+*/
