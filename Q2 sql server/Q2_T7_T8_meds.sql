@@ -1332,11 +1332,12 @@ from (
     when (coalesce (statin, Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl,
     niacin, omega_3, 0)) = 0
     then 1 end as no_lipid_lowering,
-   sum(case when High_Intensity_Statin = 1 and Ezetimibe = 1 then 1 end)            as high_intensity_statin_ezetimibe,
-
-      sum(case when Statin = 1 and other_lipid_lowering_ex_omega = 1 then 1 end) as statin_plus_other_lipid_l_Ex_omega
-       ,
-        sum(no_lipid_lowering_ex_omega)                                            as no_lipid_lowering_ex_omega,
+case
+                             when (coalesce(statin, Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl,
+                                            niacin, 0)) = 0
+                                 then 1 end                                                                         as no_lipid_lowering_ex_omega,
+   coalesce(Ezetimibe, bile_acid_sequestrant, fibrate, pcsk9, icosapent_ethyl, niacin,
+                                  0)                                                                                as other_lipid_lowering_ex_omega,
     Statin,
     High_Intensity_Statin,
     Ezetimibe,
@@ -1377,10 +1378,12 @@ select cohort,
        sum(case when Statin = 1 and Ezetimibe = 1 then 1 end)            as statin_ezetimibe,
        sum(case when Statin = 1 and other_lipid_lowering = 1 then 1 end) as statin_plus_other_lipid_l,
 
-       sum(case when Statin = 1 and other_lipid_lowering = 1 then 1 end) as statin_plus_other_lipid_l,
+      sum(case when High_Intensity_Statin = 1 and Ezetimibe = 1 then 1 end)            as high_intensity_statin_ezetimibe,
 
-       sum(case when Statin = 1 and other_lipid_lowering_Except_omega3 = 1 then 1 end) as statin_plus_other_lipid_l_Ex_omega
-        ,
+      sum(case when Statin = 1 and other_lipid_lowering_ex_omega = 1 then 1 end) as statin_plus_other_lipid_l_Ex_omega
+       ,
+
+
        sum(no_lipid_lowering_ex_omega) as                                                     no_lipid_lowering_ex_omega,
        sum(no_lipid_lowering) as                                                              no_lipid_lowering
 from foo.dbo.shtg_meds_Q2_v2
