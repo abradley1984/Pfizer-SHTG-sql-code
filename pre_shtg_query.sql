@@ -15,12 +15,13 @@ select 'Pitt'          as                                           site_name,
        count(result_num),
        result_unit,
        lab_loinc,
-       raw_lab_name,
+       --raw_lab_name,
        median(result_num)                                           median,
        trunc(avg(result_num), 2)                                    mean,
        trunc(STDDEV(result_num), 2)                                 std,
        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY result_num asc) "pct_25",
-       PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY result_num asc) "pct_75"
+       PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY result_num asc) "pct_75",
+        PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY result_num asc) "pct_95"
         ,
        min(result_num) as                                           min,
        max(result_num) as                                           max
@@ -115,7 +116,7 @@ where result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30
 '2091-7',
 '2160-0',
 '38483-4')
-group by result_unit, lab_loinc, raw_lab_name;
+group by result_unit, lab_loinc;
 
 --Insurance_counts.csv
 select 'Pitt' as site_name, count(distinct patid), payer_type_primary
