@@ -272,15 +272,6 @@ where age > 18 and pre_index_days > 180;
 
 --Q1_Table0.csv (basic counts -  save to csv)
 
-(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm.dbo.demographic
-union
-select count(distinct patid) ,'Have lab data',2 from #with_exclusions
-    union
-select count(distinct patid) ,'Have lab data and over 18',3 from #with_exclusions
-where age >= 18
-union
-select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
-where age >= 18 and pre_index_days >= 180);
 
 select * into #labs from (select * from foo.dbo.shtg_Q1_cohort_definition2
 ) as [sQ1cd2*];
@@ -408,6 +399,25 @@ select * into foo.dbo.shtg_Q1_cohort_with_exclusions
 from #with_cohorts
 
 ;
+--filename:Q1_T0.csv
+
+select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm.dbo.demographic
+union
+select count(distinct patid) ,'Have lab data',2 from #with_exclusions
+    union
+select count(distinct patid) ,'Have lab data and over 18',3 from #with_exclusions
+where age >= 18
+union
+select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #with_exclusions
+where age >= 18 and pre_index_days >= 180
+
+ union
+select count(patid) as N , cohort ,10 as order1 from foo.dbo.shtg_Q1_cohort_with_exclusions
+
+group by cohort
+union
+select count(patid), 'total all cohorts', 11 from foo.dbo.shtg_Q1_cohort_with_exclusions
+order by order1, label1;
 
 
 

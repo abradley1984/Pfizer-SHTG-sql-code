@@ -2,15 +2,12 @@
 
 Running time: 8 mins *2
 */
-with pat_list as
-         (
-             select TG_Date as index_date, shtg_Q1_cohorts_with_ex.*
-             from shtg_Q1_cohorts_with_ex
 
-             where cohort is not null
-             -- fetch first 1000 rows only
-         ),
-     all_labs as (select * from Q1_labs_all_v2),-- generated in Q1_labs_part1
+with pat_list as
+        (select a.*, LDL_Date as index_date from SHTG_Q2_STEP3_d5 a
+    where cohort is not null),
+      all_labs as (select Q2_labs_all.*, cohort from Q2_labs_all left join pat_list on pat_list.patid =Q2_labs_all.patid),-- generated in Q2_labs_part1
+
 
      HDL_all as (select distinct patid,
 
@@ -20,15 +17,16 @@ with pat_list as
 
 
                  FROM pat_list
-                          left join cdm_60_etl.lab_result_cm using (patid)
+                          left join CDM_60_ETL.lab_result_cm using (patid)
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('04/01/2019', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
                    and lab_result_cm.result_num is not null
+                       AND result_num < 1000
 
                    -- and lab_result_cm.result_num >= 0
                    AND not lab_result_cm.result_unit in
                            ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         AND lab_result_cm.result_num < 1000
+
 
      ),
 
@@ -42,27 +40,20 @@ with pat_list as
 
 
                         FROM pat_list
-                                 left join cdm_60_etl.lab_result_cm using (patid)
+                                 left join CDM_60_ETL.lab_result_cm using (patid)
 
                         WHERE lab_result_cm.result_date BETWEEN TO_DATE('04/01/2019', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
+                              AND result_num < 30000
 
                           -- and lab_result_cm.result_num >= 0
                           AND not lab_result_cm.result_unit in
                                   ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         AND lab_result_cm.result_num < 30000
+
 
      ),
-     lipid_panel_date as (select patid,
-                      cohort,
-                      result_date,
-                      index_date,
-                      result_date - index_date as time_from_index,
-                                 row_number() OVER (
-                          PARTITION BY patid
-                          ORDER BY abs(result_date - index_date) ASC
-                          ) as row_num
+     lipid_panel_date as (select *
                           from HDL_all
                                    inner join total_chol_all using (patid, result_date)),
 
@@ -76,11 +67,18 @@ with pat_list as
                 row_num,
                 case when abs(time_from_index) < 90 then 1 else 0 end  as less_than_90_days,
                 case when abs(time_from_index) < 456 then 1 else 0 end as less_than_15_months
-         from (select *
+         from (select patid,
+                      cohort,
+                      result_date,
+                      index_date,
+                      result_date - index_date as time_from_index,
+                      row_number() OVER (
+                          PARTITION BY patid
+                          ORDER BY abs(result_date - index_date) ASC
+                          )                       row_num
                from lipid_panel_date
               )
          where row_num in (2)),
-
      nhdl_after_index as (
          select patid,
                 cohort,
@@ -125,17 +123,17 @@ with pat_list as
                                             )                            row_num
 
                                  FROM pat_list
-                                          left join cdm_60_etl.lab_result_cm using (patid)
+                                          left join CDM_60_ETL.lab_result_cm using (patid)
                                  WHERE                                                                       --lab_result_cm.result_date BETWEEN TO_DATE('07/31/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                                      lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                                    AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                                    and lab_result_cm.result_num is not null
                                    and lab_result_cm.result_num >= 500
+                                   AND result_num < 30000
                                    and (result_date - index_date) <= (-1)--TG occurs before index_date
                                 )
                                 --and patid in (select patid from pat_list)
-                                --AND lab_result_cm.result_num < 1000
-                           where row_num = 1
+where row_num = 1
      ),
      diabetic_control as (
          select count(patid)                                   count_patients,
@@ -184,7 +182,7 @@ with pat_list as
                         round(STDDEV(TG_time_from_index), 2)                                           std,
                         round(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY TG_time_from_index asc), 2) "pct_25",
                         round(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY TG_time_from_index asc), 2) "pct_75",
-                        'time to last TG over 500 (days)',
+                        'time to last TG > 500 (days)',
                         cohort
 
                  from pat_list
@@ -601,9 +599,9 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE WHEN BMI between 20 and 24.99 then   1 END),
+                        COUNT(CASE WHEN BMI between 20 and 24.99 THEN 1 END),
                         'N BMI 20 to 25',
-                        round(100 * COUNT(CASE WHEN BMI between 20 and 24.99 then   1 END) / count(patid), 2) pct3,
+                        round(100 * COUNT(CASE WHEN BMI between 20 and 24.99 THEN 1 END) / count(patid), 2) pct3,
                         'pct BMI 20 to 25',
                         'BMI'                                                                            measure1,
                         cohort
@@ -611,10 +609,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE WHEN BMI between 35 and 39.99 then  1 END),
+                        COUNT(CASE WHEN BMI between 35 and 39.99 THEN 1 END),
                         'N BMI 35 to 40',
 
-                        round(100 * COUNT(CASE WHEN BMI between 35 and 39.99 then  1 END) / count(patid), 2) as pct4
+                        round(100 * COUNT(CASE WHEN BMI between 35 and 39.99 THEN 1 END) / count(patid), 2) as pct4
                          ,
                         'pct BMI 35 to 40',
                         'BMI'                                                                               measure1,
@@ -623,9 +621,9 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE WHEN BMI between 25 and 29.99 then  1 END),
+                        COUNT(CASE WHEN BMI between 25 and 29.99 THEN 1 END),
                         'N BMI 25 to 30',
-                        round(100 * COUNT(CASE WHEN BMI between 25 and 29.99 then   1 END) / count(patid), 2) pct5,
+                        round(100 * COUNT(CASE WHEN BMI between 25 and 29.99 THEN 1 END) / count(patid), 2) pct5,
                         'pct BMI 25 to 30',
                         'BMI'                                                                            measure1,
                         cohort
@@ -633,10 +631,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE WHEN BMI between 30 and 34.99 then   1 END)                                   count1,
+                        COUNT(CASE WHEN BMI between 30 and 34.99 THEN 1 END)                                   count1,
                         'N BMI 30 to 35',
 
-                        round(100 * COUNT(CASE WHEN BMI between 30 and 34.99 then   1 END) / count(patid), 2) as pct6
+                        round(100 * COUNT(CASE WHEN BMI between 30 and 34.99 THEN 1 END) / count(patid), 2) as pct6
                          ,
                         'pct BMI 30 to 35',
                         'BMI'                                                                               measure1,
@@ -667,9 +665,9 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when egfr_2021 between 60 and 89.99 then   1 END),
+                        COUNT(CASE when egfr_2021 between 60 and  89.99 THEN 1 END),
                         'N eGFR 60 to 90',
-                        round(100 * COUNT(CASE when egfr_2021 between 60 and 89.99 then   1 END) / count(patid), 2) pct3,
+                        round(100 * COUNT(CASE when egfr_2021 between 60 and  89.99 THEN 1 END) / count(patid), 2) pct3,
                         'pct eGFR 60 to 90',
                         'eGFR'                                                                                 measure1,
                         cohort
@@ -678,9 +676,9 @@ with pat_list as
 
                  union
                  select count(patid),
-                        COUNT(CASE when egfr_2021 between 45 and 59.99 then  1 END),
+                        COUNT(CASE when egfr_2021 between 45 and  59.99 THEN 1 END),
                         'N eGFR 45 to 60',
-                        round(100 * COUNT(CASE when egfr_2021 between 45 and 59.99 then  1 END) / count(patid), 2) pct5,
+                        round(100 * COUNT(CASE when egfr_2021 between 45 and  59.99 THEN 1 END) / count(patid), 2) pct5,
                         'pct eGFR 45 to 60',
                         'eGFR'                                                                                 measure1,
                         cohort
@@ -688,10 +686,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when egfr_2021 between 30 and 44.99 then  1 END)                                   count1,
+                        COUNT(CASE when egfr_2021 between 30 and 44.99 THEN 1 END)                                   count1,
                         'N eGFR 30 to 45',
 
-                        round(100 * COUNT(CASE when egfr_2021 between 30 and 44.99 then  1 END) / count(patid), 2) as pct6
+                        round(100 * COUNT(CASE when egfr_2021 between 30 and 44.99 THEN 1 END) / count(patid), 2) as pct6
                          ,
                         'pct eGFR 30 to 45',
                         'eGFR'                                                                                    measure1,
@@ -700,10 +698,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when egfr_2021 between 15 and 29.99 then  1 END),
+                        COUNT(CASE when egfr_2021 between 15 and 29.99 THEN 1 END),
                         'N eGFR 15 to 30',
 
-                        round(100 * COUNT(CASE when egfr_2021 between 15 and 29.9  THEN 1 END) / count(patid), 2) as pct4
+                        round(100 * COUNT(CASE when egfr_2021 between 15 and 29.99 THEN 1 END) / count(patid), 2) as pct4
                          ,
                         'pct eGFR 15 to 30',
                         'eGFR'                                                                                    measure1,
@@ -734,9 +732,9 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when LDL between 130 and 159.99 then  1 END),
+                        COUNT(CASE when LDL between 130 and 159.99 THEN 1 END),
                         'N LDL 130 to 160',
-                        round(100 * COUNT(CASE when LDL between 130 and 159.9  THEN 1 END) / count(patid), 2) pct3,
+                        round(100 * COUNT(CASE when LDL between 130 and 159.99 THEN 1 END) / count(patid), 2) pct3,
                         'pct LDL 130 to 160',
                         'LDL'                                                                              measure1,
                         cohort
@@ -745,9 +743,9 @@ with pat_list as
 
                  union
                  select count(patid),
-                        COUNT(CASE when LDL between 100 and 129.99 then  1 END),
+                        COUNT(CASE when LDL between 100 and 129.99 THEN 1 END),
                         'N LDL 100 to 130',
-                        round(100 * COUNT(CASE when LDL between 100 and 129.99 then  1 END) / count(patid), 2) pct5,
+                        round(100 * COUNT(CASE when LDL between 100 and 129.99 THEN 1 END) / count(patid), 2) pct5,
                         'pct LDL 100 to 130',
                         'LDL'                                                                              measure1,
                         cohort
@@ -810,10 +808,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when TG between 500 and 879.99 then  1 END)                                   count1,
+                        COUNT(CASE when TG between 500 and 879.99 THEN 1 END)                                   count1,
                         'N TG 500 to 880 ',
 
-                        round(100 * COUNT(CASE when TG between 500 and 879.99 then  1 END) / count(patid), 2) as pct6
+                        round(100 * COUNT(CASE when TG between 500 and 879.99 THEN 1 END) / count(patid), 2) as pct6
                          ,
                         'pct TG 500 to 880 ',
                         'TG'                                                                                 measure1,
@@ -822,10 +820,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when TG between 150 and 499.99 then  1 END)                                   count1,
+                        COUNT(CASE when TG between 150 and 499.99 THEN 1 END)                                   count1,
                         'N TG 150 to 500',
 
-                        round(100 * COUNT(CASE when TG between 150 and 499.99 then  1 END) / count(patid), 2) as pct6
+                        round(100 * COUNT(CASE when TG between 150 and 499.99 THEN 1 END) / count(patid), 2) as pct6
                          ,
                         'pct TG 150 to 500',
                         'TG'                                                                                 measure1,
@@ -845,9 +843,9 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when nHDL between 160 and 189.99 then  1 END),
+                        COUNT(CASE when nHDL between 160 and 189.99 THEN 1 END),
                         'N nHDL 160 to 190',
-                        round(100 * COUNT(CASE when nHDL between 160 and 189.99 then  1 END) / count(patid), 2) pct3,
+                        round(100 * COUNT(CASE when nHDL between 160 and 189.99 THEN 1 END) / count(patid), 2) pct3,
                         'pct nHDL 160 to 190',
                         'nHDL'                                                                              measure1,
                         cohort
@@ -856,9 +854,9 @@ with pat_list as
 
                  union
                  select count(patid),
-                        COUNT(CASE when nHDL between 130 and 159.99 then  1 END),
+                        COUNT(CASE when nHDL between 130 and 159.99 THEN  1 END),
                         'N nHDL 130 to 160',
-                        round(100 * COUNT(CASE when nHDL between 130 and 159.99 then  1 END) / count(patid), 2) pct5,
+                        round(100 * COUNT(CASE when nHDL between 130 and 159.99 THEN  1 END) / count(patid), 2) pct5,
                         'pct nHDL 130 to 160',
                         'nHDL'                                                                              measure1,
                         cohort
@@ -866,10 +864,10 @@ with pat_list as
                  group by cohort
                  union
                  select count(patid),
-                        COUNT(CASE when nHDL between 100 and 129.99 then  1 END)                                   count1,
+                        COUNT(CASE when nHDL between 100 and 129.99 THEN 1 END)                                   count1,
                         'N nHDL 100 to 130',
 
-                        round(100 * COUNT(CASE when nHDL between 100 and 129.99 then  1 END) / count(patid), 2) as pct6
+                        round(100 * COUNT(CASE when nHDL between 100 and 129.99 THEN 1 END) / count(patid), 2) as pct6
                          ,
                         'pct nHDL 100 to 130',
                         'nHDL'                                                                                 measure1,
@@ -941,7 +939,5 @@ with pat_list as
 
 
                  order by 7, 6, 5)
---select * from table3a;
---select * from lipid_panel_date;
---select * from lipid_panel_next_closest ;
-select * from table3b;
+select * from table3a;
+--select * from table3b;
