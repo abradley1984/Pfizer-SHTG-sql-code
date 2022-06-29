@@ -4,8 +4,8 @@
    This version is specific to Pitt due to insurance categories
  */
 
-
-with pat_list as (select * from shtg_Q1_cohorts_with_exclusions),
+--Q1_T1.csv
+with pat_list as (select * from shtg_Q1_cohorts_with_ex),
      smoking AS (select *
                  from (
                           select patid,
