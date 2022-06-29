@@ -35,7 +35,7 @@ from (select patid,
         AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
         and result_num is not null
         and result_num >= 0
-         --AND result_num < 1000
+         AND result_num < 30000
 
      ) c;
 select *
@@ -61,7 +61,7 @@ from (select patid,
         and result_num is not null
         and result_num >= 0
          -- AND not result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --and result_num < 1000
+         and result_num < 10000
 
      ) c;
 select *
@@ -119,6 +119,7 @@ from (select patid,
         AND lab_loinc in ('2085-9')
         --  and result_num is not null
         and result_num >= 0
+        and result_num < 1000
         AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 

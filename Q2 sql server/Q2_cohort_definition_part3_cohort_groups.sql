@@ -454,6 +454,7 @@ from (select lab_result_cm.patid,
           lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
         --and lab_result_cm.patid in pat_list
         and lab_result_cm.result_num is not null
+        AND result_num < 10000
         --  and lab_result_cm.result_num >= 100
         and patid in (select patid from #pat_list a)
         AND not lab_result_cm.result_unit in
@@ -873,9 +874,12 @@ from (select lab_result_cm.patid,
         --and lab_result_cm.patid in pat_list
         and lab_result_cm.result_num is not null
         --  and lab_result_cm.result_num >= 100
+        AND result_num < 30000
         and patid in (select patid from #pat_list a)
          -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         --AND lab_result_cm.
+         --
+
 
      ) as lrc;
 select *
@@ -1008,5 +1012,16 @@ from (
                   left join #add_categories add_categories on a.patid = add_categories.patid) as aveac;
 
 
-select a.*,                b.TG_CATEGORY,                b.LDL_category2,                b.nhdl_category2,                b.v_high_risk,                b.enhanced_risk,                b.diabetes,       cohortinto foo.dbo.shtg_Q2_STEP3from #PAT_LIST a         join #cohorts b on a.patid = b.patidwhere cohort is not null;
+select a.*,
+                b.TG_CATEGORY,
+                b.LDL_category2,
+                b.nhdl_category2,
+                b.v_high_risk,
+                b.enhanced_risk,
+                b.diabetes,
+       cohort
+into foo.dbo.shtg_Q2_STEP3
+from #PAT_LIST a
+         join #cohorts b on a.patid = b.patid
+where cohort is not null;
 

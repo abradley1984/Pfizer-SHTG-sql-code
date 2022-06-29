@@ -20,7 +20,7 @@ from (
      ) a;
 
  select *
-into #all_labs from (select a.*, b.cohort from foo.dbo.Q2_labs_all_v2 a  left join #pat_list b on a.patid =b.patid) as [q2la.*c];-- generated in Q2_labs_part1
+into #all_labs from (select a.*, b.cohort from foo.dbo.Q2_labs_all a  left join #pat_list b on a.patid =b.patid) as [q2la.*c];-- generated in Q2_labs_part1
 
 
 select *
@@ -42,7 +42,7 @@ from (select distinct a.patid,
         -- and result_num >= 0
         AND not b.result_unit in
                 ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND result_num < 1000
+         AND result_num < 1000
 
      ) c;
 
@@ -64,6 +64,7 @@ from (select distinct a.patid,
       WHERE result_date BETWEEN '2019-04-01' AND '2021-09-30'
         AND lab_loinc in ('2093-3')
         and result_num is not null
+        AND result_num < 30000
 
         -- and result_num >= 0
         AND not result_unit in
@@ -158,6 +159,7 @@ from (select *
               AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
               and result_num is not null
               and result_num >= 500
+              AND result_num < 30000
               and (datediff(dd, index_date,result_date)) <= (-1)--TG occurs before index_date
            ) c
            --and patid in (select a.patid from #pat_list)

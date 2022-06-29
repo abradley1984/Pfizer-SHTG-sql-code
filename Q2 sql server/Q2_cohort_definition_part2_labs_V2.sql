@@ -74,7 +74,8 @@ from (select a.patid,
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1884-6', '1871-3', '1881-2')
-        and result_num is not null) as ab;
+        and result_num is not null
+        AND result_num < 1000) as ab;
 
 
 --  lpa - mol and mass handled separately
@@ -98,7 +99,7 @@ from (select a.patid,
         AND (lab_loinc in
              ('10835-7') and not result_unit = 'nmol/L')
 
-
+AND result_num < 2000
         and result_num is not null) as ab;
 
 select *
@@ -116,7 +117,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 2000
         AND (lab_loinc in
              ('43583-4')
           or (lab_loinc in
@@ -143,7 +144,8 @@ from (select a.patid,
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('1869-7', '1874-7', '55724-9')
-        and result_num is not null) as ab;
+        and result_num is not null
+        AND result_num < 1000) as ab;
 
 
 --nlr
@@ -166,6 +168,7 @@ from (select a.patid,
         AND lab_loinc in
             ('770-8', '23761-0', '26511-6')
         and result_num is not null
+        AND result_num < 10000
         and (result_unit in ('OT', '%') or result_unit is null)) as ab;
 
 
@@ -188,7 +191,8 @@ from (select a.patid,
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
 
         AND lab_loinc in ('30522-7', '35648-5')
-        and result_num is not null) as ab;
+        and result_num is not null
+        AND result_num < 200) as ab;
 
 select *
 into #diabetes
@@ -223,7 +227,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 100
         AND lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
         and result_num is not null
         and a.patid in (select patid from #diabetes)) as ab;
@@ -267,7 +271,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 5000
         AND lab_loinc in
             ('6768-6')
         and result_num is not null) as ab;
@@ -289,7 +293,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 30000
         AND lab_loinc in ('1742-6', '1743-4', '1744-2')
         and result_num is not null
         and result_num > 0) as ab;
@@ -311,7 +315,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 30000
         AND lab_loinc in ('1920-8', '30239-8')
         and result_num is not null) as ab;
 
@@ -332,7 +336,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 10000
         AND lab_loinc in ('2324-2')
         and result_num is not null) as ab;
 
@@ -354,7 +358,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 10000
         AND lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
         and result_num is not null
         and result_num > 0) as ab;
@@ -376,7 +380,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 30000
         AND lab_loinc in ('2571-8')
         and result_num is not null) as ab;
 
@@ -397,7 +401,7 @@ from (select a.patid,
       from #pat_list a
                left join cdm.dbo.lab_result_cm  b on a.patid = b.patid
       WHERE result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+AND result_num < 1000
         AND lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
         and result_num is not null) as ab;
 select *
@@ -454,7 +458,7 @@ from (select *
 
               AND lab_loinc in ('2160-0', '38483-4')
               and result_num is not null
-              AND RESULT_NUM < 500
+              AND RESULT_NUM < 30
               AND RESULT_NUM > 0
            ) as "p*"
       where row_num = 1) as "p**";
@@ -551,6 +555,6 @@ from (
 --writing labs table
 --create table Q1_labs_all as
 select *
-into foo.dbo.Q2_labs_all_v2
+into foo.dbo.Q2_labs_all
 From #all_labs2;
-select * from foo.dbo.Q2_labs_all_v2;
+select * from foo.dbo.Q2_labs_all;

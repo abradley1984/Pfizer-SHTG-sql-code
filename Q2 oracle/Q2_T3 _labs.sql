@@ -21,11 +21,12 @@ with pat_list as
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('04/01/2019', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
                    and lab_result_cm.result_num is not null
+                       AND result_num < 1000
 
                    -- and lab_result_cm.result_num >= 0
                    AND not lab_result_cm.result_unit in
                            ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+
 
      ),
 
@@ -44,11 +45,12 @@ with pat_list as
                         WHERE lab_result_cm.result_date BETWEEN TO_DATE('04/01/2019', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
+                              AND result_num < 30000
 
                           -- and lab_result_cm.result_num >= 0
                           AND not lab_result_cm.result_unit in
                                   ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+
 
      ),
      lipid_panel_date as (select *
@@ -127,11 +129,11 @@ with pat_list as
                                    AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                                    and lab_result_cm.result_num is not null
                                    and lab_result_cm.result_num >= 500
+                                   AND result_num < 30000
                                    and (result_date - index_date) <= (-1)--TG occurs before index_date
                                 )
                                 --and patid in (select patid from pat_list)
-                                --AND lab_result_cm.result_num < 1000
-                           where row_num = 1
+where row_num = 1
      ),
      diabetic_control as (
          select count(patid)                                   count_patients,

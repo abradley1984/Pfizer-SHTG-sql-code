@@ -401,6 +401,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                      lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
+                       AND result_num < 10000
                    --  and lab_result_cm.result_num >= 100
                    and patid in (select patid from pat_list)
         AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units   --AND lab_result_cm.result_num < 1000
@@ -800,6 +801,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                     lab_result_cm.lab_loinc in ('2571-8')
                   --and lab_result_cm.patid in pat_list
                   and lab_result_cm.result_num is not null
+                      AND result_num < 30000
                   --  and lab_result_cm.result_num >= 100
                   and patid in (select patid from pat_list)
          -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units

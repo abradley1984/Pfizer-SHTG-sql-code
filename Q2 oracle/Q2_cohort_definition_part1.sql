@@ -21,6 +21,7 @@ TG_all as (select lab_result_cm.patid,
              AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
              and lab_result_cm.result_num is not null
              and lab_result_cm.result_num >= 0
+     and result_num<30000
     --AND lab_result_cm.result_num < 1000
 
 ),
@@ -42,6 +43,7 @@ LDL_all as (select lab_result_cm.patid,
               --and lab_result_cm.patid in pat_list
               and lab_result_cm.result_num is not null
               and lab_result_cm.result_num >= 0
+     and result_num<10000
     -- AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
     --AND lab_result_cm.result_num < 1000
 
@@ -72,7 +74,7 @@ total_chol_all as (select lab_result_cm.patid,
     -- and lab_result_cm.result_num is not null
     -- and lab_result_cm.result_num >= 0
       AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-    --AND lab_result_cm.result_num < 1000
+      and result_num<30000
 
 ),
 total_chol as (select *
@@ -92,6 +94,8 @@ HDL_all as (select lab_result_cm.patid,
               AND lab_result_cm.lab_loinc in ('2085-9')
               --  and lab_result_cm.result_num is not null
               and lab_result_cm.result_num >= 0
+                  and result_num < 1000
+
       AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
    
 
