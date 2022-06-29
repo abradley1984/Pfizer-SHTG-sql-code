@@ -42,7 +42,7 @@ AND lab.lab_loinc in ('2571-8', '12951-0')
                   AND not lab.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                   and lab.result_num is not null
                   and lab.result_num >= 0
-    --AND lab.result_num < 1000
+    AND lab.result_num < 30000
     -- fetch first 1000 rows only
 ;
     select *
@@ -66,6 +66,7 @@ AND lab.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab.patid in pat_list
                    and lab.result_num is not null
                    and lab.result_num >= 0
+AND lab.result_num < 10000
          --  AND not lab.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
          --AND lab.result_num < 1000
      ;
@@ -91,6 +92,7 @@ FROM cdm.dbo.lab_result_cm lab
                           AND lab.lab_loinc in ('2093-3')
                           and lab.result_num is not null
                           and lab.result_num >= 0
+                    AND lab.result_num < 30000
                           AND not lab.result_unit in
                                   ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
      ;
@@ -114,6 +116,7 @@ from cdm.dbo.lab_result_cm lab
                    AND lab.lab_loinc in ('2085-9')
                    and lab.result_num is not null
                    and lab.result_num >= 0
+                    AND lab.result_num < 1000
                    AND not lab.result_unit in
                            ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
      ;

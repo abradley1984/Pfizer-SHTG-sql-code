@@ -54,7 +54,8 @@ with pat_list as
                WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                  AND lab_result_cm.lab_loinc in ('1884-6', '1871-3', '1881-2')
                  and lab_result_cm.result_num is not null
-                 and lab_result_cm.result_num > 0),
+                 and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 1000),
 
 
      --  lpa - mol and mass handled separately
@@ -77,7 +78,8 @@ with pat_list as
 
 
                     and lab_result_cm.result_num is not null
-                    and lab_result_cm.result_num > 0),
+                    and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 2000),
 
      lpa_mol as (select patid,
                         row_number() OVER (
@@ -96,7 +98,8 @@ with pat_list as
                         ('43583-4')
                      or (lab_result_cm.lab_loinc in
                          ('10835-7') and result_unit = 'nmol/L')
-                            and lab_result_cm.result_num is not null and lab_result_cm.result_num > 0))
+                            and lab_result_cm.result_num is not null and lab_result_cm.result_num > 0
+                       )and lab_result_cm.result_num < 2000)
         ,
 
 
@@ -117,7 +120,8 @@ with pat_list as
                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   AND lab_result_cm.lab_loinc in ('1869-7', '1874-7', '55724-9')
                   and lab_result_cm.result_num is not null
-                  and lab_result_cm.result_num > 0),
+                  and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 1000),
 
 
 --nlr
@@ -138,6 +142,7 @@ with pat_list as
                    ('770-8', '23761-0', '26511-6')
                and lab_result_cm.result_num is not null
                and lab_result_cm.result_num > 0
+               and lab_result_cm.result_num < 10000
                and (result_unit in ('OT', '%') or result_unit is null)),
 
 
@@ -158,7 +163,8 @@ with pat_list as
                WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                  AND lab_result_cm.lab_loinc in ('30522-7', '35648-5')
                  and lab_result_cm.result_num is not null
-                 and lab_result_cm.result_num > 0),
+                 and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num <200),
 
      diabetes as (select distinct (patid), 1 as Diabetes
                   FROM pat_list pats
@@ -188,6 +194,7 @@ with pat_list as
                AND lab_result_cm.lab_loinc in ('17856-6', '41995-2', '4549-2', '4548-4')
                and lab_result_cm.result_num is not null
                and lab_result_cm.result_num > 0
+               and lab_result_cm.result_num <100
                and patid in (select patid from diabetes)),--only giving A1c for diabetic patients
 
 --albumin
@@ -227,7 +234,8 @@ with pat_list as
                AND lab_result_cm.lab_loinc in
                    ('6768-6')
                and lab_result_cm.result_num is not null
-               and lab_result_cm.result_num > 0),
+               and lab_result_cm.result_num > 0
+               and lab_result_cm.result_num < 5000),
 
 --alt
 
@@ -246,7 +254,8 @@ with pat_list as
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('1742-6', '1743-4', '1744-2')
                and lab_result_cm.result_num is not null
-               and lab_result_cm.result_num > 0),
+               and lab_result_cm.result_num > 0
+          and lab_result_cm.result_num < 30000),
 
 --ast
 
@@ -265,7 +274,9 @@ with pat_list as
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('1920-8', '30239-8')
                and lab_result_cm.result_num is not null
-               and lab_result_cm.result_num > 0),
+               and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 30000)
+     ,
 
 --ggt
 
@@ -284,7 +295,8 @@ with pat_list as
              WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                AND lab_result_cm.lab_loinc in ('2324-2')
                and lab_result_cm.result_num is not null
-               and lab_result_cm.result_num > 0),
+               and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 10000),
 
 
 --platelets
@@ -304,7 +316,8 @@ with pat_list as
                    WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                      AND lab_result_cm.lab_loinc in ('777-3', '26515-7', '49497-1', '778-1')
                      and lab_result_cm.result_num is not null
-                     and lab_result_cm.result_num > 0),
+                     and lab_result_cm.result_num > 0
+     and lab_result_cm.result_num < 10000),
 
 --TG
 
@@ -323,7 +336,8 @@ with pat_list as
             WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
               AND lab_result_cm.lab_loinc in ('2571-8')
               and lab_result_cm.result_num is not null
-              and lab_result_cm.result_num > 0),
+              and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 30000),
 
 --uacr
 
@@ -342,7 +356,8 @@ with pat_list as
               WHERE lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                 AND lab_result_cm.lab_loinc in ('9318-7', '13705-9', '32294-1', '14585-4')
                 and lab_result_cm.result_num is not null
-                and lab_result_cm.result_num > 0),
+                and lab_result_cm.result_num > 0
+         and lab_result_cm.result_num < 1000),
      weight as (select patid,
                        row_number() OVER (
                            PARTITION BY patid
@@ -355,7 +370,8 @@ with pat_list as
                 WHERE measure_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   and wt is not null
 
-                    and wt>10 and wt<1000
+                  and wt > 10
+                  and wt < 1000
                   and patid in (select patid from pat_list)),
      height as (select patid,
                        row_number() OVER (
@@ -369,7 +385,8 @@ with pat_list as
                 WHERE measure_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
                   and ht is not null
 
-                  and ht>24 and ht<120
+                  and ht > 24
+                  and ht < 120
                   and patid in (select patid from pat_list)),
 
      creatinine as (select *
@@ -394,6 +411,7 @@ with pat_list as
                             and lab_result_cm.result_num is not null
                             --AND RESULT_NUM < 500
                             AND RESULT_NUM > 0
+                        and lab_result_cm.result_num < 30
                          )
                     where row_num = 1),
 

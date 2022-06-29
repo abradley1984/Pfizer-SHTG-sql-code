@@ -28,7 +28,7 @@ with pat_list as
                    -- and lab_result_cm.result_num >= 0
                    AND not lab_result_cm.result_unit in
                            ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         AND lab_result_cm.result_num < 1000
 
      ),
 
@@ -51,7 +51,7 @@ with pat_list as
                           -- and lab_result_cm.result_num >= 0
                           AND not lab_result_cm.result_unit in
                                   ('mg/d', 'g/dL', 'mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         AND lab_result_cm.result_num < 30000
 
      ),
      lipid_panel_date as (select patid,

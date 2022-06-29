@@ -1,5 +1,9 @@
 /* Q1 step 1
-This code defines the overall cohort for the first section of the SHTG qery (Q1) as patients who
+
+   Note: I'm adding in upper fences for TG and LDL here, but those aren't reached by any site, so won't need to be rerun
+
+
+    This code defines the overall cohort for the first section of the SHTG qery (Q1) as patients who
    -had a TG value in the one year study period (30-Sep-2020 to 30-Sep-2021)
    -had a TG>500, or had an LDL within the study period if their TG was <500,
    - had an NHDL within 30 days of their first TG.
@@ -33,8 +37,10 @@ drop table shtg_Q1_total_counts;
 drop table shtg_Q1_cohorts_with_ex
   */
 
-
-
+create table shtg_cohort_definition_old_version as select * from shtg_cohort_definition;
+    drop table shtg_cohort_definition;
+   drop table shtg_Q1_cohorts_with_ex;
+drop table shtg_q1_total_counts;
 --list of patients who have triglycerides in study period
 create table shtg_cohort_definition as
 with TG_all as (select lab_result_cm.patid,
@@ -54,7 +60,7 @@ with TG_all as (select lab_result_cm.patid,
                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                   and lab_result_cm.result_num is not null
                   and lab_result_cm.result_num >= 0
-    --AND lab_result_cm.result_num < 1000
+    AND lab_result_cm.result_num < 30000
    -- fetch first 1000 rows only
 
 ),
@@ -77,7 +83,7 @@ with TG_all as (select lab_result_cm.patid,
                    and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
         --  AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}') --Excluding rare weird units
-         --AND lab_result_cm.result_num < 1000
+         AND lab_result_cm.result_num < 10000
 
      ),
      LDL as (select *
@@ -97,6 +103,7 @@ with TG_all as (select lab_result_cm.patid,
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
                           and lab_result_cm.result_num >= 0
+                           and lab_result_cm.result_num <30000
            AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 
@@ -118,6 +125,7 @@ with TG_all as (select lab_result_cm.patid,
                    AND lab_result_cm.lab_loinc in ('2085-9')
                  and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
+                    and lab_result_cm.result_num <1000
          AND not lab_result_cm.result_unit in ('mg/d','g/dL','mL/min/{1.73_m2}', 'mL/min') --Excluding rare weird units
 
 
