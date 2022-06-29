@@ -4,11 +4,9 @@ Run time: ~35 mins
  */
 
 
---select * From Q1_labs_all;
---
--- drop table Q1_labs_all;*/
 
-create table Q1_labs_all_v2 as
+--
+create table Q1_labs_all as
 with pat_list as
          (
              select TG_Date as index_date, shtg_Q1_cohorts_with_ex.*
