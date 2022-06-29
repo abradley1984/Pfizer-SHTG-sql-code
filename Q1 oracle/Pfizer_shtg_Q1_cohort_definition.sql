@@ -37,7 +37,7 @@ drop table shtg_Q1_total_counts;
 drop table shtg_Q1_cohorts_with_ex
   */
 
-create table shtg_cohort_definition_old_version as select * from shtg_cohort_definition;
+--create table shtg_cohort_definition_old_version as select * from shtg_cohort_definition;
     drop table shtg_cohort_definition;
    drop table shtg_Q1_cohorts_with_ex;
 drop table shtg_q1_total_counts;
@@ -55,7 +55,7 @@ with TG_all as (select lab_result_cm.patid,
                        LAB_RESULT_CM.RAW_RESULT
 
                 FROM cdm_60_etl.lab_result_cm
-                WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('11/30/2021', 'MM/DD/YYYY')
+                WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                   AND lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                   and lab_result_cm.result_num is not null

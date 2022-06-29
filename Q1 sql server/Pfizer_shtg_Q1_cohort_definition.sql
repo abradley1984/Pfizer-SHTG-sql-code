@@ -111,8 +111,8 @@ FROM cdm.dbo.lab_result_cm lab
 into #HDL_all
 --FROM @cdm.@cdmschema.lab lab
 from cdm.dbo.lab_result_cm lab
-                -- WHERE lab.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-                  WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
+                 WHERE lab.result_date BETWEEN '2020-08-30' AND '2021-09-30'
+                 -- WHERE lab.result_date BETWEEN @DATE_START AND @DATE_END
                    AND lab.lab_loinc in ('2085-9')
                    and lab.result_num is not null
                    and lab.result_num >= 0
