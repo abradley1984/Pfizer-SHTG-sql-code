@@ -1,9 +1,8 @@
 /* SHTG Query 2 part 1 - first part of cohort definition, gathering a list of patient with LDL values in the study period, their ages and ASCVD history.
 
  */
-create table SHTG_Q2_STEP1_d5_old as select * from SHTG_Q2_STEP1_d5;
-drop table SHTG_Q2_STEP1_d5;
-create table SHTG_Q2_STEP1_d5 as
+
+create table SHTG_Q2_STEP1_d5_pre_exc as
  with 
 TG_all as (select lab_result_cm.patid,
                   row_number() OVER (
@@ -409,7 +408,10 @@ select distinct joined.*,
        round(last_admit_date - LDL_DATE)          as post_index_days,
        round((LDL_DATE - birth_date) / 365.25, 2) as age
 from joined
-Where round((LDL_DATE - birth_date) / 365.25, 2)>18 --over 18
-And  round(LDL_date - first_admit_date)  >180 --at least 6 months pre-index. 
+
 ;
+create table SHTG_Q2_STEP1_d5 as
+select * from SHTG_Q2_STEP1_d5_pre_exc Where round((LDL_DATE - birth_date) / 365.25, 2)>18 --over 18
+And  round(LDL_date - first_admit_date)  >180 --at least 6 months pre-index.
+
 

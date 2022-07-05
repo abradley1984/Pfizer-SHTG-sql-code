@@ -295,7 +295,7 @@ from #joined
 --Where round((datediff(dd, birth_date, LDL_date) / 365.25), 2) > 18 --over 18
   --And datediff(dd, first_admit_date, LDL_date) > 180 --at least 6 months pre-index.
 ;
-
+--Q2_t0.csv
 select * from (
 select count(distinct patid) as N ,'Have lab data' as label1 ,2 as order1 from #temp1
     union
@@ -305,3 +305,15 @@ union
 select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from #temp1
 where age>=18 and pre_index_days>=180)
 order by order1, label1;
+
+--write to table for later use. 
+Select * into foo.dbo.SHTG_Q2_STEP1_pre_exc
+from #temp1 
+--Where round(age,2) > 18 --over 18
+ -- And pre_index_days>180;
+
+--write to table for later use.
+Select * into foo.dbo.SHTG_Q2_STEP1
+from foo.dbo.SHTG_Q2_STEP1_pre_exc
+Where round(age,2) > 18 --over 18
+  And pre_index_days>180;
