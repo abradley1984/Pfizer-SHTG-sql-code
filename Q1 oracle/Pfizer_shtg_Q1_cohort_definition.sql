@@ -274,7 +274,7 @@ select * from shtg_Q1_total_counts;
 
 create table shtg_Q1_cohorts_with_ex
 as WITH labs as (select * from shtg_cohort_definition
-where age>=18 and pre_index_days>=180 and abs(nHDL_gap)<30),
+where age>=18 and pre_index_days>=180 and abs(nHDL_gap)<=30),
 
 
      lab_labels as (select labs.*,
