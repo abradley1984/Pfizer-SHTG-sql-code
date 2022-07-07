@@ -1445,7 +1445,7 @@ select cohort,
 
 from shtg_meds_Q1
 group by cohort;
-/*
+
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
@@ -1456,7 +1456,7 @@ select sum(Statin)                                              Statin,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     */sum(Statin * Ezetimibe)                           as statin_ezetimibe,
+    */ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
        sum(statin * other_lipid_lowering)                as     statin_plus_other_lipid_l,
