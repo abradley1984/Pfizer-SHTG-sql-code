@@ -1388,20 +1388,20 @@ select cohort,
        sum(no_lipid_lowering) as                                                              no_lipid_lowering
 from foo.dbo.shtg_meds_Q2_v2
 group by cohort;
-/*
+
 
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1414,21 +1414,21 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by ldl_above_70
 having ldl_above_70 = 1
 union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1442,21 +1442,21 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by ldl_above_100
 having ldl_above_100 = 1
 union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1469,21 +1469,21 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by nhdl_above_100
 having nhdl_above_100 = 1
 union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1495,21 +1495,21 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
        'nhdl_above_130'
 --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by nhdl_above_130
 having nhdl_above_130 = 1
 union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1523,21 +1523,21 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by TG_above_150
 having TG_above_150 = 1
 union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
-       sum(Ezetimibe)                                           Ezetimibe,
-    */
+ sum(Ezetimibe)                                           Ezetimibe,
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1550,7 +1550,7 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        'ldl_under_70_nhdl_above_100_TG_above_150'
 
 
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by ldl_under_70_nhdl_above_100_TG_above_150
 having ldl_under_70_nhdl_above_100_TG_above_150 = 1
 union
@@ -1558,14 +1558,14 @@ union
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
        sum(Ezetimibe)                                           Ezetimibe,
-    */
+
 /* sum(bile_acid_sequestrant)              bile_acid_sequestrant,
      sum(fibrate)                            fibrate,
      sum(pcsk9)                              pcsk9,
      sum(omega_3)                            omega_3,
      sum(niacin)                             niacin,
      sum(icosapent_ethyl)                    icosapent_ethyl,
-     *//*
+     */
 sum(Statin * Ezetimibe)                           as statin_ezetimibe,
        sum(Statin * pcsk9)                               as     statin_pcsk9,
        sum(Statin * Ezetimibe * pcsk9)                   as     statin_ezetimibe_pcsk9,
@@ -1579,9 +1579,9 @@ sum(Statin * Ezetimibe)                           as statin_ezetimibe,
 
 
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
-from foo.dbo.shtg_meds_Q2
+from foo.dbo.shtg_meds_Q2_v2
 group by ldl_under_70_nhdl_above_100
 having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
-*/
+

@@ -253,6 +253,7 @@ into #joined
                       left join #first_encounter fe on labs.patid = fe.patid
                       left join #last_encounter le on labs.patid = le.patid
                       left join #age_gender_race_ethnicity dem on labs.patid = dem.patid
+where abs(nHDL_gap)<=30
          ;
 
 select #joined.*,
@@ -268,7 +269,7 @@ into  --@dest.@destschema.shtg_Q1_cohort_definition_with_exclusions
     --CHECK Database name written to disk for site
 foo.dbo.shtg_Q1_cohort_definition2
 from #with_exclusions
-where age > 18 and pre_index_days > 180;
+where age > 18 and pre_index_days > 180 ;
 
 --Q1_Table0.csv (basic counts -  save to csv)
 
