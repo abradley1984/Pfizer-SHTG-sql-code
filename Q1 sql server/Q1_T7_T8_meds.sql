@@ -1376,7 +1376,7 @@ from (
 
 -- This is a table that will be used in later queries
 select *
-into foo.dbo.shtg_meds_Q1_v2
+into foo.dbo.shtg_meds_Q1
 from #all_meds_with_labs;
 
 --table 7
@@ -1404,10 +1404,10 @@ select cohort,
        --sum(less_than_3_months_therapy) as less_than_3_months_therapy
        --  sum(max(Statin,Ezetimibe, bile_acid_sequestrant,fibrate, pcsk9,icosapent_ethyl, niacin, omega_3 ))
 
-from shtg_meds_Q1_v2
+from shtg_meds_Q1
 group by cohort;
 
-/* Not rerunning for v2
+
 --table 8
 select sum(Statin)                                              Statin,
        sum(High_Intensity_Statin)                               High_Intensity_Statin,
@@ -1589,4 +1589,3 @@ having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
 
-*/

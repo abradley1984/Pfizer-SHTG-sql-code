@@ -168,7 +168,7 @@ datediff(dd,HDL_DATE,TG.RESULT_DATE) as nHDL_gap
          from #TG tg
                   left join #NHDL nhdl on tg.patid = nhdl.patid
                   left join #LDL ldl on tg.patid  = ldl.patid
-         where datediff(dd, HDL_DATE,TG.RESULT_DATE) <= 30
+         where abs(datediff(dd, HDL_DATE,TG.RESULT_DATE)) <= 30
 
            --Note:this is allowing for LDL to be null if TG>500
 
