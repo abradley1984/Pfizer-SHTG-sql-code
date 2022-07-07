@@ -39,6 +39,8 @@ drop table shtg_Q1_cohorts_with_ex
 
 --create table shtg_cohort_definition_old_version as select * from shtg_cohort_definition;
     drop table shtg_cohort_definition;
+
+
    drop table shtg_Q1_cohorts_with_ex;
 drop table shtg_q1_total_counts;
 --list of patients who have triglycerides in study period
@@ -99,7 +101,7 @@ with TG_all as (select lab_result_cm.patid,
                                lab_result_cm.result_date result_date
 
                         FROM cdm_60_etl.lab_result_cm
-                        WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                        WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
                           and lab_result_cm.result_num >= 0
@@ -121,7 +123,7 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_date
 
                  FROM cdm_60_etl.lab_result_cm
-                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
                  and lab_result_cm.result_num is not null
                    and lab_result_cm.result_num >= 0
@@ -184,7 +186,7 @@ from TG
          left join NHDL USING (PATID)
          left join LDL USING (PATID)
 
-     where  TG.RESULT_DATE - HDL_DATE <=30
+     where  abs(TG.RESULT_DATE - HDL_DATE) <=30
 
        --Note:this is allowing for LDL to be null if TG>500
 
@@ -267,11 +269,12 @@ union
 select count(distinct patid) ,'Have lab data, over 18 and at least 180 days since first encounter',4 from shtg_cohort_definition
 where age>=18 and pre_index_days>=180);
 
+select * from shtg_Q1_total_counts;
 
 
 create table shtg_Q1_cohorts_with_ex
 as WITH labs as (select * from shtg_cohort_definition
-where age>=18 and pre_index_days>=180),
+where age>=18 and pre_index_days>=180 and abs(nHDL_gap)<30),
 
 
      lab_labels as (select labs.*,
@@ -404,8 +407,8 @@ select count(patid) as N , cohort ,10 as order1 from shtg_Q1_cohorts_with_ex
 
 group by cohort
 union
-select count(patid), 'total all cohorts', 11 from shtg_Q1_cohorts_with_ex)
-order by order1, label1;
+select count(patid), 'total all cohorts', 11 from shtg_Q1_cohorts_with_ex
+order by order1;
 
 
 
