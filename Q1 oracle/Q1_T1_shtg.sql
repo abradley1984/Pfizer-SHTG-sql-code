@@ -355,4 +355,3 @@ when Age BETWEEN 65 and 75
 select *
 from percentages
 order by cohort, order1;
-;
