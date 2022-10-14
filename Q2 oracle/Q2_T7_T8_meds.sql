@@ -1711,8 +1711,10 @@ SELECT distinct patid,
     icosapent_ethyl,
     first_therapy_date,
     last_therapy_date_in_sp,
-    case when LDL_result_num >= 100 then 1 else 0 end as ldl_above_100,
+
     case when LDL_result_num >= 70 then 1 else 0 end as ldl_above_70,
+    case when LDL_result_num >= 100 then 1 else 0 end as ldl_above_100,
+
     case when (LDL_result_num < 70 and nhdl >= 100) then 1 else 0 end as ldl_under_70_nhdl_above_100,
     case when (LDL_result_num < 70 and nhdl >= 100 and TG_result_num >= 150) then 1 else 0 end as ldl_under_70_nhdl_above_100_TG_above_150,
     case when nhdl >= 100 then 1 else 0 end as nhdl_above_100,
@@ -1936,4 +1938,3 @@ having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
 
-*/
