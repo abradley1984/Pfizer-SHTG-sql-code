@@ -1,5 +1,5 @@
---For Q1 T7 and T8
---drop table shtg_meds_q1;
+--For Q2 T7 and T8
+drop table shtg_meds_Q2_v2;
 
 create table shtg_meds_Q2_v2 as
 --statins

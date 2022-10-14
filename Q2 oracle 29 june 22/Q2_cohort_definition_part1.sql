@@ -410,8 +410,11 @@ select distinct joined.*,
 from joined
 
 ;
+drop table SHTG_Q2_STEP1_d5;
 create table SHTG_Q2_STEP1_d5 as
 select * from SHTG_Q2_STEP1_d5_pre_exc Where round((LDL_DATE - birth_date) / 365.25, 2)>18 --over 18
-And  round(LDL_date - first_admit_date)  >180 --at least 6 months pre-index.
+And  round(LDL_date - first_admit_date)  >180 ;--at least 6 months pre-index.
 
+
+select * from SHTG_Q2_STEP1_d5;
 

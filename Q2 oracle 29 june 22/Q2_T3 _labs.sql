@@ -939,5 +939,5 @@ where row_num = 1
 
 
                  order by 7, 6, 5)
-select * from table3a;
---select * from table3b;
+--select * from table3a;
+select * from table3b;

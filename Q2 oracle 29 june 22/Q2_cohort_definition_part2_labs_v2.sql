@@ -3,10 +3,10 @@
 Run time: ~36 mins
 
 
---select * from Q2_labs_all;
 --
--- drop table Q2_labs_all;*/
-
+--*/
+-- drop table Q2_labs_all;
+select * from Q2_labs_all;
 
 create table Q2_labs_all as
 with pat_list as

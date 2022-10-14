@@ -944,4 +944,4 @@ with pat_list as
 --select * from table3a;
 --select * from lipid_panel_date;
 --select * from lipid_panel_next_closest ;
-select * from table3b;
+select * from table3a;

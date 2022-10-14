@@ -1626,4 +1626,4 @@ group by ldl_under_70_nhdl_above_100
 having ldl_under_70_nhdl_above_100 = 1
 --order by ldl_above_70, ldl_above_100, nhdl_above_100, nhdl_above_130, TG_above_150
 ;
-*/
+

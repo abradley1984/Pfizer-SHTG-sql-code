@@ -805,6 +805,10 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
 
                           OR Como.dx like '434%' -- STROKE
 
+
+
+
+
                           OR Como.dx = '997.02' -- STROKE
 
                           OR Como.dx like 'I63%' -- STROKE
