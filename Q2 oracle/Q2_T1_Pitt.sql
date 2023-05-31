@@ -5,7 +5,8 @@
  */
 
 
-with pat_list as (select * from shtg_Q1_cohorts_with_ex),
+with pat_list as ( select * from
+                                 SHTG_Q2_STEP3_d5),
      smoking AS (select *
                  from (
                           select patid,
@@ -73,7 +74,7 @@ with pat_list as (select * from shtg_Q1_cohorts_with_ex),
 
 
                       from pat_list),
-    /* age_Category as (select patid, case
+     age_Category as (select patid, cohort, case
                           when Age < 18
                               then 'Age_under_18'
                           when Age BETWEEN 18 and 40
@@ -88,7 +89,7 @@ when Age BETWEEN 65 and 75
                               then 'Age_over_75'
                           else 'uhoh'
                           end as Age_category
-               from pat_list),*/
+               from pat_list),
      insurance as (select *
                    from pat_list
                             left join CDM_60_ETL.encounter e using (patid)
@@ -214,7 +215,7 @@ when Age BETWEEN 65 and 75
                     group by cohort
                     union
                     select '2' as order1, 'Age', Age_category, count(distinct patid) as N, cohort
-                    from pat_list
+                    from age_Category
                     group by cohort, Age_category
                     union
                     select '2' as order1, 'age', 'Mean age', trunc(avg(age), 2) as N, cohort
@@ -269,7 +270,7 @@ when Age BETWEEN 65 and 75
 
                     union
                     select '8' as order1, 'Insurance', 'has_insurance_info', count(distinct patid), cohort
-                    from insurance
+                    from insurance_type
 
                     group by cohort
                     union
@@ -331,27 +332,30 @@ when Age BETWEEN 65 and 75
      ),
      totals as (select N as N_cohort_total, cohort From Table1_pre where label1 = 'Total'),
 
-     percentages as (select order1,
-                            Cohort,
-                            label1,
-                            label2,
-                            N,
-                            N_cohort_total,
-                            case
-                                when (Table1_pre.label2 in ('pct_75', 'pct_25')
-                                    or Table1_pre.label2 like ('Mean%')
-                                    or Table1_pre.label2 like ('Median%')
-                                    or Table1_pre.label2 like ('STD%'))
-                                    then 0
-                                else
-                                    trunc(100 * N / N_cohort_total, 2)
-                                end
-                                as percentage1
+     percentages as (select order1, Cohort, label1, label2, N, N_cohort_total,
+                            case  when (Table1_pre.label2 in ('pct_75','pct_25')
+
+        or Table1_pre.label2 like ('Mean%')
+             or Table1_pre.label2 like ('Median%')
+              or Table1_pre.label2 like ('STD%'))
+              then 0
+              else
+              trunc(100 * N/N_cohort_total,2)
+               end
+               as percentage1
                      from Table1_pre
                               left join totals using (cohort)
+
      )
 
 
-select *
-from percentages
+select * from percentages
 order by cohort, order1;
+
+
+/* pivot (
+
+sum(N) FOR cohort in ('cohort_A', 'cohort_B', 'cohort_C', 'cohort_D', 'cohort_E', 'cohort_F', 'cohort_G', 'cohort_H', 'cohort_I',' cohort_J','cohort_K')
+ )*/
+
+;
