@@ -1,0 +1,1 @@
+select * from shtg_cohort_definition_old_version
