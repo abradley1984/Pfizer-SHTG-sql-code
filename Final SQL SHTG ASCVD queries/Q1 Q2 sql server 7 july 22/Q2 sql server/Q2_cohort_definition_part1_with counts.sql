@@ -209,7 +209,8 @@ from (select patid, admit_date as last_admit_date
                    encounter.patid      as patid
             from #pat_list p
                      left join cdm.dbo.encounter encounter on p.patid = encounter.patid) as rnadp
-      where row_num = 1
+                     where admit_date<'2021-09-30'
+      and row_num = 1
      ) as plad;
 select *
 into #diabetes
@@ -219,7 +220,9 @@ from (select pats.patid,
              1 as Diabetes
       FROM #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      where Como.dx like 'E08%' -- diabetes
+      where
+      admit_date<'2021-09-30' and
+      (Como.dx like 'E08%' -- diabetes
 
          OR Como.dx like 'E09%' -- diabetes
 
@@ -231,7 +234,7 @@ from (select pats.patid,
 
          OR Como.dx like '249%' -- diabetes
 
-         OR Como.dx like '250%' -- diabetes
+         OR Como.dx like '250%' -- diabetes)
       group by pats.patid
      ) as pD;
 
@@ -243,7 +246,8 @@ from (select pats.patid,
              1                                                as ASCVD
       FROM #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      WHERE dx in
+      WHERE  admit_date<'2021-09-30' and
+      dx in
             ('413.9', 'I20.9', 'I23.7', 'I25.111', 'I25.118', 'I25.119', 'I25.701', 'I25.708', 'I25.709', 'I25.738',
              'I25.751', 'I25.791', '411.1', '411.81', '411.89', '413.0', 'I20.0', , 'I20.8', 'I24.0',
              'I24.8', 'I24.9', 'I25.110', 'I25.700', 'I25.710', 'I25.720', 'I25.730', 'I25.750', 'I25.760', 'I25.790',

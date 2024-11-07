@@ -196,7 +196,9 @@ from LDL
                                      encounter.patid      as patid
                               from pat_list p
                                        left join cdm_60_etl.encounter encounter on p.patid = encounter.patid)
-                        where row_num = 1
+                        where  admit_date <=TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and row_num = 1
+
      ),
      diabetes as (select patid,
 
@@ -204,7 +206,9 @@ from LDL
                          1                                   as Diabetes
                   FROM pat_list pats
                            INNER JOIN cdm_60_etl.diagnosis como using (patid)
-                  where Como.dx like 'E08%' -- diabetes
+                  where
+                      admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (Como.dx like 'E08%' -- diabetes
 
                      OR Como.dx like 'E09%' -- diabetes
 
@@ -217,6 +221,7 @@ from LDL
                      OR Como.dx like '249%' -- diabetes
 
                      OR Como.dx like '250%' -- diabetes
+                      )
          group by patid
      ),
 
@@ -226,7 +231,8 @@ from LDL
                       1                                   as ASCVD
                FROM pat_list pats
                         INNER JOIN cdm_60_etl.diagnosis como using (patid)
-               WHERE dx in ('346.62',
+               WHERE  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and dx in ('346.62',
 '346.63',
 '410.11',
 '410.2',

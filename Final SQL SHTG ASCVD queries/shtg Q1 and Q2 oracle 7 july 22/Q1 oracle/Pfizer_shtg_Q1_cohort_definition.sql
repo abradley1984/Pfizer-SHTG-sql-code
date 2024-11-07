@@ -38,11 +38,11 @@ drop table shtg_Q1_cohorts_with_ex
   */
 
 --create table shtg_cohort_definition_old_version as select * from shtg_cohort_definition;
-    drop table shtg_cohort_definition;
+  --  drop table shtg_cohort_definition;
 
 
-   drop table shtg_Q1_cohorts_with_ex;
-drop table shtg_q1_total_counts;
+--  drop table shtg_Q1_cohorts_with_ex;
+--drop table shtg_q1_total_counts;
 --list of patients who have triglycerides in study period
 create table shtg_cohort_definition as
 with TG_all as (select lab_result_cm.patid,
@@ -56,7 +56,7 @@ with TG_all as (select lab_result_cm.patid,
                        lab_result_cm.result_date,
                        LAB_RESULT_CM.RAW_RESULT
 
-                FROM cdm_60_etl.lab_result_cm
+                FROM cdm_60_prod.lab_result_cm
                 WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                   AND lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                   AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
@@ -78,7 +78,7 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_unit result_unit,
                         lab_result_cm.result_date
 
-                 FROM cdm_60_etl.lab_result_cm
+                 FROM cdm_60_prod.lab_result_cm
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
@@ -100,7 +100,7 @@ with TG_all as (select lab_result_cm.patid,
                                lab_result_cm.result_unit result_unit,
                                lab_result_cm.result_date result_date
 
-                        FROM cdm_60_etl.lab_result_cm
+                        FROM cdm_60_prod.lab_result_cm
                         WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                           AND lab_result_cm.lab_loinc in ('2093-3')
                           and lab_result_cm.result_num is not null
@@ -122,7 +122,7 @@ with TG_all as (select lab_result_cm.patid,
                         lab_result_cm.result_unit result_unit,
                         lab_result_cm.result_date
 
-                 FROM cdm_60_etl.lab_result_cm
+                 FROM cdm_60_prod.lab_result_cm
                  WHERE lab_result_cm.result_date BETWEEN TO_DATE('08/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                    AND lab_result_cm.lab_loinc in ('2085-9')
                  and lab_result_cm.result_num is not null
@@ -210,7 +210,7 @@ pat_list as (select patid from lab_list),
                 demographic.birth_date
 
          FROM pat_list pats
-                  INNER JOIN cdm_60_etl.demographic ON demographic.patid = pats.patid
+                  INNER JOIN cdm_60_prod.demographic ON demographic.patid = pats.patid
      ),
 --First encounter, to calculate if we have 6 month pre-index.
      first_encounter as (select patid, admit_date as first_admit_date
@@ -221,7 +221,7 @@ pat_list as (select patid from lab_list),
                                       encounter.admit_date as admit_date,
                                       encounter.patid      as patid
                                from pat_list p
-                                        left join cdm_60_etl.encounter encounter on p.patid = encounter.patid)
+                                        left join cdm_60_prod.encounter encounter on p.patid = encounter.patid)
                          where row_num = 1
      )
         ,
@@ -233,7 +233,7 @@ pat_list as (select patid from lab_list),
                                      encounter.admit_date as admit_date,
                                      encounter.patid      as patid
                               from pat_list p
-                                       left join cdm_60_etl.encounter encounter on p.patid = encounter.patid)
+                                       left join cdm_60_prod.encounter encounter on p.patid = encounter.patid)
                         where row_num = 1
      ),
 
@@ -259,7 +259,7 @@ from joined;
 --Counts for table 0
 
 create table shtg_Q1_total_counts as
-(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm_60_etl.demographic
+(select count(distinct patid)  as N, 'Total system population'  as label1, 1 as order1 from cdm_60_prod.demographic
 union
 select count(distinct patid) ,'Have lab data',2 from shtg_cohort_definition
     union

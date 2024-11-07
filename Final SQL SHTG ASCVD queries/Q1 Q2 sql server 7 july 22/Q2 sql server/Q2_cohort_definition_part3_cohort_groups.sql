@@ -72,7 +72,8 @@ from (select pats.patid,
              1 as Diabetes
       FROM #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      where Como.dx like 'E08%' -- diabetes
+       where admit_date<'2021-09-30' and
+      (Como.dx like 'E08%' -- diabetes
 
          OR Como.dx like 'E09%' -- diabetes
 
@@ -98,7 +99,8 @@ from (
 
          from #pat_list pats
                   INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-         where (Como.dx like '410%' -- MI
+         where  admit_date<'2021-09-30' and
+         (Como.dx like '410%' -- MI
 
              OR Como.dx = '411.0' -- MI
 
@@ -128,7 +130,7 @@ from (
 
          from #pat_list pats
                   INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-         where (
+         where admit_date<'2021-09-30' and (
                        Como.dx like '433%' -- STROKE
 
                        OR Como.dx like '434%' -- STROKE
@@ -155,7 +157,7 @@ from (
 
          from #pat_list pats
                   INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-         where (
+         where  admit_date<'2021-09-30' and (
                        dx in ('440.20',
                               '440.21',
                               '440.22',
@@ -212,7 +214,8 @@ from (
                         join cdm.dbo.diagnosis Como on (e.patid = Como.patid and e.encounterid = Como.encounterid)
 
                where e.patid in (Select patid from #pat_list a)
-                 and (
+                 and  admit_date<'2021-09-30' and
+                 (
                        Como.dx like '433%' -- STROKE
 
                        OR Como.dx like '434%' -- STROKE
@@ -244,7 +247,8 @@ from (
 
                where diagnosis.patid in (Select patid from #pat_list a)
                  and diagnosis.enc_Type in ('EI', 'IP')
-                 and (((dx like '410%' -- MI
+                 and  admit_date<'2021-09-30' and
+                 (((dx like '410%' -- MI
 
                    OR dx like 'I21%')-- MI)
 
@@ -273,7 +277,8 @@ from (
                       datediff(dd, max(b.admit_date), min(b.admit_date)) as PCI_gap
                from #pat_list a
                         left join cdm.dbo.procedures b on a.patid = b.patid
-               where PX in
+               where  admit_date<'2021-09-30' and
+               PX in
                      ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
@@ -294,7 +299,7 @@ from (select distinct pats.patid,
 
       from #pat_list pats
                left JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      where (
+      where  como.admit_date<'2021-09-30' and (
           dx = 'E78.01' --'familial hypercholesterolemia'
           )
          or max_ldl_above_190 = 1) as ph;
@@ -310,7 +315,8 @@ from (
                  max(admit_date) - min(admit_date) as PCI_gap*/
          from #pat_list a
                   left join cdm.dbo.procedures b on a.patid = b.patid
-         where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
+         where  admit_date<'2021-09-30' and
+         PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
          group by a.patid) as pP;
@@ -321,7 +327,7 @@ from (select distinct pats.patid, IIF(dx = 'I10', 1, 0) as hypertension
 
       from #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      where (
+      where  admit_date<'2021-09-30' and(
                 Como.dx = 'I10' -- hypertension
 
                 )) as ph;
@@ -340,7 +346,7 @@ from (
                          b.smoking as smoking
                   from #pat_list a
                            left join cdm.dbo.vital b on a.patid = b.patid
-                  WHERE b.smoking IS NOT NULL
+                  WHERE  measure_Date<'2021-09-30' and b.smoking IS NOT NULL
                     AND not b.smoking in ('NI', 'OT', 'UN')) as prns
          where row_num = 1) as pcs;
 select *
@@ -353,7 +359,7 @@ from (
 
          from #pat_list pats
                   INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-         where Como.dx in ('I50.20',
+         where  admit_date<'2021-09-30' and Como.dx in ('I50.20',
                            'I50.21',
                            'I50.22',
                            'I50.23',
@@ -380,7 +386,7 @@ from (select distinct pats.patid,
 
       from #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      where Como.dx like 'G45%' -- TIA
+      where  admit_date<'2021-09-30' and (Como.dx like 'G45%' -- TIA
          OR Como.dx like '435%' -- TIA
 
          OR Como.dx like 'I20%' -- IHD
@@ -394,6 +400,7 @@ from (select distinct pats.patid,
          OR Como.dx like 'I24%' -- IHD
 
          OR Como.dx like 'I25%' -- IHD
+         )
      ) as pTI;
 select *
 into #LDL_all
@@ -408,7 +415,7 @@ from (select lab_result_cm.patid,
 
       FROM cdm.dbo.lab_result_cm
       WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+ lab_result_cm.result_date<'2021-09-30' and
           lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
         --and lab_result_cm.patid in pat_list
         and lab_result_cm.result_num is not null
@@ -481,7 +488,11 @@ from (
                   left join cdm.dbo.prescribing b on a.patid = b.patid
 
          where /*prescribing.rx_order_Date BETWEEN '2020-09-30' AND '2021-09-30'
-             and*/ rxnorm_cui in
+             and*/
+             prescribing.rx_order_Date <= '2021-09-30'
+             and
+             (
+             rxnorm_cui in
                    ('6472',
 '36567',
 '41127',
@@ -802,7 +813,7 @@ from (
 '2536060',
 '2536062',
 '2536064',
-'2536066')
+'2536066'))
 
          group by a.patid
      ) as pSe;
@@ -985,8 +996,8 @@ from (select lab_result_cm.patid,
              lab_result_cm.result_date
 
       FROM cdm.dbo.lab_result_cm
-      WHERE -- WHERE lab_result_cm.result_date BETWEEN '2020-09-30' AND '2021-09-30'
-
+      WHERE lab_result_cm.result_date > '2021-09-30'
+and
           lab_result_cm.lab_loinc in ('2571-8')
         --and lab_result_cm.patid in pat_list
         and lab_result_cm.result_num is not null
@@ -1043,7 +1054,9 @@ from (select distinct pats.patid, 1 as diagnosis_risk_enhanced
 
       from #pat_list pats
                INNER JOIN cdm.dbo.diagnosis Como on pats.patid = Como.patid
-      where (
+      where lab_result_cm.result_date > '2021-09-30'
+and
+(
                     Como.dx = 'Z82.49' --family_hx_ascvd
                     or Como.dx = 'E88.1' -- metabolic_syndrome
                     or Como.dx like 'B20%' --HIV

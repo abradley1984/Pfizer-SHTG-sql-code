@@ -1,0 +1,1 @@
+select * from cdm_60_etl.diagnosis

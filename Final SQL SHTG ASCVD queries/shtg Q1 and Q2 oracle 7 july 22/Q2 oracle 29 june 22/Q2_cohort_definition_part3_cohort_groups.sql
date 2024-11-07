@@ -17,7 +17,7 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                            1 as recent_ACS
                     FROM pat_list pats
                              INNER JOIN cdm_60_etl.diagnosis como using (patid)
-                    WHERE dx in ( --dealing with MI separately
+                    WHERE  dx in ( --dealing with MI separately
                                 --Angina codes -removed
                                 '411.1',
 '411.81',
@@ -67,7 +67,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-         where (Como.dx like '410%' -- MI
+         where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (Como.dx like '410%' -- MI
 
              OR Como.dx = '411.0' -- MI
 
@@ -97,7 +98,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-         where (
+         where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (
                        Como.dx like '433%' -- STROKE
 
                        OR Como.dx like '434%' -- STROKE
@@ -122,7 +124,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-         where (
+         where (  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and
                        dx in ('440.20',
                               '440.21',
                               '440.22',
@@ -178,7 +181,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                         join cdm_60_etl.diagnosis Como using (patid, encounterid)
 
                where patid in (Select patid From pat_list)
-                 and (
+                 and  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (
                        Como.dx like '433%' -- STROKE
 
                        OR Como.dx like '434%' -- STROKE
@@ -208,7 +212,11 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                where patid in (Select patid From pat_list)
                    and diagnosis.enc_Type in ('EI', 'IP')
-                   and (((dx like '410%' -- MI
+
+                   and
+                    admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and
+                   (((dx like '410%' -- MI
 
                        OR dx like 'I21%')-- MI)
 
@@ -235,9 +243,11 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                  max(admit_date) - min(admit_date) as PCI_gap
          from pat_list
                   left join cdm_60_etl.procedures using (patid)
-         where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
+         where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
-                      'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
+                      'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608') admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and
          group by patid)
          where PCI_gap>30),
      CKD as (select patid, case when egfr_2021 < 60 then 1 else 0 end as CKD
@@ -252,7 +262,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                               from pat_list pats
                                        left JOIN cdm_60_etl.diagnosis Como using (patid)
-                              where (
+                              where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (
                                   dx = 'E78.01' --'familial hypercholesterolemia'
                                   )
                                  or max_ldl_above_190 = 1),
@@ -266,7 +277,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                  max(admit_date) - min(admit_date) as PCI_gap*/
          from pat_list
                   left join cdm_60_etl.procedures using (patid)
-         where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
+         where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
          group by patid),
@@ -277,7 +289,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                       from pat_list pats
                                INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-                      where (
+                      where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and (
                                 Como.dx = 'I10' -- hypertension
 
                                 )),
@@ -294,7 +307,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
                          vital.smoking as smoking
                   FROM pat_list
                            left join cdm_60_etl.vital using (patid)
-                  WHERE vital.smoking IS NOT NULL
+                  WHERE  measure_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                      and vital.smoking IS NOT NULL
                     AND not vital.smoking in ('NI', 'OT', 'UN'))
          where row_num = 1)
         ,
@@ -306,7 +320,10 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
          from pat_list pats
                   INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-         where Como.dx in ('I50.20',
+         where admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY')
+         and
+
+         Como.dx in ('I50.20',
                            'I50.21',
                            'I50.22',
                            'I50.23',
@@ -331,20 +348,22 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                  from pat_list pats
                           INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-                 where Como.dx like 'G45%' -- TIA
-                    OR Como.dx like '435%' -- TIA
+                 where  admit_date <TO_DATE('09/30/2021', 'MM/DD/YYYY') and
+                        (Como.dx like 'G45%' -- TIA
+                     OR Como.dx like '435%' -- TIA
 
-                    OR Como.dx like 'I20%' -- IHD
+                     OR Como.dx like 'I20%' -- IHD
 
-                    OR Como.dx like 'I21%' -- IHD
+                     OR Como.dx like 'I21%' -- IHD
 
-                    OR Como.dx like 'I22%' -- IHD
+                     OR Como.dx like 'I22%' -- IHD
 
-                    OR Como.dx like 'I23%' -- IHD
+                     OR Como.dx like 'I23%' -- IHD
 
-                    OR Como.dx like 'I24%' -- IHD
+                     OR Como.dx like 'I24%' -- IHD
 
-                    OR Como.dx like 'I25%' -- IHD
+                     OR Como.dx like 'I25%' -- IHD
+                     )
      ),
      LDL_all as (select lab_result_cm.patid,
                         row_number() OVER (
@@ -357,6 +376,9 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                  FROM cdm_60_etl.lab_result_cm
                  WHERE -- lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+
+                     result_date<TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                     and
                      lab_result_cm.lab_loinc in ('13457-7', '18262-6', '2089-1')
                    --and lab_result_cm.patid in pat_list
                    and lab_result_cm.result_num is not null
@@ -419,8 +441,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
          from pat_list
                   left join cdm_60_etl.prescribing using (patid)
 
-         where /*prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2010', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-             and*/ rxnorm_cui in ('6472',
+         where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2010', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+             and rxnorm_cui in ('6472',
 '36567',
 '41127',
 '42463',
@@ -915,7 +937,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                 FROM cdm_60_etl.lab_result_cm
                 WHERE -- lab_result_cm.result_date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-                    lab_result_cm.lab_loinc in ('2571-8')
+                      result_date<TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                     and lab_result_cm.lab_loinc in ('2571-8')
                   --and lab_result_cm.patid in pat_list
                   and lab_result_cm.result_num is not null
                       AND result_num < 30000
@@ -963,7 +986,8 @@ WITH PAT_LIST AS (SELECT * FROM SHTG_Q2_STEP1_d5
 
                         from pat_list pats
                                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
-                        where (
+                        where   result_date<TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                     and (
                                       Como.dx = 'Z82.49' --family_hx_ascvd
                                       or Como.dx = 'E88.1' -- metabolic_syndrome
                                       or Como.dx like 'B20%' --HIV
