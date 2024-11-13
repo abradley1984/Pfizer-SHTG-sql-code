@@ -16,7 +16,7 @@ with pat_list as ( select * from
                                  cohort
 
                           FROM pat_list
-                                   left join cdm_60_etl.vital using (patid)
+                                   left join cdm_60_prod.vital using (patid)
                           WHERE vital.smoking IS NOT NULL
                             AND not vital.smoking in ('NI', 'OT', 'UN'))
                  where row_num = 1),
@@ -85,7 +85,7 @@ when Age BETWEEN 65 and 75
                from pat_list),
      insurance as (select *
                    from pat_list
-                            left join CDM_60_ETL.encounter e using (patid)
+                            left join CDM_60_prod.encounter e using (patid)
                    where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
                      and raw_payer_type_primary is not null),
      insurance_type as (select patid,
@@ -186,8 +186,8 @@ when Age BETWEEN 65 and 75
                     else 'other'
                     end as provider_specialty
          from pat_list
-                  left join cdm_60_etl.encounter using (patid)
-                  left join cdm_60_etl.provider on encounter.providerid = provider.providerid
+                  left join cdm_60_prod.encounter using (patid)
+                  left join cdm_60_prod.provider on encounter.providerid = provider.providerid
          where provider_specialty_primary in
                ('208D00000X', '163WG0000X', '207Q00000X', '207RC0000X', '207RA0001X', '207RC0001X', '207RI0011X',
                 '2080P0202X', '163WE0003X',

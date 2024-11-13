@@ -32,7 +32,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          vital.smoking as smoking,
                          cohort
                   FROM pat_list
-                           left join cdm_60_etl.vital using (patid)
+                           left join cdm_60_prod.vital using (patid)
                   WHERE vital.smoking IS NOT NULL
                     AND not vital.smoking in ('NI', 'OT', 'UN'))
          where row_num = 1)
@@ -49,7 +49,7 @@ with pat_list as (select patid, cohort, TG_DATE
 
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (Como.dx IN ('H31.021',--RETINOPATHY
                             'H31.022',
                             'H31.023',
@@ -80,7 +80,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          1              as diabetes_10y
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (Como.dx like 'E08%' -- diabetes
 
              OR Como.dx like 'E09%' -- diabetes
@@ -110,7 +110,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          1     as TIA
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (dx LIKE 'G45%' --'TIA'
              OR dx LIKE '435%' --'TIA'
              )
@@ -127,7 +127,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          1     as PAD
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (Como.dx in
                 ('440.20', '440.21', '440.22', '440.23', '440.24', '440.29', '440.30', '440.31', '440.32', '440.4',
                  'I70.0', 'I70.1', 'I70.201', 'I70.202', 'I70.203', 'I70.208', 'I70.209', 'I70.21', 'I70.22', 'I70.232',
@@ -149,7 +149,7 @@ with pat_list as (select patid, cohort, TG_DATE
 
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (Como.dx IN ('Z95.1', 'Z95.5', 'Z98.61')
 
                    -- MULTIVESSEL CAD
@@ -167,7 +167,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          count(distinct admit_date)
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (Como.dx like '410%' -- MI
 
              OR Como.dx = '411.0' -- MI
@@ -203,7 +203,7 @@ with pat_list as (select patid, cohort, TG_DATE
                          max(case when Como.dx like 'I22%' then 1 else 0 end) as subsequent_MI_I22
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where /*((Como.dx like '410%' -- MI
 
              OR Como.dx like 'I21%' -- MI
@@ -228,7 +228,7 @@ with pat_list as (select patid, cohort, TG_DATE
                 max(admit_date) - min(admit_date) as stroke_gap
 
          from pat_list pats
-                  INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis Como using (patid)
          where (
                        Como.dx like '433%' -- STROKE
 
@@ -252,7 +252,7 @@ with pat_list as (select patid, cohort, TG_DATE
                 min(admit_date),
                 max(admit_date) - min(admit_date) as PCI_gap
          from pat_list
-                  left join cdm_60_etl.procedures using (patid)
+                  left join cdm_60_prod.procedures using (patid)
          where PX in ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',
                       'C9602', 'C9603', 'C9604', 'C9605', 'C9606', 'C9607', 'C9608')
@@ -261,7 +261,7 @@ with pat_list as (select patid, cohort, TG_DATE
      statins as (
          select distinct patid, cohort, 1 as Statin
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
              , 'MM/DD/YYYY')
@@ -406,7 +406,7 @@ with pat_list as (select patid, cohort, TG_DATE
      insulin as (
          select patid, '1' as insulin, cohort
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('08/01/2020'
              , 'MM/DD/YYYY')
@@ -455,8 +455,8 @@ with pat_list as (select patid, cohort, TG_DATE
                       max(encounter.admit_date),
                       min(encounter.admit_date),
                       trunc((max(encounter.admit_date) - min(encounter.admit_date)) / 10) * 10 as gap
-               from cdm_60_etl.encounter
-                        join cdm_60_etl.diagnosis Como using (patid, encounterid)
+               from cdm_60_prod.encounter
+                        join cdm_60_prod.diagnosis Como using (patid, encounterid)
 
                where patid in (Select patid From pat_list)
                  and (
@@ -484,8 +484,8 @@ with pat_list as (select patid, cohort, TG_DATE
                       max(diagnosis.admit_date),
                       min(diagnosis.admit_date),
                       trunc(max(diagnosis.admit_date) - min(diagnosis.admit_date)) as gap
-               from cdm_60_etl.diagnosis
---join cdm_60_etl.diagnosis  Como using (patid, encounterid)
+               from cdm_60_prod.diagnosis
+--join cdm_60_prod.diagnosis  Como using (patid, encounterid)
 
                where patid in (Select patid From pat_list)
                  and diagnosis.enc_Type in ('EI', 'IP')
@@ -515,7 +515,7 @@ with pat_list as (select patid, cohort, TG_DATE
                       min(admit_date),
                       max(admit_date) - min(admit_date) as PCI_gap
                from pat_list
-                        left join cdm_60_etl.procedures using (patid)
+                        left join cdm_60_prod.procedures using (patid)
                where PX in
                      ('92920', '92921', '92924', '92925', '92928', '92929', '92933', '92934', '92937', '92938', '92941',
                       '92943', '92944', '92973', '92974', '92975', '92978', '92979', '93571', '93572', 'C9600', 'C9601',

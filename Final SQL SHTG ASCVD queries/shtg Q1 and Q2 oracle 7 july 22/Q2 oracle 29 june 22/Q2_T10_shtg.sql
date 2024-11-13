@@ -26,7 +26,7 @@ with pat_list as
 
      nash as (select distinct patid, 1 as NASH
               from pat_list
-                       INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                       INNER JOIN cdm_60_prod.diagnosis como using (patid)
               Where dx in ('K75.81', '571.8', 'K76.0')),
 
 

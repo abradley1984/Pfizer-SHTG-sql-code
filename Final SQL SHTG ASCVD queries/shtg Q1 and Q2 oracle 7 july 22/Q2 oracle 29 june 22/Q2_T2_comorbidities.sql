@@ -235,7 +235,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
          FROM pat_list pats
 
 
-                  INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                  INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
          WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
@@ -528,7 +528,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
      ),
      Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list
-                                 left join cdm_60_etl.procedures using (patid)
+                                 left join cdm_60_prod.procedures using (patid)
                         where PX =
                               '36514'),
      comorbidity_group as (select patid,
@@ -539,7 +539,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                            FROM pat_list pats
 
 
-                                    INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                                    INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
                            WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
@@ -551,7 +551,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                       max(index_date - admit_date) / 365.25 as time_since_first_ascvd_diagnosis,
                       'ASCVD'                               as Comorbidity_name
                FROM pat_list pats
-                        INNER JOIN cdm_60_etl.diagnosis como using (patid)
+                        INNER JOIN cdm_60_prod.diagnosis como using (patid)
                WHERE dx in ('413.9',
                             'I20.9',
                             'I23.7',
@@ -723,7 +723,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
 
     PCI as (select distinct patid, cohort, 'PCI' as Comorbidity_name
             from pat_list
-                     left join cdm_60_etl.procedures using (patid)
+                     left join cdm_60_prod.procedures using (patid)
             where PX in ('92920',
                          '92921',
                          '92924',
@@ -759,7 +759,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
     MI as (select distinct patid, cohort, 'MI' as Comorbidity_name
 
            from pat_list pats
-                    INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                    INNER JOIN cdm_60_prod.diagnosis Como using (patid)
            where (Como.dx like '410%' -- MI
 
                OR Como.dx = '411.0' -- MI
@@ -785,7 +785,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
     stroke as (select distinct patid, cohort, 'stroke' as Comorbidity_name
 
                from pat_list pats
-                        INNER JOIN cdm_60_etl.diagnosis Como using (patid)
+                        INNER JOIN cdm_60_prod.diagnosis Como using (patid)
                where (
                          Como.dx like '433%' -- STROKE
 

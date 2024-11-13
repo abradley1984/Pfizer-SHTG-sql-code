@@ -15,7 +15,7 @@ with pat_list as
      statins as (
          select distinct patid, cohort, 1 as Statin
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
              and rxnorm_cui in
@@ -123,7 +123,7 @@ with pat_list as
                                                  '597993',
                                                  '750215') then 'dose_over_40' end as level1
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in --only including >40 rxnorms right now.
@@ -176,7 +176,7 @@ with pat_list as
      ezetimibe as (
          select distinct patid, cohort, 1 as Ezetimibe
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -191,7 +191,7 @@ with pat_list as
      bile_acid_sequestrant as (
          select distinct patid, cohort, 1 as bile_acid_sequestrant
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -205,7 +205,7 @@ with pat_list as
      fibrate as (
          select distinct patid, cohort, 1 as fibrate
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -222,7 +222,7 @@ with pat_list as
      icosapent_ethyl as (
          select distinct patid, cohort, 1 as icosapent_ethyl
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -234,7 +234,7 @@ with pat_list as
      niacin as (
          select distinct patid, cohort, 1 as niacin
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -256,7 +256,7 @@ with pat_list as
      omega_3 as (
          select distinct patid, cohort, 1 as omega_3
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -274,7 +274,7 @@ with pat_list as
      pcsk9 as (
          select distinct patid, cohort, 1 as pcsk9
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
 
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
@@ -286,7 +286,7 @@ with pat_list as
          select patid, cohort, min(prescribing.rx_order_Date) as first_therapy_date
 
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
          where rxnorm_cui in
                ('1007270',
                 '1008282',
@@ -813,7 +813,7 @@ with pat_list as
          select patid, cohort, max(prescribing.rx_order_Date) as last_therapy_date_in_sp
 
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid)
+                  left join cdm_60_prod.prescribing using (patid)
          where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
            and rxnorm_cui in
                ('1007270',

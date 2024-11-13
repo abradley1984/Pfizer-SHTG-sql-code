@@ -14,7 +14,7 @@ with pat_list as
      statins as (
          select distinct patid, cohort, 1 as Statin
          from pat_list
-                  left join cdm_60_etl.prescribing using (patid) where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                  left join cdm_60_prod.prescribing using (patid) where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
              and rxnorm_cui in
                  ('83366', '83367', '215567', '596723', '309123', '41127', '72875', '541841', '997007', '1233871', '6472', '352420', '206258', '433849', '997004', '359732', '861612', '2001255', '861652', '2001252', '861634', '2001264', '203144', '323828', '2167558', '301542', '2167563', '213319', '36567', '196503', '312961', '1944257', '1312423', '621590', '1312424', '1312410', '1189805', '593411', '1189809', '1189821', '644112', '791835', '791839', '791846', '327008', '582041', '1372731', '999939', '803516', '1422093', '1422085', '341248', '2535748', '495215', '476351', '904669', '1897', '215436', '904477', '904460', '404914', '750231', '104416', '791831', '791843', '761907', '999935', '7393', '761909', '762970', '1422087', '6574', '904665', '42463', '484211', '1191', '904664', '404773', '597980', '17767', '320864', '859749', '314231', '198211', '313936', '221072', '310405', '687048', '884383', '224938', '197905', '861650', '861646', '861640', '617318', '262095', '617314', '309124', '151972', '360507', '359731', '206257', '433848', '861648', '861643', '2001262', '904483', '904469', '859747', '2167571', '1944262', '104491', '1312417', '1189822', '1372754', '582042', '791834', '757745', '999943', '999946', '763236', '1422098', '2536060', '2535747', '1245449', '476349', '904660', '203333', '750199', '617310', '259255', '617312', '153302', '103919', '197904', '2001260', '904467', '904481', '859753', '859426', '2167557', '2167567', '2167569', '200345', '104490', '152923', '1312415', '1189818', '1189803', '582043', '757733', '1422096', '2536055', '2535750', '1245441', '904661', '597987', '153165', '2001266', '1944734', '859751', '859424', '2167565', '1790679', '1312429', '1189808', '352387', '757748', '999936', '1422101', '2536062', '750203', '153303', '261244', '209013', '2001254', '2001268', '1189827', '1312422', '791838', '999942', '763233', '1422099', '1245420', '597967', '617311', '103918', '1233869', '1233883', '197903', '904458', '904475', '859421', '2167575', '1944264', '312962', '791842', '763228', '763232', '763229', '1422086', '2535749', '2536066', '476345', '750227', '750219', '617320', '309125', '284424', '310404', '1233878', '859419', '1944266', '208220', '1189804', '1312409', '1189814', '763225', '2535745', '597971', '997006', '1233870', '861654', '2167573', '1422095', '1245430', '904668', '597977', '597974', '284764', '1233888', '1312416', '757736', '1422092', '2536064', '476350', '750223')
             OR rxnorm_cui IN
@@ -91,7 +91,7 @@ select distinct patid,
     '597993',
     '750215') then 'dose_over_40' end as level1
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -148,7 +148,7 @@ where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     ezetimibe as (
 select distinct patid, cohort, 1 as Ezetimibe
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -205,7 +205,7 @@ group by patid, cohort),
     bile_acid_sequestrant as (
 select distinct patid, cohort, 1 as bile_acid_sequestrant
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -247,7 +247,7 @@ group by patid, cohort),
     fibrate as (
 select distinct patid, cohort, 1 as fibrate
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -322,7 +322,7 @@ group by patid, cohort)
     icosapent_ethyl as (
 select distinct patid, cohort, 1 as icosapent_ethyl
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -344,7 +344,7 @@ group by patid, cohort),
     niacin as (
 select distinct patid, cohort, 1 as niacin
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -464,7 +464,7 @@ group by patid, cohort),
     omega_3 as (
 select distinct patid, cohort, 1 as omega_3
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -548,7 +548,7 @@ group by patid, cohort),
     pcsk9 as (
 select distinct patid, cohort, 1 as pcsk9
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
@@ -579,7 +579,7 @@ group by patid, cohort)
 select patid, cohort, min (prescribing.rx_order_Date) as first_therapy_date
 
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 where rxnorm_cui in
     ('1007270'
     , '1008282'
@@ -1112,7 +1112,7 @@ group by patid, cohort)
 select patid, cohort, max (prescribing.rx_order_Date) as last_therapy_date_in_sp
 
 from pat_list
-    left join cdm_60_etl.prescribing using (patid)
+    left join cdm_60_prod.prescribing using (patid)
 where prescribing.rx_order_Date BETWEEN TO_DATE('09/30/2020'
     , 'MM/DD/YYYY')
   AND TO_DATE('09/30/2021'
