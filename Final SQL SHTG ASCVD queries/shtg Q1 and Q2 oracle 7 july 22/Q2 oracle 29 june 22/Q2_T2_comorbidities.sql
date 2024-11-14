@@ -86,30 +86,124 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                     WHEN dx like 'Z48.2%' THEN 'ORGAN TRN'*/
 
 
-                    WHEN dx IN ('403.01', '404.02', '403.91', '404.03', '404.12', '585.3', '585.4', '585.5', '585.6',
-                                '285.21', '710', '403.1', '403.9', '403.11',
-                                '404', '404.01', '403', '404.9', '404.92', '250.41', '404.91', '404.93', '404.13',
-                                '250.4', '250.42', '250.43', '416.8', '404.11', '404.1', '249.4',
-                                '249.41', 'V56.0', 'V56.8', 'V64.2', 'IMO0001', '996.81', '428.9', '428', '584.9',
-                                '250.81', '250.8', '250.9', '402.1', '250.52', '250.51', 'IMO0002',
-                                '593.9', '584.6', '584.7', '584.5', '588.81', '584.8', '585.9', '583.81', 'V45.11',
-                                '428.3', '428.2', '428.4', 'V15.89', '587', '586', '362.11', '583.9',
-                                '428.21', '428.42', '428.32', '428.22', '428.31', '428.33', '428.41', 'V42.0', '428.23',
-                                '428.43', 'V58.67') THEN 'CKD'
-
-
-                    WHEN dx in
-                         ('I12.0', 'I13.11', 'I13.2', 'N18.30', 'N18.4', 'N18.5', 'N18.6', 'M32.14', 'I12.9', 'I13.10',
-                          'I13.0', 'E10.22', 'E11.22', 'E13.22',
-                          'I27.29', 'Z53.20', 'IMO0001', 'T86.19', 'N18.31', 'N18.32', 'N18.3', 'N17.9', 'E08.22',
-                          'E08.65', 'E09.22', 'E09.65', 'N17.1', 'N17.2', 'N17.0', 'N25.81',
-                          'N17.8', 'E10.21', 'N18.5', 'D63.1', 'N18.6', 'Z99.2', 'N18.30', 'N18.4', 'E11.65', 'E10.65',
-                          'I50.810', 'E13.65', 'N19', 'I50.30', 'I50.20', 'I50.40', 'Z91.89',
-                          'H35.039', 'H32', 'N18.32', 'I12.9', 'I50.9', 'I12.0', 'E11.21', 'E08.22', 'E09.65', 'I50.21',
-                          'I50.42', 'I50.32', 'I50.22', 'I50.31', 'I50.33', 'I50.41',
-                          'E08.65', 'Z94.0', 'E09.22', 'I50.23', 'I50.43', 'I50.812', 'I50.811', 'I50.813', 'I50.84',
-                          'I50.82', 'I50.814', 'I50.89', 'I50.83', 'N18.31', 'N18.3', 'Z79.4')
-                        THEN 'CKD'
+                    WHEN dx IN ('249.4',
+                                '249.41',
+                                '250.4',
+                                '250.41',
+                                '250.42',
+                                '250.43',
+                                '285.21',
+                                '403',
+                                '403.01',
+                                '403.1',
+                                '403.11',
+                                '403.9',
+                                '403.91',
+                                '404',
+                                '404.01',
+                                '404.02',
+                                '404.03',
+                                '404.1',
+                                '404.11',
+                                '404.12',
+                                '404.13',
+                                '404.9',
+                                '404.91',
+                                '404.92',
+                                '404.93',
+                                '428.9',
+                                '583.81',
+                                '583.9',
+                                '584.5',
+                                '584.6',
+                                '584.7',
+                                '584.8',
+                                '584.9',
+                                '585.3',
+                                '585.4',
+                                '585.5',
+                                '585.6',
+                                '585.9',
+                                '586',
+                                '587',
+                                '588.81',
+                                '996.81',
+                                'D63.1',
+                                'D63.1',
+                                'E08.22',
+                                'E08.22',
+                                'E08.22',
+                                'E08.22',
+                                'E08.22',
+                                'E08.22',
+                                'E09.22',
+                                'E09.22',
+                                'E09.22',
+                                'E09.22',
+                                'E09.22',
+                                'E09.22',
+                                'E10.21',
+                                'E10.21',
+                                'E10.21',
+                                'E10.22',
+                                'E10.22',
+                                'E10.22',
+                                'E11.21',
+                                'E11.21',
+                                'E11.21',
+                                'E11.22',
+                                'E11.22',
+                                'E11.22',
+                                'E13.22',
+                                'E13.22',
+                                'E13.22',
+                                'I12.0',
+                                'I12.0',
+                                'I12.0',
+                                'I12.0',
+                                'I12.9',
+                                'I12.9',
+                                'I12.9',
+                                'I12.9',
+                                'I13.0',
+                                'I13.0',
+                                'I13.0',
+                                'I13.10',
+                                'I13.10',
+                                'I13.11',
+                                'I13.11',
+                                'I13.2',
+                                'I13.2',
+                                'I13.2',
+                                'M32.14',
+                                'N17.0',
+                                'N17.1',
+                                'N17.2',
+                                'N17.8',
+                                'N17.9',
+                                'N18.3',
+                                'N18.3',
+                                'N18.30',
+                                'N18.30',
+                                'N18.31',
+                                'N18.31',
+                                'N18.32',
+                                'N18.32',
+                                'N18.4',
+                                'N18.4',
+                                'N18.5',
+                                'N18.5',
+                                'N18.6',
+                                'N18.6',
+                                'N19',
+                                'N25.81',
+                                'T86.19',
+                                'V42.0',
+                                'V45.11',
+                                'V56.0',
+                                'V56.8',
+                                'Z94.0',
+                                'Z99.2') THEN 'CKD'
 
 
                     WHEN dx IN ('I10', 'I11.0', 'I11.9', 'I12.0', 'I15.0', 'I15.1', 'I15.2', 'I15.8', 'I15.9', 'I16.0',
@@ -195,7 +289,7 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                                 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') THEN 'ACUTE PANCREATITIS'
 
 
-                    WHEN dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89', 'K86.9')
+                    WHEN dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89')
                         THEN 'CHRONIC PANCREATITIS'
 
 
@@ -238,9 +332,8 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                   INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
-         WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
-*/
-
+         WHERE
+Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
              (como.dx IN (
                           'I10',
                  -- 'E66.9', obesity
@@ -356,34 +449,124 @@ with pat_list as (select patid, cohort, LDL_date as index_date
 -- DX FROM TABLE 2
 
                  OR Como.dx in
-                    ('403.01', '404.02', '403.91', '404.03', '404.12', '585.3', '585.4', '585.5', '585.6', '285.21',
-                     '710',
-                     '403.1', '403.9', '403.11',
-                     '404', '404.01', '403', '404.9', '404.92', '250.41', '404.91', '404.93', '404.13', '250.4',
+                    ('249.4',
+                     '249.41',
+                     '250.4',
+                     '250.41',
                      '250.42',
-                     '250.43', '416.8', '404.11', '404.1', '249.4',
-                     '249.41', 'V56.0', 'V56.8', 'V64.2', 'IMO0001', '996.81', '428.9', '428', '584.9', '250.81',
-                     '250.8',
-                     '250.9', '402.1', '250.52', '250.51', 'IMO0002',
-                     '593.9', '584.6', '584.7', '584.5', '588.81', '584.8', '585.9', '583.81', 'V45.11', '428.3',
-                     '428.2',
-                     '428.4', 'V15.89', '587', '586', '362.11', '583.9',
-                     '428.21', '428.42', '428.32', '428.22', '428.31', '428.33', '428.41', 'V42.0', '428.23', '428.43',
-                     'V58.67') -- CKD
-
-                 OR Como.dx in
-                    ('I12.0', 'I13.11', 'I13.2', 'N18.30', 'N18.4', 'N18.5', 'N18.6', 'M32.14', 'I12.9', 'I13.10',
+                     '250.43',
+                     '285.21',
+                     '403',
+                     '403.01',
+                     '403.1',
+                     '403.11',
+                     '403.9',
+                     '403.91',
+                     '404',
+                     '404.01',
+                     '404.02',
+                     '404.03',
+                     '404.1',
+                     '404.11',
+                     '404.12',
+                     '404.13',
+                     '404.9',
+                     '404.91',
+                     '404.92',
+                     '404.93',
+                     '428.9',
+                     '583.81',
+                     '583.9',
+                     '584.5',
+                     '584.6',
+                     '584.7',
+                     '584.8',
+                     '584.9',
+                     '585.3',
+                     '585.4',
+                     '585.5',
+                     '585.6',
+                     '585.9',
+                     '586',
+                     '587',
+                     '588.81',
+                     '996.81',
+                     'D63.1',
+                     'D63.1',
+                     'E08.22',
+                     'E08.22',
+                     'E08.22',
+                     'E08.22',
+                     'E08.22',
+                     'E08.22',
+                     'E09.22',
+                     'E09.22',
+                     'E09.22',
+                     'E09.22',
+                     'E09.22',
+                     'E09.22',
+                     'E10.21',
+                     'E10.21',
+                     'E10.21',
+                     'E10.22',
+                     'E10.22',
+                     'E10.22',
+                     'E11.21',
+                     'E11.21',
+                     'E11.21',
+                     'E11.22',
+                     'E11.22',
+                     'E11.22',
+                     'E13.22',
+                     'E13.22',
+                     'E13.22',
+                     'I12.0',
+                     'I12.0',
+                     'I12.0',
+                     'I12.0',
+                     'I12.9',
+                     'I12.9',
+                     'I12.9',
+                     'I12.9',
                      'I13.0',
-                     'E10.22', 'E11.22', 'E13.22',
-                     'I27.29', 'Z53.20', 'IMO0001', 'T86.19', 'N18.31', 'N18.32', 'N18.3', 'N17.9', 'E08.22', 'E08.65',
-                     'E09.22', 'E09.65', 'N17.1', 'N17.2', 'N17.0', 'N25.81',
-                     'N17.8', 'E10.21', 'N18.5', 'D63.1', 'N18.6', 'Z99.2', 'N18.30', 'N18.4', 'E11.65', 'E10.65',
-                     'I50.810', 'E13.65', 'N19', 'I50.30', 'I50.20', 'I50.40', 'Z91.89',
-                     'H35.039', 'H32', 'N18.32', 'I12.9', 'I50.9', 'I12.0', 'E11.21', 'E08.22', 'E09.65', 'I50.21',
-                     'I50.42', 'I50.32', 'I50.22', 'I50.31', 'I50.33', 'I50.41',
-                     'E08.65', 'Z94.0', 'E09.22', 'I50.23', 'I50.43', 'I50.812', 'I50.811', 'I50.813', 'I50.84',
-                     'I50.82',
-                     'I50.814', 'I50.89', 'I50.83', 'N18.31', 'N18.3', 'Z79.4') --CKD
+                     'I13.0',
+                     'I13.0',
+                     'I13.10',
+                     'I13.10',
+                     'I13.11',
+                     'I13.11',
+                     'I13.2',
+                     'I13.2',
+                     'I13.2',
+                     'M32.14',
+                     'N17.0',
+                     'N17.1',
+                     'N17.2',
+                     'N17.8',
+                     'N17.9',
+                     'N18.3',
+                     'N18.3',
+                     'N18.30',
+                     'N18.30',
+                     'N18.31',
+                     'N18.31',
+                     'N18.32',
+                     'N18.32',
+                     'N18.4',
+                     'N18.4',
+                     'N18.5',
+                     'N18.5',
+                     'N18.6',
+                     'N18.6',
+                     'N19',
+                     'N25.81',
+                     'T86.19',
+                     'V42.0',
+                     'V45.11',
+                     'V56.0',
+                     'V56.8',
+                     'Z94.0',
+                     'Z99.2') --'CKD'
 
 
                  OR Como.dx like 'G45%' -- TIA
@@ -455,8 +638,8 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
-                                'K86.9') -- CHRONIC PANCREATITIS
+                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89'
+                     ) -- CHRONIC PANCREATITIS
 
 
                  OR Como.dx in ('440.20',
@@ -524,12 +707,12 @@ with pat_list as (select patid, cohort, LDL_date as index_date
 
          GROUP BY patid,
                   cohort,
-                  como.dx
-     ),
+                  como.dx),
      Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list
                                  left join cdm_60_prod.procedures using (patid)
-                        where PX =
+                        where procedures.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
+                              PX =
                               '36514'),
      comorbidity_group as (select patid,
                                   cohort,
@@ -542,8 +725,8 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                                     INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
-                           WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
-                              and*/ Como.dx like
+                           WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
+                                 Como.dx like
                                     ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                            group by patid, cohort),
      ASCVD as (select patid,
@@ -552,61 +735,63 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                       'ASCVD'                               as Comorbidity_name
                FROM pat_list pats
                         INNER JOIN cdm_60_prod.diagnosis como using (patid)
-               WHERE dx in ('413.9',
-                            'I20.9',
-                            'I23.7',
-                            'I25.111',
-                            'I25.118',
-                            'I25.119',
-                            'I25.701',
-                            'I25.708',
-                            'I25.709',
-                            'I25.738',
-                            'I25.751',
-                            'I25.791',
-                            '411.1',
-                            '411.81',
-                            '411.89',
-                            '413.0',
-                            '413.1',
-                            'I20.0',
-                            'I20.1',
-                            'I20.8',
-                            'I24.0',
-                            'I24.8',
-                            'I24.9',
-                            'I25.110',
-                            'I25.700',
-                            'I25.710',
-                            'I25.720',
-                            'I25.730',
-                            'I25.750',
-                            'I25.760',
-                            'I25.790',
-                            '414.8',
-                            '414.9',
-                            'I25.5',
-                            'I25.6',
-                            'I25.89',
-                            'I25.9',
+               WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
+                   dx in ('346.62',
+                            '346.63',
                             '410.11',
                             '410.2',
                             '410.3',
                             '410.4',
                             '410.50',
                             '410.51',
-                            '410.60',
+                            '410.6',
                             '410.61',
                             '410.62',
                             '410.70',
                             '410.71',
                             '410.72',
                             '410.81',
-                            '410.90',
                             '410.91',
                             '410.92',
                             '411.0',
+                            '411.1',
+                            '411.81',
+                            '411.89',
                             '412',
+                            '413.0',
+                            '413.9',
+                            '414.8',
+                            '414.9',
+                            '433.01',
+                            '433.11',
+                            '433.21',
+                            '433.31',
+                            '433.81',
+                            '433.91',
+                            '434.01',
+                            '434.11',
+                            '434.91',
+                            '440.20',
+                            '440.21',
+                            '440.22',
+                            '440.23',
+                            '440.24',
+                            '440.29',
+                            '440.30',
+                            '440.31',
+                            '440.32',
+                            '440.4',
+                            'G43.601',
+                            'G43.601',
+                            'G43.609',
+                            'G43.609',
+                            'G43.611',
+                            'G43.611',
+                            'G43.619',
+                            'G43.619',
+                            'I20.0',
+                            'I20.8',
+                            'I20.9',
                             'I21.01',
                             'I21.02',
                             'I21.09',
@@ -627,65 +812,35 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                             'I23.0',
                             'I23.3',
                             'I23.6',
+                            'I23.7',
                             'I23.8',
+                            'I24.0',
                             'I24.1',
+                            'I24.8',
+                            'I24.9',
+                            'I25.110',
+                            'I25.111',
+                            'I25.118',
+                            'I25.119',
                             'I25.2',
-                            '440.20',
-                            '440.21',
-                            '440.22',
-                            '440.23',
-                            '440.24',
-                            '440.29',
-                            '440.30',
-                            '440.31',
-                            '440.32',
-                            '440.4',
-                            'I70.0',
-                            'I70.1',
-                            'I70.201',
-                            'I70.202',
-                            'I70.203',
-                            'I70.208',
-                            'I70.209',
-                            'I70.21',
-                            'I70.22',
-                            'I70.232',
-                            'I70.24',
-                            'I70.25',
-                            'I70.26',
-                            'I70.261',
-                            'I70.262',
-                            'I70.263',
-                            'I70.268',
-                            'I70.269',
-                            'I70.291',
-                            'I70.292',
-                            'I70.293',
-                            'I70.298',
-                            'I70.299',
-                            'I70.3',
-                            'I70.4',
-                            'I70.5',
-                            'I70.8',
-                            'I70.90',
-                            'I70.91',
-                            'I70.92',
-                            '346.62',
-                            '346.63',
-                            '433.01',
-                            '433.11',
-                            '433.21',
-                            '433.31',
-                            '433.81',
-                            '433.91',
-                            '434.01',
-                            '434.11',
-                            '434.91',
-                            'V12.54',
-                            'G43.601',
-                            'G43.609',
-                            'G43.611',
-                            'G43.619',
+                            'I25.5',
+                            'I25.5',
+                            'I25.6',
+                            'I25.700',
+                            'I25.701',
+                            'I25.708',
+                            'I25.709',
+                            'I25.710',
+                            'I25.720',
+                            'I25.730',
+                            'I25.738',
+                            'I25.750',
+                            'I25.751',
+                            'I25.760',
+                            'I25.790',
+                            'I25.791',
+                            'I25.89',
+                            'I25.9',
                             'I63.00',
                             'I63.011',
                             'I63.012',
@@ -714,10 +869,45 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                             'I63.531',
                             'I63.539',
                             'I63.59',
+                            'I70.0',
+                            'I70.1',
+                            'I70.201',
+                            'I70.202',
+                            'I70.203',
+                            'I70.208',
+                            'I70.209',
+                            'I70.21',
+                            'I70.22',
+                            'I70.232',
+                            'I70.24',
+                            'I70.25',
+                            'I70.26',
+                            'I70.261',
+                            'I70.261',
+                            'I70.262',
+                            'I70.262',
+                            'I70.263',
+                            'I70.263',
+                            'I70.268',
+                            'I70.268',
+                            'I70.269',
+                            'I70.269',
+                            'I70.291',
+                            'I70.292',
+                            'I70.293',
+                            'I70.298',
+                            'I70.299',
+                            'I70.3',
+                            'I70.4',
+                            'I70.5',
+                            'I70.8',
+                            'I70.90',
+                            'I70.91',
+                            'I70.92',
+                            'V12.54',
                             'Z86.73')
                group by patid,
-                        cohort
-     ),
+                        cohort),
 
     /*,
 
@@ -800,123 +990,109 @@ with pat_list as (select patid, cohort, LDL_date as index_date
     ),
 */
      comorbidity_count as
-         (
-             select '2'                   as order1,
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+         (select '2'                   as order1,
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from comorbid_conditions
+          from comorbid_conditions
 
-             group by Comorbidity_name, cohort
-             union
-             select '1',
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+          group by Comorbidity_name, cohort
+          union
+          select '1',
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from comorbidity_group
+          from comorbidity_group
 
-             group by Comorbidity_name, cohort
-                 /* union
-                  select '6',
-                         count(distinct patid) as N,
-                         cohort,
-                         Comorbidity_name
+          group by Comorbidity_name, cohort
+              /* union
+               select '6',
+                      count(distinct patid) as N,
+                      cohort,
+                      Comorbidity_name
 
-                  from PCI
+               from PCI
 
-                  group by Comorbidity_name, cohort*/
-             union
-             select '7',
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+               group by Comorbidity_name, cohort*/
+          union
+          select '7',
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from Plasmapheresis
+          from Plasmapheresis
 
-             group by Comorbidity_name, cohort
-             union
-             select '8',
-                    trunc(avg(tx_since_first_lip), 2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (Mean)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9'                                  as order1,
+          group by Comorbidity_name, cohort
+          union
+          select '8',
+                 trunc(avg(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (Mean)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9'                                  as order1,
 
-                    trunc(median(tx_since_first_lip), 2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (Median)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9'                                  as order1,
+                 trunc(median(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (Median)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9'                                  as order1,
 
-                    trunc(STDDEV(tx_since_first_lip), 2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (std)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9' as                                      order1,
+                 trunc(STDDEV(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (std)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9' as                order1,
 
-                    PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
+                 PERCENTILE_CONT(0.25) WITHIN
+          GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
                     cohort,
                     'Time since first lipidemia diagnosis (25th pct)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9' as order1,
-                    PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY tx_since_first_lip asc)
-                           "pct_75",
-                    cohort,
-                    'Time since first lipidemia diagnosis (75th pct)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '10'                                            as order1,
-                    trunc(avg(time_since_first_ascvd_diagnosis), 2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (Mean)'
-             from ascvd
-             group by cohort
-             union
-             select '10'                                               as order1,
-                    trunc(median(time_since_first_ascvd_diagnosis), 2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (Median)'
-             from ascvd
-             group by cohort
-             union
-             select '10'                                               as order1,
-                    trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (std)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                    PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-                            "pct_25",
-                    cohort,
-                    'Time since first ascvd diagnosis (25th pct)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                    PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-                            "pct_75",
-                    cohort,
-                    'Time since first ascvd diagnosis (75th pct)'
-             from ascvd
-             group by cohort
-         ),
+          from comorbidity_group
+          group by cohort
+          union
+          select '9' as order1, PERCENTILE_CONT(0.75) WITHIN
+          GROUP (ORDER BY tx_since_first_lip asc)
+              "pct_75",
+              cohort,
+              'Time since first lipidemia diagnosis (75th pct)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '10' as order1, trunc(avg(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (Mean)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, trunc(median(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (Median)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (std)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, PERCENTILE_CONT(0.25) WITHIN
+          GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+              "pct_25",
+              cohort,
+              'Time since first ascvd diagnosis (25th pct)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, PERCENTILE_CONT(0.75) WITHIN
+          GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+              "pct_75",
+              cohort,
+              'Time since first ascvd diagnosis (75th pct)'
+          from ascvd
+          group by cohort),
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
                 order by cohort)
@@ -948,10 +1124,7 @@ group by dx;*/
                                 end
                                 as percentage1
                      from table2
-                              left join totals using (cohort)
-                     )
-
-
+                              left join totals using (cohort))
 
 
 select *

@@ -1,6 +1,6 @@
 --Run time: <1 minute
 --3 tables are output and should be saved to csv
-
+ --12 Nov 24: No changes needed for reru
 --Q2_T4.csv
 with pat_list as (select * from SHTG_Q2_STEP3_d5)
 select count(distinct patid) as N, TG_category, LDL_category2 from pat_list

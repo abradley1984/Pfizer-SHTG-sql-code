@@ -1,6 +1,7 @@
 /*This query has two parts - table 3a and table 3b, gotten by uncommenting the second line at the end.
 
 Running time: 8 mins *2
+  12 Nov 24: No changes needed for rerun
 */
 
 with pat_list as

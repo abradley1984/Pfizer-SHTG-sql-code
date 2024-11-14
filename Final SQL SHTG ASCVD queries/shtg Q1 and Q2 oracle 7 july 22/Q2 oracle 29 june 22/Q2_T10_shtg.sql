@@ -27,7 +27,7 @@ with pat_list as
      nash as (select distinct patid, 1 as NASH
               from pat_list
                        INNER JOIN cdm_60_prod.diagnosis como using (patid)
-              Where dx in ('K75.81', '571.8', 'K76.0')),
+              Where Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and dx in ('K75.81', '571.8', 'K76.0')),
 
 
      combined as (select patid,
