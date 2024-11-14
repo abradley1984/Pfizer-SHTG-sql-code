@@ -23,7 +23,7 @@ select * into #pat_list from
 
 select * into #nash from (select distinct a.patid, 1 as NASH from #pat_list a
  INNER JOIN cdm.dbo.diagnosis como on a.patid=como.patid
-     Where dx in ('K75.81', '571.8', 'K76.0') ) as pN;
+     Where como.admit_date<='2021-09-30' and dx in ('K75.81', '571.8', 'K76.0') ) as pN;
 
 
     select * into #combined from( select a.patid, cohort, BMI_category,diabetes, ascvd, obesity,nash ,v_high_risk,enhanced_risk,
