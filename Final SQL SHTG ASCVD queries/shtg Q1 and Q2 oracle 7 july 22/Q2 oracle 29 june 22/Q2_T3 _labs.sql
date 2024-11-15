@@ -125,8 +125,9 @@ with pat_list as
 
                                  FROM pat_list
                                           left join CDM_60_prod.lab_result_cm using (patid)
-                                 WHERE                                                                       --lab_result_cm.result_date BETWEEN TO_DATE('07/31/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
-                                     lab_result_cm.lab_loinc in ('2571-8', '12951-0')
+                                 WHERE
+                                      lab_result_cm.result_date <=TO_DATE('09/30/2021', 'MM/DD/YYYY')                                                               --lab_result_cm.result_date BETWEEN TO_DATE('07/31/2020', 'MM/DD/YYYY') AND TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                                    and lab_result_cm.lab_loinc in ('2571-8', '12951-0')
                                    AND not lab_result_cm.result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
                                    and lab_result_cm.result_num is not null
                                    and lab_result_cm.result_num >= 500
