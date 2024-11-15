@@ -14,8 +14,8 @@ IF OBJECT_ID(#hypercholesterolemia) IS NOT NULL
     DROP TABLE #hypercholesterolemia;
 IF OBJECT_ID(#congestive_HF) IS NOT NULL
     DROP TABLE #congestive_HF;*/
---create table SHTG_Q2_STEP1_d5 as
---with
+create table SHTG_Q2_STEP1_d5 as
+with
 select *
 into #TG_all
 from (select patid,

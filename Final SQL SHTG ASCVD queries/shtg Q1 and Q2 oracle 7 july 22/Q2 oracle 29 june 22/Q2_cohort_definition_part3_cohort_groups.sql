@@ -6,7 +6,6 @@
 --select count(*) from SHTG_Q2_STEP3_d5
 drop table SHTG_Q2_STEP3_d5;
 
-select count(*), cohort from SHTG_Q2_STEP3_d5 group by cohort;
   create table SHTG_Q2_STEP3_d5 as
 WITH PAT_LIST AS (SELECT *
                   FROM SHTG_Q2_STEP1_d5

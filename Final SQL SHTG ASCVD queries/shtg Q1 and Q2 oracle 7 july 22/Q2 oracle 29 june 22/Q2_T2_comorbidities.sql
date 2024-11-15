@@ -332,47 +332,46 @@ with pat_list as (select patid, cohort, LDL_date as index_date
                   INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
-         WHERE
-Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
-             (como.dx IN (
-                          'I10',
-                 -- 'E66.9', obesity
-                 --'E66.01',
-                 --'E66.09',
-                 -- 'K21.9',gerd
-                 --  'K21.0',
-                 --  'K76.6',
-                 --  'F41.9',
-                          'R17',
-                          'R18.8',
-                          'I85.01',
-                 --'I85.10',
-                 --'I85.00',
-                          'I85.11',
-                          'K76.7',
-                          'K65.2'
-                 --   'K65.0',
-                 --   'K65.9'
+         WHERE Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY')
+           and (como.dx IN (
+                            'I10',
+             -- 'E66.9', obesity
+             --'E66.01',
+             --'E66.09',
+             -- 'K21.9',gerd
+             --  'K21.0',
+             --  'K76.6',
+             --  'F41.9',
+                            'R17',
+                            'R18.8',
+                            'I85.01',
+             --'I85.10',
+             --'I85.00',
+                            'I85.11',
+                            'K76.7',
+                            'K65.2'
+             --   'K65.0',
+             --   'K65.9'
 
-                 )
+             )
 
 -- DX FROM TABLE 9
-                 OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
-                 OR Como.dx like 'E08%' -- diabetes
+             OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
+             OR Como.dx like 'E08%' -- diabetes
 
-                 -- OR Como.dx like 'E09%' -- diabetes
+             -- OR Como.dx like 'E09%' -- diabetes
 
-                 OR Como.dx like 'E10%' -- diabetes
+             OR Como.dx like 'E10%' -- diabetes
 
-                 OR Como.dx like 'E11%' -- diabetes
+             OR Como.dx like 'E11%' -- diabetes
 
-                 OR Como.dx like 'E13%' -- diabetes
+             OR Como.dx like 'E13%' -- diabetes
 
-                 OR Como.dx like '249%' -- diabetes
+             OR Como.dx like '249%' -- diabetes
 
-                 OR Como.dx like '250%' -- diabetes
+             OR Como.dx like '250%' -- diabetes
 
-                 -- OVERLAP BETWEEN RETINOPATHY & DIABETES
+             -- OVERLAP BETWEEN RETINOPATHY & DIABETES
 /*
                  OR Como.dx like 'H31%' -- RETINOPATHY
 
@@ -383,55 +382,55 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
                  OR Como.dx like 'Z95%' -- MULTIVESSEL CAD
 
                  OR Como.dx = 'Z98.61' -- PCI*/
-                 OR Como.dx like 'G93.4%' -- Encephalopathy, other
+             OR Como.dx like 'G93.4%' -- Encephalopathy, other
 
 
-                 -- NEXT WAS "GUESSING EXCLUDING" TAB, ALL ARE H35 & OVERLAPS WITH RETINOPATHY
+             -- NEXT WAS "GUESSING EXCLUDING" TAB, ALL ARE H35 & OVERLAPS WITH RETINOPATHY
 
 
-                 /* OR Como.dx like '581%' -- NEPHROTIC SYN
+             /* OR Como.dx like '581%' -- NEPHROTIC SYN
 
-                  OR Como.dx like 'NO4%' -- NEPHROTIC SYN
+              OR Como.dx like 'NO4%' -- NEPHROTIC SYN
 
-                  OR Como.dx = 'Z87.441' -- NEPHROTIC SYN
+              OR Como.dx = 'Z87.441' -- NEPHROTIC SYN
 
-                  OR Como.dx = '042' -- HIV
+              OR Como.dx = '042' -- HIV
 
-                  OR Como.dx = 'B20' -- HIV
+              OR Como.dx = 'B20' -- HIV
 
-                  OR Como.dx = 'B97.35' -- HIV
+              OR Como.dx = 'B97.35' -- HIV
 
-                  OR Como.dx = 'Z21' -- HIV
+              OR Como.dx = 'Z21' -- HIV
 
 
-                  OR Como.dx like '433%' -- STROKE
+              OR Como.dx like '433%' -- STROKE
 
-                  OR Como.dx like '434%' -- STROKE
+              OR Como.dx like '434%' -- STROKE
 
-                  OR Como.dx = '997.02' -- STROKE
+              OR Como.dx = '997.02' -- STROKE
 
-                  OR Como.dx like 'I63%' -- STROKE
+              OR Como.dx like 'I63%' -- STROKE
 
-                  OR Como.dx like 'I97.8%' -- STROKE
+              OR Como.dx like 'I97.8%' -- STROKE
 
-                  OR Como.dx like '278%' -- OBESITY
+              OR Como.dx like '278%' -- OBESITY
 
-                  OR Como.dx like 'E66%' -- OBESITY
+              OR Como.dx like 'E66%' -- OBESITY
 
-                  OR Como.dx like '410%' -- MI
+              OR Como.dx like '410%' -- MI
 
-                  OR Como.dx = '411.0' -- MI
+              OR Como.dx = '411.0' -- MI
 
-                  OR Como.dx = '411.81' -- MI
+              OR Como.dx = '411.81' -- MI
 
-                  OR Como.dx = '412' -- MI
+              OR Como.dx = '412' -- MI
 
-                  OR Como.dx like 'I21%' -- MI
+              OR Como.dx like 'I21%' -- MI
 
-                  OR Como.dx like 'I22%' -- MI
+              OR Como.dx like 'I22%' -- MI
 
-                  OR Como.dx like '123%' -- MI
- */
+              OR Como.dx like '123%' -- MI
+*/
 --
 --                  -- ?? IN SPREADSHEET FOR I24 AND I25
 --
@@ -443,267 +442,261 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
 --                  OR Como.dx like '996%' -- ORGAN TRN
 --
 --                  OR Como.dx like 'Z48.2%' -- ORGAN TRN
-                 or dx like 'K72%' -- 'liver_failure'
+             or dx like 'K72%' -- 'liver_failure'
 
 
 -- DX FROM TABLE 2
 
-                 OR Como.dx in
-                    ('249.4',
-                     '249.41',
-                     '250.4',
-                     '250.41',
-                     '250.42',
-                     '250.43',
-                     '285.21',
-                     '403',
-                     '403.01',
-                     '403.1',
-                     '403.11',
-                     '403.9',
-                     '403.91',
-                     '404',
-                     '404.01',
-                     '404.02',
-                     '404.03',
-                     '404.1',
-                     '404.11',
-                     '404.12',
-                     '404.13',
-                     '404.9',
-                     '404.91',
-                     '404.92',
-                     '404.93',
-                     '428.9',
-                     '583.81',
-                     '583.9',
-                     '584.5',
-                     '584.6',
-                     '584.7',
-                     '584.8',
-                     '584.9',
-                     '585.3',
-                     '585.4',
-                     '585.5',
-                     '585.6',
-                     '585.9',
-                     '586',
-                     '587',
-                     '588.81',
-                     '996.81',
-                     'D63.1',
-                     'D63.1',
-                     'E08.22',
-                     'E08.22',
-                     'E08.22',
-                     'E08.22',
-                     'E08.22',
-                     'E08.22',
-                     'E09.22',
-                     'E09.22',
-                     'E09.22',
-                     'E09.22',
-                     'E09.22',
-                     'E09.22',
-                     'E10.21',
-                     'E10.21',
-                     'E10.21',
-                     'E10.22',
-                     'E10.22',
-                     'E10.22',
-                     'E11.21',
-                     'E11.21',
-                     'E11.21',
-                     'E11.22',
-                     'E11.22',
-                     'E11.22',
-                     'E13.22',
-                     'E13.22',
-                     'E13.22',
-                     'I12.0',
-                     'I12.0',
-                     'I12.0',
-                     'I12.0',
-                     'I12.9',
-                     'I12.9',
-                     'I12.9',
-                     'I12.9',
-                     'I13.0',
-                     'I13.0',
-                     'I13.0',
-                     'I13.10',
-                     'I13.10',
-                     'I13.11',
-                     'I13.11',
-                     'I13.2',
-                     'I13.2',
-                     'I13.2',
-                     'M32.14',
-                     'N17.0',
-                     'N17.1',
-                     'N17.2',
-                     'N17.8',
-                     'N17.9',
-                     'N18.3',
-                     'N18.3',
-                     'N18.30',
-                     'N18.30',
-                     'N18.31',
-                     'N18.31',
-                     'N18.32',
-                     'N18.32',
-                     'N18.4',
-                     'N18.4',
-                     'N18.5',
-                     'N18.5',
-                     'N18.6',
-                     'N18.6',
-                     'N19',
-                     'N25.81',
-                     'T86.19',
-                     'V42.0',
-                     'V45.11',
-                     'V56.0',
-                     'V56.8',
-                     'Z94.0',
-                     'Z99.2') --'CKD'
+             OR Como.dx in
+                ('249.4',
+                 '249.41',
+                 '250.4',
+                 '250.41',
+                 '250.42',
+                 '250.43',
+                 '285.21',
+                 '403',
+                 '403.01',
+                 '403.1',
+                 '403.11',
+                 '403.9',
+                 '403.91',
+                 '404',
+                 '404.01',
+                 '404.02',
+                 '404.03',
+                 '404.1',
+                 '404.11',
+                 '404.12',
+                 '404.13',
+                 '404.9',
+                 '404.91',
+                 '404.92',
+                 '404.93',
+                 '428.9',
+                 '583.81',
+                 '583.9',
+                 '584.5',
+                 '584.6',
+                 '584.7',
+                 '584.8',
+                 '584.9',
+                 '585.3',
+                 '585.4',
+                 '585.5',
+                 '585.6',
+                 '585.9',
+                 '586',
+                 '587',
+                 '588.81',
+                 '996.81',
+                 'D63.1',
+                 'D63.1',
+                 'E08.22',
+                 'E08.22',
+                 'E08.22',
+                 'E08.22',
+                 'E08.22',
+                 'E08.22',
+                 'E09.22',
+                 'E09.22',
+                 'E09.22',
+                 'E09.22',
+                 'E09.22',
+                 'E09.22',
+                 'E10.21',
+                 'E10.21',
+                 'E10.21',
+                 'E10.22',
+                 'E10.22',
+                 'E10.22',
+                 'E11.21',
+                 'E11.21',
+                 'E11.21',
+                 'E11.22',
+                 'E11.22',
+                 'E11.22',
+                 'E13.22',
+                 'E13.22',
+                 'E13.22',
+                 'I12.0',
+                 'I12.9',
+                 'I13.0',
+                 'I13.0',
+                 'I13.0',
+                 'I13.10',
+                 'I13.10',
+                 'I13.11',
+                 'I13.11',
+                 'I13.2',
+                 'I13.2',
+                 'I13.2',
+                 'M32.14',
+                 'N17.0',
+                 'N17.1',
+                 'N17.2',
+                 'N17.8',
+                 'N17.9',
+                 'N18.3',
+                 'N18.3',
+                 'N18.30',
+                 'N18.30',
+                 'N18.31',
+                 'N18.31',
+                 'N18.32',
+                 'N18.32',
+                 'N18.4',
+                 'N18.4',
+                 'N18.5',
+                 'N18.5',
+                 'N18.6',
+                 'N18.6',
+                 'N19',
+                 'N25.81',
+                 'T86.19',
+                 'V42.0',
+                 'V45.11',
+                 'V56.0',
+                 'V56.8',
+                 'Z94.0',
+                 'Z99.2') --'CKD'
 
 
-                 OR Como.dx like 'G45%' -- TIA
-                 OR Como.dx like '435%' -- TIA
+             OR Como.dx like 'G45%' -- TIA
+             OR Como.dx like '435%' -- TIA
 
-                 OR Como.dx like 'I20%' -- IHD
+             OR Como.dx like 'I20%' -- IHD
 
-                 OR Como.dx like 'I21%' -- IHD
+             OR Como.dx like 'I21%' -- IHD
 
-                 OR Como.dx like 'I22%' -- IHD
+             OR Como.dx like 'I22%' -- IHD
 
-                 OR Como.dx like 'I23%' -- IHD
+             OR Como.dx like 'I23%' -- IHD
 
-                 OR Como.dx like 'I24%' -- IHD
+             OR Como.dx like 'I24%' -- IHD
 
-                 OR Como.dx like 'I25%' -- IHD
+             OR Como.dx like 'I25%' -- IHD
 
-                 OR Como.dx like 'I50%' -- HEART FAILURE
-                 OR Como.dx like '428%' -- HEART FAILURE
+             OR Como.dx like 'I50%' -- HEART FAILURE
+             OR Como.dx like '428%' -- HEART FAILURE
 
-                 OR Como.dx = 'I10' -- HYPERTENSIVE
+             OR Como.dx = 'I10' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I11.0' -- HYPERTENSIVE
+             OR Como.dx = 'I11.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I11.9' -- HYPERTENSIVE
+             OR Como.dx = 'I11.9' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I12.0' -- HYPERTENSIVE
+             OR Como.dx = 'I12.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I12.9' -- HYPERTENSIVE
+             OR Como.dx = 'I12.9' -- HYPERTENSIVE
 
-                 OR Como.dx like 'I13%' -- HYPERTENSIVE
+             OR Como.dx like 'I13%' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.0' -- HYPERTENSIVE
+             OR Como.dx = 'I15.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.1' -- HYPERTENSIVE
+             OR Como.dx = 'I15.1' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.2' -- HYPERTENSIVE
+             OR Como.dx = 'I15.2' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.8' -- HYPERTENSIVE
+             OR Como.dx = 'I15.8' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I15.9' -- HYPERTENSIVE
+             OR Como.dx = 'I15.9' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.0' -- HYPERTENSIVE
+             OR Como.dx = 'I16.0' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.1' -- HYPERTENSIVE
+             OR Como.dx = 'I16.1' -- HYPERTENSIVE
 
-                 OR Como.dx = 'I16.9' -- HYPERTENSIVE
+             OR Como.dx = 'I16.9' -- HYPERTENSIVE
 
-                 OR Como.dx = '401' -- HYPERTENSIVE
-                 OR Como.dx = '402' -- HYPERTENSIVE
-                 OR Como.dx = '403' -- HYPERTENSIVE
-                 OR Como.dx = '404' -- HYPERTENSIVE
-                 OR Como.dx = '405' -- HYPERTENSIVE
+             OR Como.dx = '401' -- HYPERTENSIVE
+             OR Como.dx = '402' -- HYPERTENSIVE
+             OR Como.dx = '403' -- HYPERTENSIVE
+             OR Como.dx = '404' -- HYPERTENSIVE
+             OR Como.dx = '405' -- HYPERTENSIVE
 
-                 -- OR Como.dx like
-                 --   ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
-                 OR Como.dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
-                 OR Como.dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
-                 OR Como.dx = 'E78.1' -- LIPIDEMIA, hypertriglyceridemia
-                 OR Como.dx = 'E78.2' -- LIPIDEMIA, mixed hyperlipedimia
-                 OR Como.dx = 'E78.3' -- LIPIDEMIA, hyperchylomicronemia
-                 OR Como.dx = 'E78.41' -- LIPIDEMIA, elevated lipoprotien(a)
-                 OR Como.dx = '272.1' -- LIPIDEMIA, hypertriglyceridemia
-
-
-                 OR Como.dx in
-                    ('K85.0', 'K85.00', 'K85.01', 'K85.02', 'K85.1', 'K85.10', 'K85.11', 'K85.12', 'K85.8', 'K85.80',
-                     'K85.81',
-                     'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
+             -- OR Como.dx like
+             --   ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
+             OR Como.dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
+             OR Como.dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
+             OR Como.dx = 'E78.1' -- LIPIDEMIA, hypertriglyceridemia
+             OR Como.dx = 'E78.2' -- LIPIDEMIA, mixed hyperlipedimia
+             OR Como.dx = 'E78.3' -- LIPIDEMIA, hyperchylomicronemia
+             OR Como.dx = 'E78.41' -- LIPIDEMIA, elevated lipoprotien(a)
+             OR Como.dx = '272.1' -- LIPIDEMIA, hypertriglyceridemia
 
 
-                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89'
-                     ) -- CHRONIC PANCREATITIS
+             OR Como.dx in
+                ('K85.0', 'K85.00', 'K85.01', 'K85.02', 'K85.1', 'K85.10', 'K85.11', 'K85.12', 'K85.8', 'K85.80',
+                 'K85.81',
+                 'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ('440.20',
-                                '440.21',
-                                '440.22',
-                                '440.23',
-                                '440.24',
-                                '440.29',
-                                '440.30',
-                                '440.31',
-                                '440.32',
-                     -- '440.4',
-                                'I70.0',
-                                'I70.1',
-                                'I70.201',
-                                'I70.202',
-                                'I70.203',
-                                'I70.208',
-                                'I70.209',
-                                'I70.21',
-                                'I70.22',
-                                'I70.232',
-                                'I70.24',
-                                'I70.25',
-                                'I70.26',
-                                'I70.261',
-                                'I70.262',
-                                'I70.263',
-                                'I70.268',
-                                'I70.269',
-                                'I70.291',
-                                'I70.292',
-                                'I70.293',
-                                'I70.298',
-                                'I70.299',
-                                'I70.3',
-                                'I70.4',
-                                'I70.5',
-                                'I70.8',
-                                'I70.90',
-                                'I70.91',
-                                'I70.92')-- PAD
-
-                 OR Como.dx = 'R17' -- JAUNDICE
-                 OR Como.dx = '782.4' -- JAUNDICE
-
-                 OR Como.dx = 'R18.8' -- ASCITES
-                 OR Como.dx = '789.5' -- ASCITES
-
-                 OR Como.dx in ('I85.11', 'I85.01', '465.0', '456.20') -- ESOPHAGEAL VARICES HEMORRHAGIC
-
-                 OR Como.dx = 'G93.4' -- ENCEPHALOPATHY, UNSPEC
-                 OR Como.dx = '348.30' -- ENCEPHALOPATHY, UNSPEC
-
-                 OR Como.dx = 'K76.7' -- HEPATORENAL SYND
-                 OR Como.dx = '572.4' -- HEPATORENAL SYND
-
-                 OR Como.dx = 'K65.2' -- SPONTANEOUS BACTERIAL PERITONITIS
-                 OR Como.dx = '567.23' -- SPONTANEOUS BACTERIAL PERITONITIS
-
-                 OR Como.dx in ('K75.81', '571.8', 'K76.0') -- NAFLD OR NASH
+             OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89'
+                 ) -- CHRONIC PANCREATITIS
 
 
-                 )
+             OR Como.dx in ('440.20',
+                            '440.21',
+                            '440.22',
+                            '440.23',
+                            '440.24',
+                            '440.29',
+                            '440.30',
+                            '440.31',
+                            '440.32',
+                 -- '440.4',
+                            'I70.0',
+                            'I70.1',
+                            'I70.201',
+                            'I70.202',
+                            'I70.203',
+                            'I70.208',
+                            'I70.209',
+                            'I70.21',
+                            'I70.22',
+                            'I70.232',
+                            'I70.24',
+                            'I70.25',
+                            'I70.26',
+                            'I70.261',
+                            'I70.262',
+                            'I70.263',
+                            'I70.268',
+                            'I70.269',
+                            'I70.291',
+                            'I70.292',
+                            'I70.293',
+                            'I70.298',
+                            'I70.299',
+                            'I70.3',
+                            'I70.4',
+                            'I70.5',
+                            'I70.8',
+                            'I70.90',
+                            'I70.91',
+                            'I70.92')-- PAD
+
+             OR Como.dx = 'R17' -- JAUNDICE
+             OR Como.dx = '782.4' -- JAUNDICE
+
+             OR Como.dx = 'R18.8' -- ASCITES
+             OR Como.dx = '789.5' -- ASCITES
+
+             OR Como.dx in ('I85.11', 'I85.01', '465.0', '456.20') -- ESOPHAGEAL VARICES HEMORRHAGIC
+
+             OR Como.dx = 'G93.4' -- ENCEPHALOPATHY, UNSPEC
+             OR Como.dx = '348.30' -- ENCEPHALOPATHY, UNSPEC
+
+             OR Como.dx = 'K76.7' -- HEPATORENAL SYND
+             OR Como.dx = '572.4' -- HEPATORENAL SYND
+
+             OR Como.dx = 'K65.2' -- SPONTANEOUS BACTERIAL PERITONITIS
+             OR Como.dx = '567.23' -- SPONTANEOUS BACTERIAL PERITONITIS
+
+             OR Como.dx in ('K75.81', '571.8', 'K76.0') -- NAFLD OR NASH
+
+
+             )
 
          GROUP BY patid,
                   cohort,
@@ -711,8 +704,8 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
      Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list
                                  left join cdm_60_prod.procedures using (patid)
-                        where procedures.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
-                              PX =
+                        where procedures.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                          and PX =
                               '36514'),
      comorbidity_group as (select patid,
                                   cohort,
@@ -725,9 +718,9 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
                                     INNER JOIN cdm_60_prod.diagnosis como using (patid)
 
 
-                           WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
-                                 Como.dx like
-                                    ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
+                           WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                             and Como.dx like
+                                 ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                            group by patid, cohort),
      ASCVD as (select patid,
                       cohort,
@@ -735,8 +728,8 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
                       'ASCVD'                               as Comorbidity_name
                FROM pat_list pats
                         INNER JOIN cdm_60_prod.diagnosis como using (patid)
-               WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
-                   dx in ('346.62',
+               WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY')
+                 and dx in ('346.62',
                             '346.63',
                             '410.11',
                             '410.2',
@@ -1049,48 +1042,60 @@ Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
           from comorbidity_group
           group by cohort
           union
-          select '9' as                order1,
+          select '9' as                                      order1,
 
                  PERCENTILE_CONT(0.25) WITHIN
-          GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
-                    cohort,
-                    'Time since first lipidemia diagnosis (25th pct)'
+                     GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
+                 cohort,
+                 'Time since first lipidemia diagnosis (25th pct)'
           from comorbidity_group
           group by cohort
           union
-          select '9' as order1, PERCENTILE_CONT(0.75) WITHIN
-          GROUP (ORDER BY tx_since_first_lip asc)
-              "pct_75",
-              cohort,
-              'Time since first lipidemia diagnosis (75th pct)'
+          select '9' as order1,
+                 PERCENTILE_CONT(0.75) WITHIN
+                     GROUP (ORDER BY tx_since_first_lip asc)
+                        "pct_75",
+                 cohort,
+                 'Time since first lipidemia diagnosis (75th pct)'
           from comorbidity_group
           group by cohort
           union
-          select '10' as order1, trunc(avg(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (Mean)'
+          select '10'                                            as order1,
+                 trunc(avg(time_since_first_ascvd_diagnosis), 2) as N,
+                 cohort,
+                 'Time since first ascvd diagnosis (Mean)'
           from ascvd
           group by cohort
           union
-          select '10' as order1, trunc(median(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (Median)'
+          select '10'                                               as order1,
+                 trunc(median(time_since_first_ascvd_diagnosis), 2) as N,
+                 cohort,
+                 'Time since first ascvd diagnosis (Median)'
           from ascvd
           group by cohort
           union
-          select '10' as order1, trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N, cohort, 'Time since first ascvd diagnosis (std)'
+          select '10'                                               as order1,
+                 trunc(STDDEV(time_since_first_ascvd_diagnosis), 2) as N,
+                 cohort,
+                 'Time since first ascvd diagnosis (std)'
           from ascvd
           group by cohort
           union
-          select '10' as order1, PERCENTILE_CONT(0.25) WITHIN
-          GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-              "pct_25",
-              cohort,
-              'Time since first ascvd diagnosis (25th pct)'
+          select '10' as order1,
+                 PERCENTILE_CONT(0.25) WITHIN
+                     GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                         "pct_25",
+                 cohort,
+                 'Time since first ascvd diagnosis (25th pct)'
           from ascvd
           group by cohort
           union
-          select '10' as order1, PERCENTILE_CONT(0.75) WITHIN
-          GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
-              "pct_75",
-              cohort,
-              'Time since first ascvd diagnosis (75th pct)'
+          select '10' as order1,
+                 PERCENTILE_CONT(0.75) WITHIN
+                     GROUP (ORDER BY time_since_first_ascvd_diagnosis asc)
+                         "pct_75",
+                 cohort,
+                 'Time since first ascvd diagnosis (75th pct)'
           from ascvd
           group by cohort),
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
