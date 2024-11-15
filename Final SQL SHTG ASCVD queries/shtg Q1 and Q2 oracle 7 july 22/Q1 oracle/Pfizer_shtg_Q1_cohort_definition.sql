@@ -1,5 +1,5 @@
 /* Q1 step 1
-
+--no changes needed for nov 2024 rerun
    Note: I'm adding in upper fences for TG and LDL here, but those aren't reached by any site, so won't need to be rerun
 
 
@@ -44,6 +44,7 @@ drop table shtg_Q1_cohorts_with_ex
 --  drop table shtg_Q1_cohorts_with_ex;
 --drop table shtg_q1_total_counts;
 --list of patients who have triglycerides in study period
+drop table shtg_cohort_definition;
 create table shtg_cohort_definition as
 with TG_all as (select lab_result_cm.patid,
                        row_number() OVER (
