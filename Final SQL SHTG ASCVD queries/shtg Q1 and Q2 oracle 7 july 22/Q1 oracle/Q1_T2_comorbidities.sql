@@ -7,7 +7,6 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                   from shtg_Q1_cohorts_with_ex),
 
 
-
      comorbid_conditions AS ( --All diagnoses for each patient
 
          SELECT patid,
@@ -28,7 +27,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
                     WHEN dx like 'E10%' THEN 'diabetes'
 
-                   -- WHEN dx like 'E09%' THEN 'diabetes'
+                    -- WHEN dx like 'E09%' THEN 'diabetes'
 
                     WHEN dx like 'E08%' THEN 'diabetes'
 
@@ -37,39 +36,39 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                     WHEN dx like '250%' THEN 'diabetes'
 
 
-                  --  WHEN dx like 'H31%' THEN 'retinopathy'
+                    --  WHEN dx like 'H31%' THEN 'retinopathy'
 
-                  --  WHEN dx like 'H35%' THEN 'retinopathy'
-
-
-                 --   WHEN dx like 'I12%' THEN 'multivessel cad'
-
-                  --  WHEN dx like 'Z95%' THEN 'multivessel cad'
+                    --  WHEN dx like 'H35%' THEN 'retinopathy'
 
 
-                  --  WHEN dx like 'Z98.61%' THEN 'PCI'
+                    --   WHEN dx like 'I12%' THEN 'multivessel cad'
+
+                    --  WHEN dx like 'Z95%' THEN 'multivessel cad'
 
 
-                   -- WHEN dx like '581%' THEN 'NEPHROTIC SYN'
+                    --  WHEN dx like 'Z98.61%' THEN 'PCI'
 
-                   -- WHEN dx like 'N04%' THEN 'NEPHROTIC SYN'
+
+                    -- WHEN dx like '581%' THEN 'NEPHROTIC SYN'
+
+                    -- WHEN dx like 'N04%' THEN 'NEPHROTIC SYN'
 
                     --WHEN dx like 'Z87.441%' THEN 'NEPHROTIC SYN'
 
 
-                --    WHEN dx IN ('O42', 'B20', 'B98.35', 'Z21') THEN 'HIV'
+                    --    WHEN dx IN ('O42', 'B20', 'B98.35', 'Z21') THEN 'HIV'
 
 
-               /* --    WHEN dx like '433%' THEN 'STROKE'
+                    /* --    WHEN dx like '433%' THEN 'STROKE'
 
-                --    WHEN dx like '434%' THEN 'STROKE'
+                     --    WHEN dx like '434%' THEN 'STROKE'
 
-                    WHEN dx like '997.02%' THEN 'STROKE'
+                         WHEN dx like '997.02%' THEN 'STROKE'
 
-                    WHEN dx like 'I63%' THEN 'STROKE'
+                         WHEN dx like 'I63%' THEN 'STROKE'
 
-                    WHEN dx like 'I97.8%' THEN 'STROKE'
-*/
+                         WHEN dx like 'I97.8%' THEN 'STROKE'
+     */
 /*
                     WHEN dx like 'E66%' THEN 'obesity'
 
@@ -92,38 +91,11 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                     WHEN dx like 'Z48.2%' THEN 'ORGAN TRN'*/
 
 
-                    WHEN dx IN ('403.01', '404.02', '403.91', '404.03', '404.12', '585.3', '585.4', '585.5', '585.6',
-                                '285.21', '710', '403.1', '403.9', '403.11',
-                                '404', '404.01', '403', '404.9', '404.92', '250.41', '404.91', '404.93', '404.13',
-                                '250.4', '250.42', '250.43', '416.8', '404.11', '404.1', '249.4',
-                                '249.41', 'V56.0', 'V56.8', 'V64.2', 'IMO0001', '996.81', '428.9', '428', '584.9',
-                                '250.81', '250.8', '250.9', '402.1', '250.52', '250.51', 'IMO0002',
-                                '593.9', '584.6', '584.7', '584.5', '588.81', '584.8', '585.9', '583.81', 'V45.11',
-                                '428.3', '428.2', '428.4', 'V15.89', '587', '586', '362.11', '583.9',
-                                '428.21', '428.42', '428.32', '428.22', '428.31', '428.33', '428.41', 'V42.0', '428.23',
-                                '428.43', 'V58.67') THEN 'CKD'
-
-
-                    WHEN dx in
-                         ('I12.0', 'I13.11', 'I13.2', 'N18.30', 'N18.4', 'N18.5', 'N18.6', 'M32.14', 'I12.9', 'I13.10',
-                          'I13.0', 'E10.22', 'E11.22', 'E13.22',
-                          'I27.29', 'Z53.20', 'IMO0001', 'T86.19', 'N18.31', 'N18.32', 'N18.3', 'N17.9', 'E08.22',
-                          'E08.65', 'E09.22', 'E09.65', 'N17.1', 'N17.2', 'N17.0', 'N25.81',
-                          'N17.8', 'E10.21', 'N18.5', 'D63.1', 'N18.6', 'Z99.2', 'N18.30', 'N18.4', 'E11.65', 'E10.65',
-                          'I50.810', 'E13.65', 'N19', 'I50.30', 'I50.20', 'I50.40', 'Z91.89',
-                          'H35.039', 'H32', 'N18.32', 'I12.9', 'I50.9', 'I12.0', 'E11.21', 'E08.22', 'E09.65', 'I50.21',
-                          'I50.42', 'I50.32', 'I50.22', 'I50.31', 'I50.33', 'I50.41',
-                          'E08.65', 'Z94.0', 'E09.22', 'I50.23', 'I50.43', 'I50.812', 'I50.811', 'I50.813', 'I50.84',
-                          'I50.82', 'I50.814', 'I50.89', 'I50.83', 'N18.31', 'N18.3', 'Z79.4')
-                        THEN 'CKD'
-
-
-                    WHEN dx IN ('I10', 'I11.0', 'I11.9', 'I12.0', 'I15.0', 'I15.1', 'I15.2', 'I15.8', 'I15.9', 'I16.0',
+                    WHEN dx IN ('I10', 'I11.0', 'I11.9', 'I12.0', 'I12.9', 'I15.0', 'I15.1', 'I15.2', 'I15.8', 'I15.9',
+                                'I16.0',
                                 'I16.1', 'I16.9', '401', '402', '403', '404', '405') THEN 'hypertension'
 
-                 -- WHEN dx LIKE 'I129%' THEN 'hypertension' error
-
-                   -- WHEN dx LIKE 'I30%' THEN 'hypertension' error
+                    WHEN dx LIKE 'I13%' THEN 'hypertension'
 
 
                     WHEN dx = '272' THEN 'Disorders of lipoprotein metabolism and other'
@@ -151,7 +123,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
                     WHEN dx LIKE 'I25%' THEN 'IHD'
 
-WHEN dx in ('440.20',
+                    WHEN dx in ('440.20',
                                 '440.21',
                                 '440.22',
                                 '440.23',
@@ -160,7 +132,7 @@ WHEN dx in ('440.20',
                                 '440.30',
                                 '440.31',
                                 '440.32',
-                               -- '440.4', -- removed no icd9
+                        -- '440.4', -- removed no icd9
                                 'I70.0',
                                 'I70.1',
                                 'I70.201',
@@ -168,12 +140,12 @@ WHEN dx in ('440.20',
                                 'I70.203',
                                 'I70.208',
                                 'I70.209',
-                              -- 'I70.21', -- removed
-                               -- 'I70.22', -- removed
+                        -- 'I70.21', -- removed
+                        -- 'I70.22', -- removed
                                 'I70.232',
-                               -- 'I70.24', -- removed
+                        -- 'I70.24', -- removed
                                 'I70.25',
-                               -- 'I70.26', -- removed
+                        -- 'I70.26', -- removed
                                 'I70.261',
                                 'I70.262',
                                 'I70.263',
@@ -184,14 +156,13 @@ WHEN dx in ('440.20',
                                 'I70.293',
                                 'I70.298',
                                 'I70.299',
-                               -- 'I70.3', -- removed
-                              -- 'I70.4', -- removed
+                        -- 'I70.3', -- removed
+                        -- 'I70.4', -- removed
                                 'I70.5',
                                 'I70.8',
                                 'I70.90',
                                 'I70.91',
                                 'I70.92') THEN 'PAD'
-
 
 
                     WHEN dx LIKE 'I50%' THEN 'HEART FAILURE'
@@ -202,7 +173,7 @@ WHEN dx in ('440.20',
                                 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') THEN 'ACUTE PANCREATITIS'
 
 
-                    WHEN dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89', 'K86.9')
+                    WHEN dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89', 'K86.9')
                         THEN 'CHRONIC PANCREATITIS'
 
 
@@ -239,9 +210,6 @@ WHEN dx in ('440.20',
                     AS          Comorbidity_name
 
 
-
-
-
          FROM pat_list pats
 
 
@@ -253,31 +221,31 @@ WHEN dx in ('440.20',
 
              (como.dx IN (
                           'I10',
-                         -- 'E66.9', obesity
-                          --'E66.01',
-                          --'E66.09',
-                         -- 'K21.9',gerd
-                        --  'K21.0',
-                        --  'K76.6',
-                        --  'F41.9',
+                 -- 'E66.9', obesity
+                 --'E66.01',
+                 --'E66.09',
+                 -- 'K21.9',gerd
+                 --  'K21.0',
+                 --  'K76.6',
+                 --  'F41.9',
                           'R17',
                           'R18.8',
                           'I85.01',
-                          --'I85.10',
-                          --'I85.00',
+                 --'I85.10',
+                 --'I85.00',
                           'I85.11',
                           'K76.7',
                           'K65.2'
-                       --   'K65.0',
-                       --   'K65.9'
+                 --   'K65.0',
+                 --   'K65.9'
 
                  )
 
 -- DX FROM TABLE 9
-OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
+                 OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                  OR Como.dx like 'E08%' -- diabetes
 
-                -- OR Como.dx like 'E09%' -- diabetes
+                 -- OR Como.dx like 'E09%' -- diabetes
 
                  OR Como.dx like 'E10%' -- diabetes
 
@@ -306,49 +274,49 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                  -- NEXT WAS "GUESSING EXCLUDING" TAB, ALL ARE H35 & OVERLAPS WITH RETINOPATHY
 
 
-                /* OR Como.dx like '581%' -- NEPHROTIC SYN
+                 /* OR Como.dx like '581%' -- NEPHROTIC SYN
 
-                 OR Como.dx like 'NO4%' -- NEPHROTIC SYN
+                  OR Como.dx like 'NO4%' -- NEPHROTIC SYN
 
-                 OR Como.dx = 'Z87.441' -- NEPHROTIC SYN
+                  OR Como.dx = 'Z87.441' -- NEPHROTIC SYN
 
-                 OR Como.dx = '042' -- HIV
+                  OR Como.dx = '042' -- HIV
 
-                 OR Como.dx = 'B20' -- HIV
+                  OR Como.dx = 'B20' -- HIV
 
-                 OR Como.dx = 'B97.35' -- HIV
+                  OR Como.dx = 'B97.35' -- HIV
 
-                 OR Como.dx = 'Z21' -- HIV
+                  OR Como.dx = 'Z21' -- HIV
 
 
-                 OR Como.dx like '433%' -- STROKE
+                  OR Como.dx like '433%' -- STROKE
 
-                 OR Como.dx like '434%' -- STROKE
+                  OR Como.dx like '434%' -- STROKE
 
-                 OR Como.dx = '997.02' -- STROKE
+                  OR Como.dx = '997.02' -- STROKE
 
-                 OR Como.dx like 'I63%' -- STROKE
+                  OR Como.dx like 'I63%' -- STROKE
 
-                 OR Como.dx like 'I97.8%' -- STROKE
+                  OR Como.dx like 'I97.8%' -- STROKE
 
-                 OR Como.dx like '278%' -- OBESITY
+                  OR Como.dx like '278%' -- OBESITY
 
-                 OR Como.dx like 'E66%' -- OBESITY
+                  OR Como.dx like 'E66%' -- OBESITY
 
-                 OR Como.dx like '410%' -- MI
+                  OR Como.dx like '410%' -- MI
 
-                 OR Como.dx = '411.0' -- MI
+                  OR Como.dx = '411.0' -- MI
 
-                 OR Como.dx = '411.81' -- MI
+                  OR Como.dx = '411.81' -- MI
 
-                 OR Como.dx = '412' -- MI
+                  OR Como.dx = '412' -- MI
 
-                 OR Como.dx like 'I21%' -- MI
+                  OR Como.dx like 'I21%' -- MI
 
-                 OR Como.dx like 'I22%' -- MI
+                  OR Como.dx like 'I22%' -- MI
 
-                 OR Como.dx like '123%' -- MI
-*/
+                  OR Como.dx like '123%' -- MI
+ */
 --
 --                  -- ?? IN SPREADSHEET FOR I24 AND I25
 --
@@ -360,40 +328,10 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
 --                  OR Como.dx like '996%' -- ORGAN TRN
 --
 --                  OR Como.dx like 'Z48.2%' -- ORGAN TRN
-                  or dx like 'K72%' -- 'liver_failure'
+                 or dx like 'K72%' -- 'liver_failure'
 
 
 -- DX FROM TABLE 2
-
-                 OR Como.dx in
-                    ('403.01', '404.02', '403.91', '404.03', '404.12', '585.3', '585.4', '585.5', '585.6', '285.21',
-                     '710',
-                     '403.1', '403.9', '403.11',
-                     '404', '404.01', '403', '404.9', '404.92', '250.41', '404.91', '404.93', '404.13', '250.4',
-                     '250.42',
-                     '250.43', '416.8', '404.11', '404.1', '249.4',
-                     '249.41', 'V56.0', 'V56.8', 'V64.2', 'IMO0001', '996.81', '428.9', '428', '584.9', '250.81',
-                     '250.8',
-                     '250.9', '402.1', '250.52', '250.51', 'IMO0002',
-                     '593.9', '584.6', '584.7', '584.5', '588.81', '584.8', '585.9', '583.81', 'V45.11', '428.3',
-                     '428.2',
-                     '428.4', 'V15.89', '587', '586', '362.11', '583.9',
-                     '428.21', '428.42', '428.32', '428.22', '428.31', '428.33', '428.41', 'V42.0', '428.23', '428.43',
-                     'V58.67') -- CKD
-
-                 OR Como.dx in
-                    ('I12.0', 'I13.11', 'I13.2', 'N18.30', 'N18.4', 'N18.5', 'N18.6', 'M32.14', 'I12.9', 'I13.10',
-                     'I13.0',
-                     'E10.22', 'E11.22', 'E13.22',
-                     'I27.29', 'Z53.20', 'IMO0001', 'T86.19', 'N18.31', 'N18.32', 'N18.3', 'N17.9', 'E08.22', 'E08.65',
-                     'E09.22', 'E09.65', 'N17.1', 'N17.2', 'N17.0', 'N25.81',
-                     'N17.8', 'E10.21', 'N18.5', 'D63.1', 'N18.6', 'Z99.2', 'N18.30', 'N18.4', 'E11.65', 'E10.65',
-                     'I50.810', 'E13.65', 'N19', 'I50.30', 'I50.20', 'I50.40', 'Z91.89',
-                     'H35.039', 'H32', 'N18.32', 'I12.9', 'I50.9', 'I12.0', 'E11.21', 'E08.22', 'E09.65', 'I50.21',
-                     'I50.42', 'I50.32', 'I50.22', 'I50.31', 'I50.33', 'I50.41',
-                     'E08.65', 'Z94.0', 'E09.22', 'I50.23', 'I50.43', 'I50.812', 'I50.811', 'I50.813', 'I50.84',
-                     'I50.82',
-                     'I50.814', 'I50.89', 'I50.83', 'N18.31', 'N18.3', 'Z79.4') --CKD
 
 
                  OR Como.dx like 'G45%' -- TIA
@@ -448,7 +386,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                  OR Como.dx = '404' -- HYPERTENSIVE
                  OR Como.dx = '405' -- HYPERTENSIVE
 
-                -- OR Como.dx like
+                 -- OR Como.dx like
                  --   ('E78%') -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                  OR Como.dx = '272' -- LIPIDEMIA, Disorders of lipoprotein metabolism and other
                  OR Como.dx = 'E78.01' -- LIPIDEMIA, familial hypercholesterolemia
@@ -465,7 +403,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ( '577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
+                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
                                 'K86.9') -- CHRONIC PANCREATITIS
 
 
@@ -478,7 +416,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                                 '440.30',
                                 '440.31',
                                 '440.32',
-                               -- '440.4',
+                     -- '440.4',
                                 'I70.0',
                                 'I70.1',
                                 'I70.201',
@@ -534,21 +472,142 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
 
          GROUP BY patid,
                   cohort,
-                  como.dx
-
-
-
-
-     ),
-   Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
+                  como.dx),
+     Plasmapheresis as (select distinct patid, cohort, 'plasmapheresis history' as Comorbidity_name
                         from pat_list
                                  left join cdm_60_prod.procedures using (patid)
                         where PX =
                               '36514'),
+     CKD as (select patid,
+                    cohort,
+
+
+                    'CKD' as Comorbidity_name
+             FROM pat_list pats
+
+
+                      INNER JOIN cdm_60_prod.diagnosis como using (patid)
+
+
+             WHERE como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY')
+               and Como.dx in
+                   ('249.4',
+                    '249.41',
+                    '250.4',
+                    '250.41',
+                    '250.42',
+                    '250.43',
+                    '285.21',
+                    '403',
+                    '403.01',
+                    '403.1',
+                    '403.11',
+                    '403.9',
+                    '403.91',
+                    '404',
+                    '404.01',
+                    '404.02',
+                    '404.03',
+                    '404.1',
+                    '404.11',
+                    '404.12',
+                    '404.13',
+                    '404.9',
+                    '404.91',
+                    '404.92',
+                    '404.93',
+                    '428.9',
+                    '583.81',
+                    '583.9',
+                    '584.5',
+                    '584.6',
+                    '584.7',
+                    '584.8',
+                    '584.9',
+                    '585.3',
+                    '585.4',
+                    '585.5',
+                    '585.6',
+                    '585.9',
+                    '586',
+                    '587',
+                    '588.81',
+                    '996.81',
+                    'D63.1',
+                    'D63.1',
+                    'E08.22',
+                    'E08.22',
+                    'E08.22',
+                    'E08.22',
+                    'E08.22',
+                    'E08.22',
+                    'E09.22',
+                    'E09.22',
+                    'E09.22',
+                    'E09.22',
+                    'E09.22',
+                    'E09.22',
+                    'E10.21',
+                    'E10.21',
+                    'E10.21',
+                    'E10.22',
+                    'E10.22',
+                    'E10.22',
+                    'E11.21',
+                    'E11.21',
+                    'E11.21',
+                    'E11.22',
+                    'E11.22',
+                    'E11.22',
+                    'E13.22',
+                    'E13.22',
+                    'E13.22',
+                    'I12.0',
+                    'I12.9',
+                    'I13.0',
+                    'I13.0',
+                    'I13.0',
+                    'I13.10',
+                    'I13.10',
+                    'I13.11',
+                    'I13.11',
+                    'I13.2',
+                    'I13.2',
+                    'I13.2',
+                    'M32.14',
+                    'N17.0',
+                    'N17.1',
+                    'N17.2',
+                    'N17.8',
+                    'N17.9',
+                    'N18.3',
+                    'N18.3',
+                    'N18.30',
+                    'N18.30',
+                    'N18.31',
+                    'N18.31',
+                    'N18.32',
+                    'N18.32',
+                    'N18.4',
+                    'N18.4',
+                    'N18.5',
+                    'N18.5',
+                    'N18.6',
+                    'N18.6',
+                    'N19',
+                    'N25.81',
+                    'T86.19',
+                    'V42.0',
+                    'V45.11',
+                    'V56.0',
+                    'V56.8',
+                    'Z94.0',
+                    'Z99.2') --'CKD'
+             group by patid, cohort),
      comorbidity_group as (select patid,
                                   cohort,
 
-                                  max(index_date - admit_date) / 365.25              as tx_since_first_lip,
+                                  max(index_date - admit_date) / 365.25           as tx_since_first_lip,
                                   'Disorders of lipoprotein metabolism and other' as Comorbidity_name
                            FROM pat_list pats
 
@@ -563,7 +622,7 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
      ASCVD as (select patid,
                       cohort,
                       max(index_date - admit_date) / 365.25 as tx_since_first_ascvd,
-                      'ASCVD'                            as Comorbidity_name
+                      'ASCVD'                               as Comorbidity_name
                FROM pat_list pats
                         INNER JOIN cdm_60_prod.diagnosis como using (patid)
                WHERE dx in ('413.9',
@@ -730,234 +789,226 @@ OR Como.dx like 'K74.6%' -- 'CIRRHOSIS'
                             'I63.59',
                             'Z86.73')
                group by patid,
-                        cohort
-     ),
+                        cohort),
 
-     /*,
+    /*,
 
-     PCI as (select distinct patid, cohort, 'PCI' as Comorbidity_name
-             from pat_list
-                      left join cdm_60_prod.procedures using (patid)
-             where PX in ('92920',
-                          '92921',
-                          '92924',
-                          '92925',
-                          '92928',
-                          '92929',
-                          '92933',
-                          '92934',
-                          '92937',
-                          '92938',
-                          '92941',
-                          '92943',
-                          '92944',
-                          '92973',
-                          '92974',
-                          '92975',
-                          '92978',
-                          '92979',
-                          '93571',
-                          '93572',
-                          'C9600',
-                          'C9601',
-                          'C9602',
-                          'C9603',
-                          'C9604',
-                          'C9605',
-                          'C9606',
-                          'C9607',
-                          'C9608'))
-        ,
-
-
-     MI as (select distinct patid, cohort, 'MI' as Comorbidity_name
-
-            from pat_list pats
-                     INNER JOIN cdm_60_prod.diagnosis Como using (patid)
-            where (Como.dx like '410%' -- MI
-
-                OR Como.dx = '411.0' -- MI
-
-                OR Como.dx = '411.81' -- MI
-
-                OR Como.dx = '412' -- MI
-
-                OR Como.dx like 'I21%' -- MI
-
-                OR Como.dx like 'I22%' -- MI
-
-                OR Como.dx like '123%' -- MI
+    PCI as (select distinct patid, cohort, 'PCI' as Comorbidity_name
+            from pat_list
+                     left join cdm_60_prod.procedures using (patid)
+            where PX in ('92920',
+                         '92921',
+                         '92924',
+                         '92925',
+                         '92928',
+                         '92929',
+                         '92933',
+                         '92934',
+                         '92937',
+                         '92938',
+                         '92941',
+                         '92943',
+                         '92944',
+                         '92973',
+                         '92974',
+                         '92975',
+                         '92978',
+                         '92979',
+                         '93571',
+                         '93572',
+                         'C9600',
+                         'C9601',
+                         'C9602',
+                         'C9603',
+                         'C9604',
+                         'C9605',
+                         'C9606',
+                         'C9607',
+                         'C9608'))
+       ,
 
 
-                -- ?? IN SPREADSHEET FOR I24 AND I25
+    MI as (select distinct patid, cohort, 'MI' as Comorbidity_name
 
-                OR Como.dx = 'I24.0' -- MI
+           from pat_list pats
+                    INNER JOIN cdm_60_prod.diagnosis Como using (patid)
+           where (Como.dx like '410%' -- MI
 
-                OR Como.dx = 'I25.2' -- MI)
-                      )
-     ),
-     stroke as (select distinct patid, cohort, 'stroke' as Comorbidity_name
+               OR Como.dx = '411.0' -- MI
 
-                from pat_list pats
-                         INNER JOIN cdm_60_prod.diagnosis Como using (patid)
-                where (
-                          Como.dx like '433%' -- STROKE
+               OR Como.dx = '411.81' -- MI
 
-                          OR Como.dx like '434%' -- STROKE
+               OR Como.dx = '412' -- MI
 
-                          OR Como.dx = '997.02' -- STROKE
+               OR Como.dx like 'I21%' -- MI
 
-                          OR Como.dx like 'I63%' -- STROKE
+               OR Como.dx like 'I22%' -- MI
 
-                          OR Como.dx like 'I97.8%' -- STROKE
-                          )
-     ),
+               OR Como.dx like '123%' -- MI
+
+
+               -- ?? IN SPREADSHEET FOR I24 AND I25
+
+               OR Como.dx = 'I24.0' -- MI
+
+               OR Como.dx = 'I25.2' -- MI)
+                     )
+    ),
+    stroke as (select distinct patid, cohort, 'stroke' as Comorbidity_name
+
+               from pat_list pats
+                        INNER JOIN cdm_60_prod.diagnosis Como using (patid)
+               where (
+                         Como.dx like '433%' -- STROKE
+
+                         OR Como.dx like '434%' -- STROKE
+
+                         OR Como.dx = '997.02' -- STROKE
+
+                         OR Como.dx like 'I63%' -- STROKE
+
+                         OR Como.dx like 'I97.8%' -- STROKE
+                         )
+    ),
 */
      comorbidity_count as
-         (
-             select '2'                   as order1,
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+         (select '2'                   as order1,
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from comorbid_conditions
+          from comorbid_conditions
 
-             group by Comorbidity_name, cohort
-             union
-             select '1',
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+          group by Comorbidity_name, cohort
+          union
+          select '1',
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from comorbidity_group
+          from comorbidity_group
 
-             group by Comorbidity_name, cohort
-            /* union
-             select '6',
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+          group by Comorbidity_name, cohort
+            union
+          select '2',
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-             from PCI
+          from CKD
 
-             group by Comorbidity_name, cohort*/
-             union
-             select '7',
-                    count(distinct patid) as N,
-                    cohort,
-                    Comorbidity_name
+          group by Comorbidity_name, cohort
+              /* union
+               select '6',
+                      count(distinct patid) as N,
+                      cohort,
+                      Comorbidity_name
 
-             from Plasmapheresis
+               from PCI
 
-             group by Comorbidity_name, cohort
-             union
-             select '8',
-                    trunc(avg(tx_since_first_lip),2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (Mean)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9'                                                 as order1,
+               group by Comorbidity_name, cohort*/
+          union
+          select '7',
+                 count(distinct patid) as N,
+                 cohort,
+                 Comorbidity_name
 
-                    trunc(median(tx_since_first_lip),2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (Median)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9'                                                 as order1,
+          from Plasmapheresis
 
-                    trunc(STDDEV(tx_since_first_lip),2) as N,
-                    cohort,
-                    'Time since first lipidemia diagnosis (std)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9' as                                                        order1,
+          group by Comorbidity_name, cohort
+          union
+          select '8',
+                 trunc(avg(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (Mean)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9'                                  as order1,
 
-                    PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
+                 trunc(median(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (Median)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9'                                  as order1,
+
+                 trunc(STDDEV(tx_since_first_lip), 2) as N,
+                 cohort,
+                 'Time since first lipidemia diagnosis (std)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '9' as                order1,
+
+                 PERCENTILE_CONT(0.25) WITHIN
+          GROUP (ORDER BY tx_since_first_lip asc) "pct_25",
                     cohort,
                     'Time since first lipidemia diagnosis (25th pct)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '9' as order1,
-                    PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY tx_since_first_lip asc)
-                           "pct_75",
-                    cohort,
-                    'Time since first lipidemia diagnosis (75th pct)'
-             from comorbidity_group
-             group by cohort
-             union
-             select '10'                                         as order1,
-                    trunc(avg(tx_since_first_ascvd),2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (Mean)'
-             from ascvd
-             group by cohort
-             union
-             select '10'                                            as order1,
-                    trunc(median(tx_since_first_ascvd),2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (Median)'
-             from ascvd
-             group by cohort
-             union
-             select '10'                                            as order1,
-                    trunc(STDDEV(tx_since_first_ascvd),2) as N,
-                    cohort,
-                    'Time since first ascvd diagnosis (std)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                    PERCENTILE_CONT(0.25) WITHIN
-                        GROUP (ORDER BY tx_since_first_ascvd asc)
-                            "pct_25",
-                    cohort,
-                    'Time since first ascvd diagnosis (25th pct)'
-             from ascvd
-             group by cohort
-             union
-             select '10' as order1,
-                    PERCENTILE_CONT(0.75) WITHIN
-                        GROUP (ORDER BY tx_since_first_ascvd asc)
-                            "pct_75",
-                    cohort,
-                    'Time since first ascvd diagnosis (75th pct)'
-             from ascvd
-             group by cohort
-         ),
+          from comorbidity_group
+          group by cohort
+          union
+          select '9' as order1, PERCENTILE_CONT(0.75) WITHIN
+          GROUP (ORDER BY tx_since_first_lip asc)
+              "pct_75",
+              cohort,
+              'Time since first lipidemia diagnosis (75th pct)'
+          from comorbidity_group
+          group by cohort
+          union
+          select '10' as order1, trunc(avg(tx_since_first_ascvd), 2) as N, cohort, 'Time since first ascvd diagnosis (Mean)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, trunc(median(tx_since_first_ascvd), 2) as N, cohort, 'Time since first ascvd diagnosis (Median)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, trunc(STDDEV(tx_since_first_ascvd), 2) as N, cohort, 'Time since first ascvd diagnosis (std)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, PERCENTILE_CONT(0.25) WITHIN
+          GROUP (ORDER BY tx_since_first_ascvd asc)
+              "pct_25",
+              cohort,
+              'Time since first ascvd diagnosis (25th pct)'
+          from ascvd
+          group by cohort
+          union
+          select '10' as order1, PERCENTILE_CONT(0.75) WITHIN
+          GROUP (ORDER BY tx_since_first_ascvd asc)
+              "pct_75",
+              cohort,
+              'Time since first ascvd diagnosis (75th pct)'
+          from ascvd
+          group by cohort),
      table2 as (select order1, 'Comorbidity', Comorbidity_name, trunc(N, 2) as N_mean_etc, cohort
                 from comorbidity_count
                 order by cohort),
-      totals as (select count(distinct patid)as N_cohort_total, cohort From pat_list group by cohort),
+     totals as (select count(distinct patid) as N_cohort_total, cohort From pat_list group by cohort),
 
-     percentages as (select
-                              Cohort,
+     percentages as (select Cohort,
                             order1,
-                             Comorbidity_name,
+                            Comorbidity_name,
 
-                     N_mean_etc,
+                            N_mean_etc,
 
                             N_cohort_total,
                             case
                                 when (Comorbidity_name like '%75%'
-                                or Comorbidity_name like '%25%'
+                                    or Comorbidity_name like '%25%'
                                     or Comorbidity_name like ('%Mean%')
                                     or Comorbidity_name like ('%Median%')
                                     or Comorbidity_name like ('%std%'))
                                     then 0
                                 else
-                                    trunc(100 * N_mean_etc/ N_cohort_total, 2)
+                                    trunc(100 * N_mean_etc / N_cohort_total, 2)
                                 end
                                 as percentage1
                      from table2
-                              left join totals using (cohort)
-     )
+                              left join totals using (cohort))
 
 
 select *
