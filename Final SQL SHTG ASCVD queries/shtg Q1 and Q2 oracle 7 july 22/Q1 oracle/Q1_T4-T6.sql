@@ -1,6 +1,6 @@
 --Run time: <1 minute
 --3 tables are output and should be saved to csv
-
+--no changes needed Nov 2024
 
  /*Q1_T4.csv*/ with pat_list as (select * from shtg_Q1_cohorts_with_ex)
 select count(distinct patid) as N, TG_category, LDL_category2 from pat_list

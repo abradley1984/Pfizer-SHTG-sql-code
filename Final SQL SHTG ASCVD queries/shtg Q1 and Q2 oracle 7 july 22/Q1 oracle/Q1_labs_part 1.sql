@@ -6,8 +6,8 @@ Run time: ~35 mins
 
 
 --
-create table Q1_labs_all_old as select * from  Q1_labs_all;
-drop table Q1_labs_all;
+--create table Q1_labs_all_old2 as select * from  Q1_labs_all;
+--drop table Q1_labs_all;
 create table Q1_labs_all as
 with pat_list as
          (

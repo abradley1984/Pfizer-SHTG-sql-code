@@ -317,7 +317,7 @@ with pat_list as
                                    , 'MM/DD/YYYY')
                                    AND TO_DATE('09/30/2021'
                                        , 'MM/DD/YYYY')
-                                 and rxnorm_cui in --only including >40 rxnorms right now.
+                                 and rxnorm_cui in
                                      ('259255',
                                       '262095',
                                       '404011',
@@ -342,7 +342,7 @@ with pat_list as
                                       '2167569',
                                       '2167571',
                                       '2535749',
-                                      '2536064'
+                                      '2536064',
                                          --Dose 20
                                      '859751',
                                       '859753',
