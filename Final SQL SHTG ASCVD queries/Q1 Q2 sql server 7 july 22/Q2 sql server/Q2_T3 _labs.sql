@@ -154,7 +154,8 @@ from (select *
 
             from #pat_list a
                      left join cdm.dbo.lab_result_cm b on a.patid = b.patid
-            WHERE                                                         --result_date '2021-07-31' AND '2021-09-30'
+            WHERE                                                 
+               result_date< '2021-09-30'
                 lab_loinc in ('2571-8', '12951-0')
               AND not result_unit in ('mg/d', 'g/dL', 'mL/min/{1.73_m2}') --Excluding rare weird units
               and result_num is not null
