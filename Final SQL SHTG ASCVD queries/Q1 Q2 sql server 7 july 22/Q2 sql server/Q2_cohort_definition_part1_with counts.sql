@@ -246,7 +246,7 @@ from (select pats.patid,
              1                                                as ASCVD
       FROM #pat_list pats
                INNER JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      WHERE  admit_date<'2021-09-30' and
+      WHERE  admit_date<='2021-09-30' and
       dx in
             ('346.62',
 '346.63',

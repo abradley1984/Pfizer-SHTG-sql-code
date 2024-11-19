@@ -46,7 +46,8 @@ with pat_list as (select patid, cohort, TG_DATE
 
                      from pat_list pats
                               INNER JOIN cdm_60_prod.diagnosis Como using (patid)
-                     where (Como.dx IN ('H31.021',--RETINOPATHY
+                     where  Como.admit_date<=TO_DATE('09/30/2021'
+                     , 'MM/DD/YYYY') and (Como.dx IN ('H31.021',--RETINOPATHY
                                         'H31.022',
                                         'H31.023',
                                         'H31.029',

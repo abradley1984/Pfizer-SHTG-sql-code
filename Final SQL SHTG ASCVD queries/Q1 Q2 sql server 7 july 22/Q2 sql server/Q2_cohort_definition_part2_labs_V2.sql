@@ -199,7 +199,9 @@ into #diabetes
 from (select distinct (pats.patid), 1 as Diabetes
       from #pat_list  pats
                            JOIN cdm.dbo.diagnosis como on pats.patid = como.patid
-      WHERE (dx like 'E13%'
+      WHERE
+      como.admit_date<='2021-09-30'
+       and (dx like 'E13%'
          or
           dx like 'E11%'
          or
