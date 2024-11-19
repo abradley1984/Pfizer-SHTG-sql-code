@@ -218,7 +218,7 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
 
          WHERE /*como.admit_date BETWEEN TO_DATE('08/31/2020', 'MM/DD/YYYY') AND TO_DATE('08/31/2021', 'MM/DD/YYYY')
 */
-
+Como.admit_date <= TO_DATE('09/30/2021', 'MM/DD/YYYY') and
              (como.dx IN (
                           'I10',
                  -- 'E66.9', obesity
@@ -403,8 +403,8 @@ with pat_list as (select patid, cohort, TG_DATE as index_date
                      'K85.82', 'K85.9', 'K85.90', 'K85.91', 'K85.92', 'K85', '577.0') -- ACUTE PANCREATITIS
 
 
-                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89',
-                                'K86.9') -- CHRONIC PANCREATITIS
+                 OR Como.dx in ('577.1', 'K86.1', 'K86.2', 'K86.3', 'K86.8', 'K86.81', 'K86.89'
+            ) -- CHRONIC PANCREATITIS
 
 
                  OR Como.dx in ('440.20',
