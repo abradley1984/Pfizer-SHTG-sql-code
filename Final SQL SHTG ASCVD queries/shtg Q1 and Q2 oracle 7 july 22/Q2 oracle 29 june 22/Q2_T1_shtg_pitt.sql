@@ -83,44 +83,89 @@ when Age BETWEEN 65 and 75
                           else 'uhoh'
                           end as Age_category
                from pat_list),
-     insurance as
-         (select a.*, e.PAYER_TYPE_PRIMARY
-
-          from #pat_list a
-                   left join cdm.dbo.encounter e on a.patid = e.patid
-          where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
-            and payer_type_primary is not null
-            and not payer_type_primary in ('UN', 'NI')),
-
+     insurance as (select *
+                   from pat_list
+                            left join CDM_60_prod.encounter e using (patid)
+                   where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+                     and raw_payer_type_primary is not null),
      insurance_type as (select patid,
                                COHORT,
-                               payer_type_primary,
+                               raw_payer_type_primary,
+                               raw_payer_id_primary,
                                case
-                                   when payer_type_primary in (
-                                                               '2',
-                                                               '21',
-                                                               '29')
+                                   when raw_payer_id_primary in (
+                                                                 'X',
+                                                                 '3',
+                                                                 '104',
+                                                                 '143',
+                                                                 '151',
+                                                                 '127',
+                                                                 '157',
+                                                                 '155',
+                                                                 '103')
                                        then 'Medicaid'
-                                   when payer_type_primary in ('1',
-                                                               '11',
-                                                               '19',
-                                                               '111',
-                                                               '112',
-                                                               '122'
+                                   when raw_payer_id_primary in ('147',
+                                                                 '159',
+                                                                 'N',
+                                                                 '137',
+                                                                 '2M',
+                                                                 '2',
+                                                                 '152',
+                                                                 'MC',
+                                                                 '150',
+                                                                 '142',
+                                                                 '156',
+                                                                 '101',
+                                                                 'M',
+                                                                 'UM',
+                                                                 '2'
                                        ) then 'Medicare'
-                                   when payer_type_primary in ('5',
-                                                               '51',
-                                                               '521',
-                                                               '561',
-                                                               '6'
+                                   when raw_payer_id_primary in ('116', '111', '3C', 'cc', '145',
+                                                                 '4A',
+                                                                 '4M',
+                                                                 '138',
+                                                                 'I4',
+                                                                 '134',
+                                                                 'IC',
+                                                                 'HA',
+                                                                 '2B',
+                                                                 '4',
+                                                                 '158',
+                                                                 '107',
+                                                                 'DB',
+                                                                 'CM',
+                                                                 'B',
+                                                                 '119',
+                                                                 '0',
+                                                                 '4H',
+                                                                 '149',
+                                                                 'C',
+                                                                 '132',
+                                                                 '133',
+                                                                 '10',
+                                                                 'CG',
+                                                                 'AD',
+                                                                 'MS',
+                                                                 '131',
+                                                                 'MU',
+                                                                 'GA',
+                                                                 'US',
+                                                                 '100',
+                                                                 '144',
+                                                                 '1',
+                                                                 'Q',
+                                                                 '153',
+                                                                 'UH',
+                                                                 '102',
+                                                                 'BE',
+                                                                 '108',
+                                                                 '112'
                                        ) then 'Commercial'
-                                   when payer_type_primary is null then 'No Information'
-                                   when payer_type_primary = 'UN' then 'No Information'
+
+                                   when raw_payer_id_primary is null then 'No Information'
                                    else 'Other'
                                    end as insurance_type
-
-                        from insurance)
-        ,
+                        from insurance),
      providers as (
          select patid,
                 provider_specialty_primary,

@@ -1,25 +1,24 @@
 /* Generates demographics table for all cohorts.
    Same for Q1 and Q2, just editing initial pat_list
    Running time: ~2 minutes
-   This version is specific to Pitt due to insurance categories
+
  */
 
 
 with pat_list as (select * from shtg_Q1_cohorts_with_ex),
      smoking AS (select *
-                 from (
-                          select patid,
-                                 row_number() OVER (
-                                     PARTITION BY patid
-                                     ORDER BY vital.measure_date desc
-                                     )            row_num,
-                                 vital.smoking as smoking,
-                                 cohort
+                 from (select patid,
+                              row_number() OVER (
+                                  PARTITION BY patid
+                                  ORDER BY vital.measure_date desc
+                                  )            row_num,
+                              vital.smoking as smoking,
+                              cohort
 
-                          FROM pat_list
-                                   left join cdm_60_prod.vital using (patid)
-                          WHERE vital.smoking IS NOT NULL
-                            AND not vital.smoking in ('NI', 'OT', 'UN'))
+                       FROM pat_list
+                                left join cdm_60_prod.vital using (patid)
+                       WHERE vital.smoking IS NOT NULL
+                         AND not vital.smoking in ('NI', 'OT', 'UN'))
                  where row_num = 1),
      smoking_category as (select patid,
                                  pat_list.cohort,
@@ -89,125 +88,86 @@ when Age BETWEEN 65 and 75
                           else 'uhoh'
                           end as Age_category
                from pat_list),*/
-     insurance as (select *
-                   from pat_list
-                            left join CDM_60_prod.encounter e using (patid)
-                   where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
-                     and raw_payer_type_primary is not null),
+     insurance as
+         (select a.*, e.PAYER_TYPE_PRIMARY
+
+          from #pat_list a
+                   left join cdm.dbo.encounter e on a.patid = e.patid
+          where e.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY')
+            and payer_type_primary is not null
+            and not payer_type_primary in ('UN', 'NI')),
+
      insurance_type as (select patid,
                                COHORT,
-                               raw_payer_type_primary,
-                               raw_payer_id_primary,
+                               payer_type_primary,
                                case
-                                   when raw_payer_id_primary in (
-                                                                 'X',
-                                                                 '3',
-                                                                 '104',
-                                                                 '143',
-                                                                 '151',
-                                                                 '127',
-                                                                 '157',
-                                                                 '155',
-                                                                 '103')
+                                   when payer_type_primary in (
+                                                               '2',
+                                                               '21',
+                                                               '29')
                                        then 'Medicaid'
-                                   when raw_payer_id_primary in ('147',
-                                                                 '159',
-                                                                 'N',
-                                                                 '137',
-                                                                 '2M',
-                                                                 '2',
-                                                                 '152',
-                                                                 'MC',
-                                                                 '150',
-                                                                 '142',
-                                                                 '156',
-                                                                 '101',
-                                                                 'M',
-                                                                 'UM',
-                                                                 '2'
+                                   when payer_type_primary in ('1',
+                                                               '11',
+                                                               '19',
+                                                               '111',
+                                                               '112',
+                                                               '122'
                                        ) then 'Medicare'
-                                   when raw_payer_id_primary in ('116', '111', '3C', 'cc', '145',
-                                                                 '4A',
-                                                                 '4M',
-                                                                 '138',
-                                                                 'I4',
-                                                                 '134',
-                                                                 'IC',
-                                                                 'HA',
-                                                                 '2B',
-                                                                 '4',
-                                                                 '158',
-                                                                 '107',
-                                                                 'DB',
-                                                                 'CM',
-                                                                 'B',
-                                                                 '119',
-                                                                 '0',
-                                                                 '4H',
-                                                                 '149',
-                                                                 'C',
-                                                                 '132',
-                                                                 '133',
-                                                                 '10',
-                                                                 'CG',
-                                                                 'AD',
-                                                                 'MS',
-                                                                 '131',
-                                                                 'MU',
-                                                                 'GA',
-                                                                 'US',
-                                                                 '100',
-                                                                 '144',
-                                                                 '1',
-                                                                 'Q',
-                                                                 '153',
-                                                                 'UH',
-                                                                 '102',
-                                                                 'BE',
-                                                                 '108',
-                                                                 '112'
+                                   when payer_type_primary in ('5',
+                                                               '51',
+                                                               '521',
+                                                               '561',
+                                                               '6'
                                        ) then 'Commercial'
-
-                                   when raw_payer_id_primary is null then 'No Information'
+                                   when payer_type_primary is null then 'No Information'
+                                   when payer_type_primary = 'UN' then 'No Information'
                                    else 'Other'
                                    end as insurance_type
-                        from insurance),
-     providers as (
-         select patid,
-                provider_specialty_primary,
-                cohort,
 
-                case
-                    when provider_specialty_primary in
-                         ('208D00000X', '163WG0000X', '207Q00000X', '207QA0000X', '207QA0505X', '207R00000X',
-                          '207RA0000X',
-                          '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X', '364SF0001X') then 'primary_care'
-                    when provider_specialty_primary in
-                         ('207RC0000X', '207RA0001X', '207RC0001X', '207RI0011X', '2080P0202X') then 'cardiology'
-                    when provider_specialty_primary in
-                         ('163WE0003X', '207P00000X', '207PE0004X', '207PP0204X', '207PS0010X', '207PT0002X',
-                          '2080P0204X', '261QE0002X', '364SE0003X') then 'emergency medicine'
-                    when provider_specialty_primary in ('207RG0100X') then 'GI'
-                    when provider_specialty_primary in ('207RE0101X', '2080P0205X') then 'endo'
-                    else 'other'
-                    end as provider_specialty
-         from pat_list
-                  left join cdm_60_prod.encounter using (patid)
-                  left join cdm_60_prod.provider on encounter.providerid = provider.providerid
-         where provider_specialty_primary in
-               ('208D00000X', '163WG0000X', '207Q00000X', '207RC0000X', '207RA0001X', '207RC0001X', '207RI0011X',
-                '2080P0202X', '163WE0003X',
-                '207P00000X', '207PE0004X', '207PP0204X', '207PS0010X', '207PT0002X', '2080P0204X', '261QE0002X',
-                '364SE0003X', '207RE0101X', '2080P0205X', '207RG0100X', '207QA0000X',
-                '207QA0505X', '207R00000X', '207RA0000X', '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X',
-                '364SF0001X')
-           And encounter.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY'))
+                        from insurance)
+        ,
+
+
+     providers as (select patid,
+                          provider_specialty_primary,
+                          cohort,
+
+                          case
+                              when provider_specialty_primary in
+                                   ('208D00000X', '163WG0000X', '207Q00000X', '207QA0000X', '207QA0505X', '207R00000X',
+                                    '207RA0000X',
+                                    '207RG0300X', '2083P0901X', '261QP2300X', '363LP2300X', '364SF0001X')
+                                  then 'primary_care'
+                              when provider_specialty_primary in
+                                   ('207RC0000X', '207RA0001X', '207RC0001X', '207RI0011X', '2080P0202X')
+                                  then 'cardiology'
+                              when provider_specialty_primary in
+                                   ('163WE0003X', '207P00000X', '207PE0004X', '207PP0204X', '207PS0010X', '207PT0002X',
+                                    '2080P0204X', '261QE0002X', '364SE0003X') then 'emergency medicine'
+                              when provider_specialty_primary in ('207RG0100X') then 'GI'
+                              when provider_specialty_primary in ('207RE0101X', '2080P0205X') then 'endo'
+                              else 'other'
+                              end as provider_specialty
+                   from pat_list
+                            left join cdm_60_prod.encounter using (patid)
+                            left join cdm_60_prod.provider on encounter.providerid = provider.providerid
+                   where provider_specialty_primary in
+                         ('208D00000X', '163WG0000X', '207Q00000X', '207RC0000X', '207RA0001X', '207RC0001X',
+                          '207RI0011X',
+                          '2080P0202X', '163WE0003X',
+                          '207P00000X', '207PE0004X', '207PP0204X', '207PS0010X', '207PT0002X', '2080P0204X',
+                          '261QE0002X',
+                          '364SE0003X', '207RE0101X', '2080P0205X', '207RG0100X', '207QA0000X',
+                          '207QA0505X', '207R00000X', '207RA0000X', '207RG0300X', '2083P0901X', '261QP2300X',
+                          '363LP2300X',
+                          '364SF0001X')
+                     And encounter.admit_date BETWEEN TO_DATE('9/30/2020', 'MM/DD/YYYY') AND TO_DATE('9/30/2021', 'MM/DD/YYYY'))
         ,
      --Both cariology and endocrinology
      cardio_plus_endo as (select patid, 'both_endo_cardio' as both_endo_cardio, cohort
                           from (select * from providers where provider_specialty = 'endo')
                                    inner join (select * from providers where provider_specialty = 'cardiology')
-                                             using (patid, cohort)),
+                                              using (patid, cohort)),
 
      Table1_pre as (select '1' as order1, 'Total' as label1, 'Total_count' as label2, count(distinct patid) as N, cohort
                     from pat_list
@@ -327,8 +287,7 @@ when Age BETWEEN 65 and 75
                     select '2' as order1, 'Age', 'has_age_info', count(distinct patid), cohort
                     from pat_list
                     where Age is not null
-                    group by cohort
-     ),
+                    group by cohort),
      totals as (select N as N_cohort_total, cohort From Table1_pre where label1 = 'Total'),
 
      percentages as (select order1,
@@ -348,8 +307,7 @@ when Age BETWEEN 65 and 75
                                 end
                                 as percentage1
                      from Table1_pre
-                              left join totals using (cohort)
-     )
+                              left join totals using (cohort))
 
 
 select *
